@@ -1,17 +1,9 @@
 import torch
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
+import wandb
 
-import scipy.misc
 import os
 import torch
-import torch.nn as nn
-from torch.autograd import Variable
 import torch
-import torch.optim as optim
-import torchvision
-import numpy as np
-import torch.utils.data as data_utils
 import torch.nn.functional as F
 import pandas as pd
 import json
@@ -94,6 +86,11 @@ def load_dataset(dataset_info, data_dir, tokenizer):
     train_df = pd.read_csv(os.path.join(data_dir, "train.csv"))
     val_df = pd.read_csv(os.path.join(data_dir, "val.csv"))
     test_df = pd.read_csv(os.path.join(data_dir, "test.csv"))
+
+    train_df_split_0 = train_df[train_df["label"] == 0].sample(10000)
+    train_df_split_1 = train_df[train_df["label"] == 1].sample(10000)
+
+    train_df = pd.concat([train_df_split_0, train_df_split_1])
 
     # shuffle train dataframe
     # train_df = train_df.sample(frac=1, random_state=42).reset_index(drop=True)
@@ -192,7 +189,7 @@ def train_model(
         train_batch_ctr = 0.0
 
         for i, (input_ids, attention_mask, label) in tqdm(
-            enumerate(train_loader), leave=False
+            enumerate(train_loader), leave=False, total=len(train_loader)
         ):
             input_ids = input_ids.to(device)
             attention_mask = attention_mask.to(device)
@@ -265,7 +262,14 @@ def train_model(
 
         test_acc.append(test_epoch_acc)
         test_loss.append(1.0 * test_running_loss / test_batch_ctr)
-
+        wandb.log(
+            {
+                "Train Loss": train_loss[epoch],
+                "Test Loss": test_loss[epoch],
+                "Train Accuracy": train_acc[epoch],
+                "Test Accuracy": test_acc[epoch],
+            }
+        )
         print(
             "Test corrects: {} Test samples: {} Test accuracy {}".format(
                 test_running_corrects, (dataset_test_len), test_epoch_acc

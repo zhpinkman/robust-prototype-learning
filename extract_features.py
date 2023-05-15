@@ -10,6 +10,7 @@ import torch.nn.functional as F
 from Models import *
 from train_utils import *
 import glob
+from transformers import BertTokenizer
 import os
 import pickle
 
@@ -41,61 +42,81 @@ class LoadDataset(Dataset):
         return len(self.data)
 
 
-with open("mnist.pkl", "rb") as fid:
-    u = pickle._Unpickler(fid)
-    u.encoding = "latin1"
-    dataset = u.load()
-train_x, train_y = dataset[0]
-train_x = reshape_dataset(train_x, 28, 28)
-test_x, test_y = dataset[1]
-test_x = reshape_dataset(test_x, 28, 28)
-train_num = train_x.shape[0]
-test_num = test_x.shape[0]
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data_dir", type=str, default="sst2", help="data directory")
+    parser.add_argument("--use_max_length", action="store_true")
+    parser.add_argument("--batch_size", type=int, default=1)
 
+    args, _ = parser.parse_known_args()
 
-dataset_test = LoadDataset(test_x, test_y)
-test_loader = torch.utils.data.DataLoader(
-    dataset_test, batch_size=1, shuffle=False, num_workers=1
-)
-dataset_test_len = 1.0 * len(dataset_test)
+    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
+    dataset_info = DatasetInfo(
+        data_dir=args.data_dir, use_max_length=args.use_max_length
+    )
+    train_dataset, val_dataset, test_dataset = load_dataset(
+        dataset_info=dataset_info, data_dir=args.data_dir, tokenizer=tokenizer
+    )
 
-model = Net(2, 10, 2)
+    train_dl = torch.utils.data.DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        collate_fn=train_dataset.collate_fn,
+    )
+    val_dl = torch.utils.data.DataLoader(
+        val_dataset,
+        batch_size=args.batch_size,
+        shuffle=False,
+        collate_fn=val_dataset.collate_fn,
+    )
+    test_dl = torch.utils.data.DataLoader(
+        test_dataset,
+        batch_size=args.batch_size,
+        shuffle=False,
+        collate_fn=test_dataset.collate_fn,
+    )
 
+    train_num = len(train_dataset)
+    test_num = len(test_dataset)
 
-def copy_data(m, i, o):
-    my_embedding.copy_(o)
-
-
-model = torch.load("final_model.pt")
-model = model.cuda()
-print(model)
-layer = model._modules.get("ip1")
-extracted_features = []
-true_labels = []
-
-
-i = 0
-for (
-    image,
-    label,
-) in test_loader:
-    i += 1
-    print("working on {} image".format(i))
-
-    my_embedding = torch.zeros(1, 2)
+    model = Net(2, 2, 2)
 
     def copy_data(m, i, o):
         my_embedding.copy_(o)
 
-    h = layer.register_forward_hook(copy_data)
-    image, label = Variable(image.cuda(), volatile=True), Variable(label.cuda(1))
-    test_outputs = model(image)
-    h.remove()
-    my_embedding = my_embedding.squeeze(0)
-    my_embedding = my_embedding.detach().numpy()
-    extracted_features.append(my_embedding)
-    true_labels.append(label.cpu().data.numpy()[0])
+    model = torch.load("final_model.pt")
+    model = model.cuda()
+    print(model)
+    layer = model._modules.get("fc3")
+    extracted_features = []
+    true_labels = []
 
-    np.save("features", extracted_features)
-    np.save("labels", true_labels)
+    i = 0
+    for (
+        input_ids,
+        attention_mask,
+        label,
+    ) in test_dl:
+        i += 1
+        print("working on {} input".format(i))
+
+        my_embedding = torch.zeros(1, 2)
+
+        def copy_data(m, i, o):
+            my_embedding.copy_(o)
+
+        h = layer.register_forward_hook(copy_data)
+        input_ids = input_ids.cuda()
+        attention_mask = attention_mask.cuda()
+        label = label.cuda()
+        test_outputs = model(input_ids, attention_mask)
+        h.remove()
+        my_embedding = my_embedding.squeeze(0)
+        my_embedding = my_embedding.detach().numpy()
+        extracted_features.append(my_embedding)
+        true_labels.append(label.cpu().data.numpy()[0])
+
+        np.save("features", extracted_features)
+        np.save("labels", true_labels)
