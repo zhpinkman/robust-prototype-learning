@@ -16,7 +16,7 @@ class Net(nn.Module):
 
         self.bert_model = BertModel.from_pretrained("bert-base-uncased")
 
-        self.dropout = nn.Dropout(0.1)
+        self.dropout = nn.Dropout(0)
 
         # Write down some linear layers starting from the output of the bert model and after two layers getting to the num_hidden_units
         self.fc1 = nn.Linear(768, 256)

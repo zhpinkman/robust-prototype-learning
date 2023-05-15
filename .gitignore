@@ -2,3 +2,4 @@
 best_model.pt
 final_model.pt
 mnist.pkl
+wandb/

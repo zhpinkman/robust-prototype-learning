@@ -1,26 +1,18 @@
 import torch
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
+from torch.utils.data import Dataset
 import torch.optim as optim
-import pandas as pd
-import torchvision
-from torchvision import datasets, models, transforms
-import math
-import torch.utils.data as data_utils
-import torch.nn.functional as F
 from Models import *
+import wandb
 from train_utils import *
 from transformers import BertTokenizer
-import torch.utils.data as utils
-import pickle
 import argparse
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", type=str, default="sst2", help="data directory")
     parser.add_argument("--use_max_length", action="store_true")
-    parser.add_argument("--lr", type=float, default=0.01, help="initial_learning_rate")
-    parser.add_argument("--batch_size", type=int, default=64)
+    parser.add_argument("--lr", type=float, default=0.5, help="initial_learning_rate")
+    parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--num_classes", type=int, default=2, help="number of classes")
     parser.add_argument(
         "--h", type=int, default=2, help="dimension of the hidden layer"
@@ -88,9 +80,7 @@ if __name__ == "__main__":
     model = model.cuda()
 
     lrate = args.lr
-    optimizer_s = optim.SGD(
-        model.parameters(), lr=lrate, momentum=0.9, weight_decay=1e-4
-    )
+    optimizer_s = optim.Adam(model.parameters(), lr=lrate)
 
     num_epochs = 10
 
@@ -98,6 +88,18 @@ if __name__ == "__main__":
     # csvFileName = "./stats/mnist_log.csv"  # Filename to save training log. Updated with each epoch, contains Accuracy, Loss and Error Rate
 
     print(model)
+
+    wandb.init(
+        # set the wandb project where this run will be logged
+        project="robust-prototype-learning",
+        # track hyperparameters and run metadata
+        config={
+            "learning_rate": lrate,
+            "architecture": "bert-prototype",
+            "dataset": "sst2",
+            "epochs": num_epochs,
+        },
+    )
 
     train_model(
         model,
