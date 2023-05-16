@@ -1,5 +1,7 @@
 from __future__ import print_function
 import argparse
+from collections import defaultdict
+from IPython import embed
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -7,23 +9,29 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 from torch.autograd import Variable
-from transformers import BertModel
+from tqdm import tqdm
+from transformers import RobertaModel
 
 
 class Net(nn.Module):
-    def __init__(self, num_hidden_units=2, num_classes=2, s=2):
+    def __init__(self, num_hidden_units=2, num_classes=2, s=2, train_dataset=None):
         super(Net, self).__init__()
 
-        self.bert_model = BertModel.from_pretrained("bert-base-uncased")
+        self.encoder = RobertaModel.from_pretrained("xlm-roberta-base")
 
-        self.dropout = nn.Dropout(0)
+        self.dropout_1 = nn.Dropout(0.1)
+        self.dropout_2 = nn.Dropout(0.1)
+        self.dropout_3 = nn.Dropout(0.1)
 
-        # Write down some linear layers starting from the output of the bert model and after two layers getting to the num_hidden_units
+        self.batchnorm1_1 = nn.BatchNorm1d(256)
+        self.batchnorm1_2 = nn.BatchNorm1d(128)
+
         self.fc1 = nn.Linear(768, 256)
         self.prelu1 = nn.PReLU()
         self.fc2 = nn.Linear(256, 128)
         self.prelu2 = nn.PReLU()
         self.fc3 = nn.Linear(128, num_hidden_units)
+        # self.prelu3 = nn.PReLU()
 
         self.scale = s
 
@@ -43,12 +51,53 @@ class Net(nn.Module):
 
         # self.ip1 = nn.Linear(128 * 3 * 3, num_hidden_units)
         self.dce = dce_loss(num_classes, num_hidden_units)
+        self.init_dce_loss(train_dataset)
+
+    def init_dce_loss(self, train_dataset):
+        train_dl = torch.utils.data.DataLoader(
+            train_dataset,
+            batch_size=128,
+            shuffle=True,
+            collate_fn=train_dataset.collate_fn,
+        )
+
+        train_dl_bert_features = defaultdict(list)
+
+        model = self.eval()
+        model = model.cuda()
+        with torch.no_grad():
+            for input_ids, attention_mask, labels in tqdm(
+                train_dl, total=len(train_dl)
+            ):
+                input_ids = input_ids.cuda()
+                attention_mask = attention_mask.cuda()
+                labels = labels.cuda()
+                x1, _, _, _ = model(input_ids, attention_mask)
+                for one_bert_feature, label in zip(x1, labels):
+                    train_dl_bert_features[label.item()].append(one_bert_feature)
+
+        train_dl_bert_features_mean = {
+            key: torch.stack(train_dl_bert_features[key]).mean(dim=0)
+            for key in train_dl_bert_features.keys()
+        }
+        train_dl_bert_features_mean = torch.stack(
+            [train_dl_bert_features_mean[0], train_dl_bert_features_mean[1]]
+        ).T
+
+        self.dce.centers.data = train_dl_bert_features_mean
 
     def forward(self, input_ids, attention_mask):
-        x = self.bert_model(input_ids=input_ids, attention_mask=attention_mask)[1]
-        x = self.dropout(x)
-        x = self.prelu1(self.fc1(x))
-        x = self.prelu2(self.fc2(x))
+        x = self.encoder(input_ids=input_ids, attention_mask=attention_mask)[1]
+        x = self.dropout_1(x)
+
+        x = self.fc1(x)
+        x = self.batchnorm1_1(x)
+        x = self.prelu1(x)
+
+        x = self.fc2(x)
+        x = self.batchnorm1_2(x)
+        x = self.prelu2(x)
+
         x1 = self.fc3(x)
 
         # x = self.prelu1_1(self.conv1_1(x))
@@ -99,3 +148,13 @@ def regularization(features, centers, labels):
     distance = (torch.sum(distance, 0, keepdim=True)) / features.shape[0]
 
     return distance
+
+
+def centers_divergence_loss(
+    centers,
+    threshold: float = 0.02,
+):
+    distance = centers.t()[0] - centers.t()[1]
+    distance = torch.sum(torch.pow(distance, 2))
+    loss = torch.max(torch.Tensor([distance - threshold, 0]).cuda())
+    return loss
