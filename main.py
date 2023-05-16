@@ -4,14 +4,14 @@ import torch.optim as optim
 from Models import *
 import wandb
 from train_utils import *
-from transformers import BertTokenizer
+from transformers import AutoTokenizer
 import argparse
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", type=str, default="sst2", help="data directory")
     parser.add_argument("--use_max_length", action="store_true")
-    parser.add_argument("--lr", type=float, default=0.5, help="initial_learning_rate")
+    parser.add_argument("--lr", type=float, default=0.1, help="initial_learning_rate")
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--num_classes", type=int, default=2, help="number of classes")
     parser.add_argument(
@@ -21,17 +21,13 @@ if __name__ == "__main__":
         "--scale", type=float, default=2, help="scaling factor for distance"
     )
     parser.add_argument(
-        "--reg", type=float, default=0.1, help="regularization coefficient"
+        "--reg", type=float, default=0.01, help="regularization coefficient"
+    )
+    parser.add_argument(
+        "--lambd", type=float, default=0.01, help="lambda for prototype segregation"
     )
 
     args, _ = parser.parse_known_args()
-
-    def reshape_dataset(dataset, height, width):
-        new_dataset = []
-        for k in range(0, dataset.shape[0]):
-            new_dataset.append(np.reshape(dataset[k], [1, height, width]))
-
-        return np.array(new_dataset)
 
     class LoadDataset(Dataset):
         def __init__(self, data, target, transform=None):
@@ -51,7 +47,7 @@ if __name__ == "__main__":
         def __len__(self):
             return len(self.data)
 
-    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+    tokenizer = AutoTokenizer.from_pretrained("xlm-roberta-base")
 
     dataset_info = DatasetInfo(
         data_dir=args.data_dir, use_max_length=args.use_max_length
@@ -76,16 +72,18 @@ if __name__ == "__main__":
     train_num = len(train_dataset)
     test_num = len(test_dataset)
 
-    model = Net(args.h, args.num_classes, args.scale)
+    model = Net(
+        num_hidden_units=args.h,
+        num_classes=args.num_classes,
+        s=args.scale,
+        train_dataset=train_dataset,
+    )
     model = model.cuda()
 
     lrate = args.lr
     optimizer_s = optim.Adam(model.parameters(), lr=lrate)
 
     num_epochs = 10
-
-    # plotsFileName = "./plots/mnist+"  # Filename to save plots. Three plots are updated with each epoch; Accuracy, Loss and Error Rate
-    # csvFileName = "./stats/mnist_log.csv"  # Filename to save training log. Updated with each epoch, contains Accuracy, Loss and Error Rate
 
     print(model)
 
@@ -95,7 +93,7 @@ if __name__ == "__main__":
         # track hyperparameters and run metadata
         config={
             "learning_rate": lrate,
-            "architecture": "bert-prototype",
+            "architecture": "roberta-prototype",
             "dataset": "sst2",
             "epochs": num_epochs,
         },
@@ -107,10 +105,9 @@ if __name__ == "__main__":
         lrate,
         num_epochs,
         args.reg,
+        args.lambd,
         train_dl,
         test_dl,
         train_num,
         test_num,
-        # plotsFileName,
-        # csvFileName,
     )

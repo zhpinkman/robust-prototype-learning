@@ -9,8 +9,9 @@ import torch.utils.data as data_utils
 import torch.nn.functional as F
 from Models import *
 from train_utils import *
+import numpy as np
 import glob
-from transformers import BertTokenizer
+from transformers import AutoTokenizer
 import os
 import pickle
 
@@ -50,7 +51,7 @@ if __name__ == "__main__":
 
     args, _ = parser.parse_known_args()
 
-    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+    tokenizer = AutoTokenizer.from_pretrained("xlm-roberta-base")
 
     dataset_info = DatasetInfo(
         data_dir=args.data_dir, use_max_length=args.use_max_length

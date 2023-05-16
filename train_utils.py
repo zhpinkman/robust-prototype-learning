@@ -157,19 +157,17 @@ def lr_scheduler(optimizer, init_lr, epoch):
 
 
 def train_model(
-    cnn,
+    model,
     optimizer_s,
     lrate,
     num_epochs,
     reg,
+    lambd,
     train_loader,
     test_loader,
     dataset_train_len,
     dataset_test_len,
-    # plotsFileName,
-    # csvFileName,
 ):
-    criterion = dce_loss(2, 2)
     epochs = []
     train_acc = []
     test_acc = []
@@ -179,7 +177,7 @@ def train_model(
     test_error = []
     best_acc = 0.0
     for epoch in range(num_epochs):
-        cnn.train()
+        model.train()
         epochs.append(epoch)
         optimizer = lr_scheduler(optimizer_s, lrate, epoch)
         print("Epoch {}/{}".format(epoch + 1, num_epochs))
@@ -197,19 +195,20 @@ def train_model(
 
             optimizer.zero_grad()
 
-            features, centers, distance, outputs = cnn(input_ids, attention_mask)
+            features, centers, distance, outputs = model(input_ids, attention_mask)
 
             _, preds = torch.max(distance, 1)
 
             loss1 = F.nll_loss(outputs, label)
             loss2 = regularization(features, centers, label)
+            loss3 = centers_divergence_loss(centers)
 
-            loss = loss1 + reg * loss2
+            loss = loss1 + reg * loss2 + lambd * loss3
 
             loss.backward()
 
             optimizer.step()
-            train_batch_ctr = train_batch_ctr + 1
+            train_batch_ctr += 1.0
 
             running_loss += loss.item()
 
@@ -228,7 +227,7 @@ def train_model(
             ((dataset_train_len) - running_corrects) / (dataset_train_len)
         )
 
-        cnn.eval()
+        model.eval()
         test_running_corrects = 0.0
         test_batch_ctr = 0.0
         test_running_loss = 0.0
@@ -240,24 +239,25 @@ def train_model(
                 attention_mask = attention_mask.to(device)
                 label = label.to(device)
 
-                features, centers, distance, test_outputs = cnn(
+                features, centers, distance, test_outputs = model(
                     input_ids, attention_mask
                 )
                 _, predicted_test = torch.max(distance, 1)
 
                 loss1 = F.nll_loss(test_outputs, label)
                 loss2 = regularization(features, centers, label)
+                loss3 = centers_divergence_loss(centers)
 
-                loss = loss1 + reg * loss2
+                loss = loss1 + reg * loss2 + lambd * loss3
 
                 test_running_loss += loss.item()
-                test_batch_ctr = test_batch_ctr + 1
+                test_batch_ctr += 1
 
                 test_running_corrects += torch.sum(predicted_test == label.data)
                 test_epoch_acc = float(test_running_corrects) / float(dataset_test_len)
 
         if test_epoch_acc > best_acc:
-            torch.save(cnn, "best_model.pt")
+            torch.save(model, "best_model.pt")
             best_acc = test_epoch_acc
 
         test_acc.append(test_epoch_acc)
@@ -285,4 +285,4 @@ def train_model(
         # plots(epochs, train_acc, test_acc, train_loss, test_loss, plotsFileName)
         # write_csv(csvFileName, train_acc, test_acc, train_loss, test_loss, epoch)
 
-    torch.save(cnn, "final_model.pt")
+    torch.save(model, "final_model.pt")
