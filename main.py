@@ -9,7 +9,7 @@ import argparse
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, default="sst2", help="data directory")
+    parser.add_argument("--data_dir", type=str, default="imdb", help="data directory")
     parser.add_argument("--use_max_length", action="store_true")
     parser.add_argument("--lr", type=float, default=0.1, help="initial_learning_rate")
     parser.add_argument("--batch_size", type=int, default=128)
@@ -52,7 +52,11 @@ if __name__ == "__main__":
     dataset_info = DatasetInfo(
         data_dir=args.data_dir, use_max_length=args.use_max_length
     )
-    train_dataset, val_dataset, test_dataset = load_dataset(
+    (
+        train_dataset,
+        #  val_dataset,
+        test_dataset,
+    ) = load_dataset(
         dataset_info=dataset_info, data_dir=args.data_dir, tokenizer=tokenizer
     )
 
@@ -62,9 +66,9 @@ if __name__ == "__main__":
         shuffle=True,
         collate_fn=train_dataset.collate_fn,
     )
-    val_dl = torch.utils.data.DataLoader(
-        val_dataset, batch_size=128, shuffle=False, collate_fn=val_dataset.collate_fn
-    )
+    # val_dl = torch.utils.data.DataLoader(
+    #     val_dataset, batch_size=128, shuffle=False, collate_fn=val_dataset.collate_fn
+    # )
     test_dl = torch.utils.data.DataLoader(
         test_dataset, batch_size=128, shuffle=False, collate_fn=test_dataset.collate_fn
     )
@@ -94,7 +98,7 @@ if __name__ == "__main__":
         config={
             "learning_rate": lrate,
             "architecture": "roberta-prototype",
-            "dataset": "sst2",
+            "dataset": "imdb",
             "epochs": num_epochs,
         },
     )
