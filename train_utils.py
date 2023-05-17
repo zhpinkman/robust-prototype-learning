@@ -84,7 +84,7 @@ def load_classification_dataset(dataset_info, df, tokenizer):
 
 def load_dataset(dataset_info, data_dir, tokenizer):
     train_df = pd.read_csv(os.path.join(data_dir, "train.csv"))
-    val_df = pd.read_csv(os.path.join(data_dir, "val.csv"))
+    # val_df = pd.read_csv(os.path.join(data_dir, "val.csv"))
     test_df = pd.read_csv(os.path.join(data_dir, "test.csv"))
 
     train_df_split_0 = train_df[train_df["label"] == 0].sample(10000)
@@ -98,7 +98,11 @@ def load_dataset(dataset_info, data_dir, tokenizer):
     if dataset_info.dataset_type == "classification":
         return [
             load_classification_dataset(dataset_info, df, tokenizer)
-            for df in [train_df, val_df, test_df]
+            for df in [
+                train_df,
+                # val_df,
+                test_df,
+            ]
         ]
     else:
         raise Exception("Dataset type not supported")

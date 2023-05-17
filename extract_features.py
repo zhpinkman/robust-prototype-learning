@@ -45,7 +45,7 @@ class LoadDataset(Dataset):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, default="sst2", help="data directory")
+    parser.add_argument("--data_dir", type=str, default="imdb", help="data directory")
     parser.add_argument("--use_max_length", action="store_true")
     parser.add_argument("--batch_size", type=int, default=1)
 
@@ -56,7 +56,11 @@ if __name__ == "__main__":
     dataset_info = DatasetInfo(
         data_dir=args.data_dir, use_max_length=args.use_max_length
     )
-    train_dataset, val_dataset, test_dataset = load_dataset(
+    (
+        train_dataset,
+        #  val_dataset,
+        test_dataset,
+    ) = load_dataset(
         dataset_info=dataset_info, data_dir=args.data_dir, tokenizer=tokenizer
     )
 
@@ -66,12 +70,12 @@ if __name__ == "__main__":
         shuffle=True,
         collate_fn=train_dataset.collate_fn,
     )
-    val_dl = torch.utils.data.DataLoader(
-        val_dataset,
-        batch_size=args.batch_size,
-        shuffle=False,
-        collate_fn=val_dataset.collate_fn,
-    )
+    # val_dl = torch.utils.data.DataLoader(
+    #     val_dataset,
+    #     batch_size=args.batch_size,
+    #     shuffle=False,
+    #     collate_fn=val_dataset.collate_fn,
+    # )
     test_dl = torch.utils.data.DataLoader(
         test_dataset,
         batch_size=args.batch_size,
