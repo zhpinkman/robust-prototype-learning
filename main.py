@@ -49,16 +49,14 @@ if __name__ == "__main__":
 
     tokenizer = AutoTokenizer.from_pretrained("xlm-roberta-base")
 
-    dataset_info = DatasetInfo(
-        data_dir=args.data_dir, use_max_length=args.use_max_length
-    )
+    # dataset_info = DatasetInfo(
+    #     data_dir=args.data_dir, use_max_length=args.use_max_length
+    # )
     (
         train_dataset,
         #  val_dataset,
         test_dataset,
-    ) = load_dataset(
-        dataset_info=dataset_info, data_dir=args.data_dir, tokenizer=tokenizer
-    )
+    ) = load_dataset(data_dir=args.data_dir, tokenizer=tokenizer)
 
     train_dl = torch.utils.data.DataLoader(
         train_dataset,

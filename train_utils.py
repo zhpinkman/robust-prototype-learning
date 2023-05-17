@@ -67,7 +67,7 @@ class CustomNonBinaryClassDataset(torch.utils.data.Dataset):
         )
 
 
-def load_classification_dataset(dataset_info, df, tokenizer):
+def load_classification_dataset(df, tokenizer, dataset_type, max_length):
     sentences = df["sentence"].tolist()
     labels = df["label"].tolist()
 
@@ -75,14 +75,14 @@ def load_classification_dataset(dataset_info, df, tokenizer):
         sentences=sentences,
         labels=labels,
         tokenizer=tokenizer,
-        max_length=dataset_info.max_length,
-        dataset_type=dataset_info.dataset_type,
+        max_length=max_length,
+        dataset_type=dataset_type,
     )
 
     return dataset
 
 
-def load_dataset(dataset_info, data_dir, tokenizer):
+def load_dataset(data_dir, tokenizer, dataset_type="classification", max_length=512):
     train_df = pd.read_csv(os.path.join(data_dir, "train.csv"))
     # val_df = pd.read_csv(os.path.join(data_dir, "val.csv"))
     test_df = pd.read_csv(os.path.join(data_dir, "test.csv"))
@@ -95,9 +95,9 @@ def load_dataset(dataset_info, data_dir, tokenizer):
     # shuffle train dataframe
     # train_df = train_df.sample(frac=1, random_state=42).reset_index(drop=True)
 
-    if dataset_info.dataset_type == "classification":
+    if dataset_type == "classification":
         return [
-            load_classification_dataset(dataset_info, df, tokenizer)
+            load_classification_dataset(df, tokenizer, dataset_type, max_length)
             for df in [
                 train_df,
                 # val_df,
@@ -108,43 +108,43 @@ def load_dataset(dataset_info, data_dir, tokenizer):
         raise Exception("Dataset type not supported")
 
 
-class DatasetInfo:
-    @property
-    def data(self):
-        return self.dataset_info
+# class DatasetInfo:
+#     @property
+#     def data(self):
+#         return self.dataset_info
 
-    def __init__(self, data_dir, use_max_length) -> None:
-        self.use_max_length = use_max_length
-        self.load_dataset_info(data_dir)
+#     def __init__(self, data_dir, use_max_length) -> None:
+#         self.use_max_length = use_max_length
+#         self.load_dataset_info(data_dir)
 
-    def load_dataset_info(self, data_dir):
-        with open(os.path.join(data_dir, "info.json"), "r") as f:
-            self.dataset_info = json.load(f)
+#     def load_dataset_info(self, data_dir):
+#         with open(os.path.join(data_dir, "info.json"), "r") as f:
+#             self.dataset_info = json.load(f)
 
-    @property
-    def batch_size(self):
-        return self.data["batch_size"]
+#     @property
+#     def batch_size(self):
+#         return self.data["batch_size"]
 
-    @property
-    def dataset_type(self):
-        return self.data["dataset_type"]
+#     @property
+#     def dataset_type(self):
+#         return self.data["dataset_type"]
 
-    @property
-    def dataset_classes_dict(self):
-        classes = self.dataset_info["features"]["label"]["names"]
-        return dict(zip(classes, range(len(classes))))
+#     @property
+#     def dataset_classes_dict(self):
+#         classes = self.dataset_info["features"]["label"]["names"]
+#         return dict(zip(classes, range(len(classes))))
 
-    @property
-    def max_length(self):
-        return (
-            self.dataset_info["sentence_max_length"]
-            if ("sentence_max_length" in self.dataset_info and self.use_max_length)
-            else 128
-        )
+#     @property
+#     def max_length(self):
+#         return (
+#             self.dataset_info["sentence_max_length"]
+#             if ("sentence_max_length" in self.dataset_info and self.use_max_length)
+#             else 128
+#         )
 
-    @property
-    def num_classes(self):
-        return len(self.dataset_info["features"]["label"]["names"])
+#     @property
+#     def num_classes(self):
+#         return len(self.dataset_info["features"]["label"]["names"])
 
 
 def lr_scheduler(optimizer, init_lr, epoch):
