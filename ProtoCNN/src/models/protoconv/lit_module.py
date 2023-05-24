@@ -29,7 +29,7 @@ class ProtoConvLitModule(pl.LightningModule):
                  pc_project_prototypes_every_n=1, pc_sim_func='log', pc_separation_threshold=1,
                  pc_number_of_prototypes=16, pc_conv_filters=64, pc_ce_loss_weight=0.99, pc_sep_loss_weight=0.005,
                  pc_cls_loss_weight=0.005, pc_l1_loss_weight=0.01, pc_conv_filter_size=5, pc_prototypes_init='rand',
-                 itos=None, pc_dynamic_number=True, verbose_proto=1, *args, **kwargs):
+                 itos=None, pc_dynamic_number=True, verbose_proto=1, use_dce_loss=True, *args, **kwargs):
         super().__init__()
 
         self.save_hyperparameters()
@@ -66,6 +66,7 @@ class ProtoConvLitModule(pl.LightningModule):
 
         self.max_number_of_prototypes = 100
         self.dynamic_number = pc_dynamic_number
+        self.use_dce_loss = use_dce_loss
 
         self.current_prototypes_number = self.number_of_prototypes
         self.enabled_prototypes_mask = nn.Parameter(torch.cat([
@@ -80,6 +81,7 @@ class ProtoConvLitModule(pl.LightningModule):
         self.prototypes = PrototypeLayer(channels_in=self.conv_filters,
                                          number_of_prototypes=self.max_number_of_prototypes,
                                          initialization=self.prototypes_init)
+        self.fc = nn.Linear(8192, 100, bias=False)
         self.fc1 = nn.Linear(self.max_number_of_prototypes, 1, bias=False)
 
         self.prototype_tokens = nn.Parameter(torch.zeros([self.max_number_of_prototypes, self.conv_filter_size],
@@ -96,8 +98,10 @@ class ProtoConvLitModule(pl.LightningModule):
         self.loss = BCEWithLogitsLoss()
 
     def forward(self, x):
+        batch_dim = x.shape[0]
         embedding = self.embedding(x).permute((0, 2, 1))
         latent_space = self.conv1(embedding)
+        projection = self.fc(latent_space.reshape(batch_dim, -1))
 
         padded_tokens = F.pad(x, (self.conv_padding, self.conv_padding), 'constant')
         tokens_per_kernel = padded_tokens.unfold(1, self.conv_filter_size, 1)
@@ -107,7 +111,7 @@ class ProtoConvLitModule(pl.LightningModule):
         similarity = self.dist_to_sim[self.sim_func](min_dist)
         masked_similarity = similarity * self.enabled_prototypes_mask
         logits = self.fc1(masked_similarity).squeeze(1)
-        return PrototypeDetailPrediction(latent_space, distances, logits, min_dist, tokens_per_kernel)
+        return PrototypeDetailPrediction(latent_space, distances, logits, min_dist, projection, tokens_per_kernel)
 
     @torch.no_grad()
     def on_train_epoch_start(self, *args, **kwargs):
@@ -170,23 +174,24 @@ class ProtoConvLitModule(pl.LightningModule):
         outputs = self(TTF.to_tensor(batch["text"], padding_value=1).to(self.device))
         preds = torch.round(torch.sigmoid(outputs.logits))
 
-        cross_entropy = self.loss(outputs.logits, torch.tensor(batch["label"], dtype=torch.float32).to(self.device))
         
-        _, dce_loss = self.dce_loss(self.prototypes.prototypes, outputs)
-        dce_loss = F.nll_loss(F.log_softmax(dce_loss, dim=1))
 
         clustering_loss = self.calculate_clustering_loss(outputs)
         separation_loss = self.calculate_separation_loss(self.prototypes.prototypes,
                                                          threshold=self.separation_threshold)
         l1 = self.fc1.weight.norm(p=1)
 
-        loss = self.ce_loss_weight * cross_entropy + self.cls_loss_weight * clustering_loss + \
-               self.sep_loss_weight * separation_loss + self.l1_loss_weight * l1
-        
+        if self.use_dce_loss:        
+            _, dce_loss = self.dce_loss(self.prototypes.prototypes, outputs)
+            classification_loss = F.nll_loss(F.log_softmax(dce_loss, dim=1), torch.tensor(batch["label"], dtype=torch.long).to(self.device))
+        else:
+            classification_loss = self.loss(outputs.logits, torch.tensor(batch["label"], dtype=torch.float32).to(self.device))
+            
+        loss = self.ce_loss_weight * classification_loss + self.cls_loss_weight * clustering_loss + \
+                self.sep_loss_weight * separation_loss + self.l1_loss_weight * l1
         accuracy = acc_score(preds, torch.tensor(batch["label"], dtype=torch.float32).to("cuda"))
 
-        return LossesWrapper(loss, cross_entropy, clustering_loss, separation_loss, l1, accuracy)
-        # return LossesWrapper(loss, dce_loss, clustering_loss, separation_loss, l1, accuracy)
+        return LossesWrapper(loss, classification_loss, clustering_loss, separation_loss, l1, accuracy)
 
     def log_all_metrics(self, stage, losses: LossesWrapper):
         self.log(f'{stage}_loss_{self.fold_id}', losses.loss, prog_bar=True, batch_size=BATCH_SIZE)
@@ -225,13 +230,10 @@ class ProtoConvLitModule(pl.LightningModule):
         return cluster_cost
 
     def dce_loss(self, prototypes, outputs):
-        # prototypes : (num_prototypes, conv_filters, 1) -> (1, num_proto, conv_filters)
-        # latent_space: (bs, conv_filters, conv_out_dim=128)
-        # logits : (bs, )
-        embed()
-        features_square = torch.sum(torch.pow(outputs.latent_space, 2), 1, keepdim=True)
+        prototypes = prototypes.squeeze(-1)
+        features_square = torch.sum(torch.pow(outputs.projection, 2), 1, keepdim=True)
         centers_square = torch.sum(torch.pow(prototypes, 2), 0, keepdim=True)
-        features_into_centers = 2 * torch.matmul(outputs.latent_space, (prototypes))
+        features_into_centers = 2 * torch.matmul(outputs.projection, (prototypes))
         dist = features_square + centers_square - features_into_centers
 
         return prototypes, -dist
