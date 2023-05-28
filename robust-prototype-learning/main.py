@@ -7,24 +7,25 @@ from train_utils import *
 from transformers import AutoTokenizer
 import argparse
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", type=str, default="imdb", help="data directory")
     parser.add_argument("--use_max_length", action="store_true")
-    parser.add_argument("--lr", type=float, default=0.1, help="initial_learning_rate")
-    parser.add_argument("--batch_size", type=int, default=128)
+    parser.add_argument("--lr", type=float, default=0.3, help="initial_learning_rate")
+    parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--num_classes", type=int, default=2, help="number of classes")
     parser.add_argument(
-        "--h", type=int, default=2, help="dimension of the hidden layer"
+        "--h", type=int, default=32, help="dimension of the hidden layer"
     )
     parser.add_argument(
-        "--scale", type=float, default=2, help="scaling factor for distance"
+        "--scale", type=float, default=0.01, help="scaling factor for distance"
     )
     parser.add_argument(
-        "--reg", type=float, default=0.01, help="regularization coefficient"
+        "--reg", type=float, default=0.1, help="regularization coefficient"
     )
     parser.add_argument(
-        "--lambd", type=float, default=0.01, help="lambda for prototype segregation"
+        "--lambd", type=float, default=0.1, help="lambda for prototype segregation"
     )
 
     args, _ = parser.parse_known_args()
@@ -68,7 +69,10 @@ if __name__ == "__main__":
     #     val_dataset, batch_size=128, shuffle=False, collate_fn=val_dataset.collate_fn
     # )
     test_dl = torch.utils.data.DataLoader(
-        test_dataset, batch_size=128, shuffle=False, collate_fn=test_dataset.collate_fn
+        test_dataset,
+        batch_size=args.batch_size,
+        shuffle=False,
+        collate_fn=test_dataset.collate_fn,
     )
 
     train_num = len(train_dataset)
@@ -87,8 +91,6 @@ if __name__ == "__main__":
 
     num_epochs = 10
 
-    print(model)
-
     wandb.init(
         # set the wandb project where this run will be logged
         project="robust-prototype-learning",
@@ -100,6 +102,8 @@ if __name__ == "__main__":
             "epochs": num_epochs,
         },
     )
+
+    wandb.watch(model, log="all")
 
     train_model(
         model,
