@@ -115,9 +115,10 @@ class dce_loss(torch.nn.Module):
         nn.init.kaiming_normal_(self.centers)
 
     def forward(self, x):
-        features_square = torch.sum(torch.pow(x, 2), 1, keepdim=True)
-        centers_square = torch.sum(torch.pow(self.centers, 2), 0, keepdim=True)
-        features_into_centers = 2 * torch.matmul(x, (self.centers))
+        embed()
+        features_square = torch.sum(torch.pow(x, 2), 1, keepdim=True) #(128,2 (n_prrototypes)) -> (128,1)
+        centers_square = torch.sum(torch.pow(self.centers, 2), 0, keepdim=True) #(2,2) -> (1,2)
+        features_into_centers = 2 * torch.matmul(x, (self.centers)) # -> (128,2)
         dist = features_square + centers_square - features_into_centers
 
         return self.centers, -dist
