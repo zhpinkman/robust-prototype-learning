@@ -55,7 +55,9 @@ def main():
     # Attack 20 samples with CSV logging and checkpoint saved every 5 interval
     attack_args = textattack.AttackArgs(
         num_examples=200,
-        log_to_csv="log.csv",
+        shuffle=True,
+        log_to_csv="log_textfooler.csv",
+        log_summary_to_json="summary_textfooler.json",
         checkpoint_interval=5,
         checkpoint_dir="checkpoints",
         disable_stdout=True,
