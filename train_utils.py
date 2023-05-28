@@ -87,8 +87,8 @@ def load_dataset(data_dir, tokenizer, dataset_type="classification", max_length=
     # val_df = pd.read_csv(os.path.join(data_dir, "val.csv"))
     test_df = pd.read_csv(os.path.join(data_dir, "test.csv"))
 
-    train_df_split_0 = train_df[train_df["label"] == 0].sample(10000)
-    train_df_split_1 = train_df[train_df["label"] == 1].sample(10000)
+    train_df_split_0 = train_df[train_df["label"] == 0].sample(1000)
+    train_df_split_1 = train_df[train_df["label"] == 1].sample(1000)
 
     train_df = pd.concat([train_df_split_0, train_df_split_1])
 
@@ -106,45 +106,6 @@ def load_dataset(data_dir, tokenizer, dataset_type="classification", max_length=
         ]
     else:
         raise Exception("Dataset type not supported")
-
-
-# class DatasetInfo:
-#     @property
-#     def data(self):
-#         return self.dataset_info
-
-#     def __init__(self, data_dir, use_max_length) -> None:
-#         self.use_max_length = use_max_length
-#         self.load_dataset_info(data_dir)
-
-#     def load_dataset_info(self, data_dir):
-#         with open(os.path.join(data_dir, "info.json"), "r") as f:
-#             self.dataset_info = json.load(f)
-
-#     @property
-#     def batch_size(self):
-#         return self.data["batch_size"]
-
-#     @property
-#     def dataset_type(self):
-#         return self.data["dataset_type"]
-
-#     @property
-#     def dataset_classes_dict(self):
-#         classes = self.dataset_info["features"]["label"]["names"]
-#         return dict(zip(classes, range(len(classes))))
-
-#     @property
-#     def max_length(self):
-#         return (
-#             self.dataset_info["sentence_max_length"]
-#             if ("sentence_max_length" in self.dataset_info and self.use_max_length)
-#             else 128
-#         )
-
-#     @property
-#     def num_classes(self):
-#         return len(self.dataset_info["features"]["label"]["names"])
 
 
 def lr_scheduler(optimizer, init_lr, epoch):
@@ -177,10 +138,12 @@ def train_model(
     test_acc = []
     train_loss = []
     test_loss = []
-    train_error = []
-    test_error = []
     best_acc = 0.0
+
+    begin_epoch = False
+
     for epoch in range(num_epochs):
+        begin_epoch = True
         model.train()
         epochs.append(epoch)
         optimizer = lr_scheduler(optimizer_s, lrate, epoch)
@@ -190,8 +153,8 @@ def train_model(
         running_corrects = 0.0
         train_batch_ctr = 0.0
 
-        for i, (input_ids, attention_mask, label) in tqdm(
-            enumerate(train_loader), leave=False, total=len(train_loader)
+        for input_ids, attention_mask, label in tqdm(
+            train_loader, leave=False, total=len(train_loader)
         ):
             input_ids = input_ids.to(device)
             attention_mask = attention_mask.to(device)
@@ -199,7 +162,9 @@ def train_model(
 
             optimizer.zero_grad()
 
-            features, centers, distance, outputs = model(input_ids, attention_mask)
+            features, centers, distance, outputs = model(
+                input_ids, attention_mask, begin_epoch
+            )
 
             _, preds = torch.max(distance, 1)
 
@@ -208,6 +173,9 @@ def train_model(
             loss3 = centers_divergence_loss(centers)
 
             loss = loss1 + reg * loss2 + lambd * loss3
+            if begin_epoch:
+                embed()
+            begin_epoch = False
 
             loss.backward()
 
@@ -227,66 +195,63 @@ def train_model(
         )
         train_acc.append(epoch_acc)
         train_loss.append(1.0 * running_loss / train_batch_ctr)
-        train_error.append(
-            ((dataset_train_len) - running_corrects) / (dataset_train_len)
-        )
 
-        model.eval()
-        test_running_corrects = 0.0
-        test_batch_ctr = 0.0
-        test_running_loss = 0.0
-        test_total = 0.0
-
-        for input_ids, attention_mask, label in test_loader:
-            with torch.no_grad():
-                input_ids = input_ids.to(device)
-                attention_mask = attention_mask.to(device)
-                label = label.to(device)
-
-                features, centers, distance, test_outputs = model(
-                    input_ids, attention_mask
-                )
-                _, predicted_test = torch.max(distance, 1)
-
-                loss1 = F.nll_loss(test_outputs, label)
-                loss2 = regularization(features, centers, label)
-                loss3 = centers_divergence_loss(centers)
-
-                loss = loss1 + reg * loss2 + lambd * loss3
-
-                test_running_loss += loss.item()
-                test_batch_ctr += 1
-
-                test_running_corrects += torch.sum(predicted_test == label.data)
-                test_epoch_acc = float(test_running_corrects) / float(dataset_test_len)
-
-        if test_epoch_acc > best_acc:
-            torch.save(model, "best_model.pt")
-            best_acc = test_epoch_acc
-
-        test_acc.append(test_epoch_acc)
-        test_loss.append(1.0 * test_running_loss / test_batch_ctr)
-        wandb.log(
-            {
-                "Train Loss": train_loss[epoch],
-                "Test Loss": test_loss[epoch],
-                "Train Accuracy": train_acc[epoch],
-                "Test Accuracy": test_acc[epoch],
-            }
-        )
         print(
-            "Test corrects: {} Test samples: {} Test accuracy {}".format(
-                test_running_corrects, (dataset_test_len), test_epoch_acc
+            "Train loss: {}".format(
+                train_loss[epoch],
             )
         )
 
-        print(
-            "Train loss: {} Test loss: {}".format(train_loss[epoch], test_loss[epoch])
+        # model.eval()
+        # test_running_corrects = 0.0
+        # test_batch_ctr = 0.0
+        # test_running_loss = 0.0
+
+        # for input_ids, attention_mask, label in tqdm(
+        #     test_loader, leave=False, total=len(test_loader)
+        # ):
+        #     with torch.no_grad():
+        #         input_ids = input_ids.to(device)
+        #         attention_mask = attention_mask.to(device)
+        #         label = label.to(device)
+
+        #         features, centers, distance, test_outputs = model(
+        #             input_ids, attention_mask
+        #         )
+        #         _, predicted_test = torch.max(distance, 1)
+
+        #         loss1 = F.nll_loss(test_outputs, label)
+        #         loss2 = regularization(features, centers, label)
+        #         loss3 = centers_divergence_loss(centers)
+
+        #         loss = loss1 + reg * loss2 + lambd * loss3
+
+        #         test_running_loss += loss.item()
+        #         test_batch_ctr += 1
+
+        #         test_running_corrects += torch.sum(predicted_test == label.data)
+        #         test_epoch_acc = float(test_running_corrects) / float(dataset_test_len)
+
+        # if test_epoch_acc > best_acc:
+        #     torch.save(model, "best_model.pt")
+        #     best_acc = test_epoch_acc
+
+        # test_acc.append(test_epoch_acc)
+        # test_loss.append(1.0 * test_running_loss / test_batch_ctr)
+        wandb.log(
+            {
+                "Train Loss": train_loss[epoch],
+                # "Test Loss": test_loss[epoch],
+                "Train Accuracy": train_acc[epoch],
+                # "Test Accuracy": test_acc[epoch],
+            }
         )
+        # print(
+        #     "Test corrects: {} Test samples: {} Test accuracy {}".format(
+        #         test_running_corrects, (dataset_test_len), test_epoch_acc
+        #     )
+        # )
 
         print("*" * 70)
 
-        # plots(epochs, train_acc, test_acc, train_loss, test_loss, plotsFileName)
-        # write_csv(csvFileName, train_acc, test_acc, train_loss, test_loss, epoch)
-
-    torch.save(model, "final_model.pt")
+    # torch.save(model, "final_model.pt")

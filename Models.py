@@ -19,6 +19,9 @@ class Net(nn.Module):
 
         self.encoder = RobertaModel.from_pretrained("xlm-roberta-base")
 
+        for param in self.encoder.parameters():
+            param.requires_grad = False
+
         self.dropout_1 = nn.Dropout(0.1)
         self.dropout_2 = nn.Dropout(0.1)
         self.dropout_3 = nn.Dropout(0.1)
@@ -27,36 +30,21 @@ class Net(nn.Module):
         self.batchnorm1_2 = nn.BatchNorm1d(128)
 
         self.fc1 = nn.Linear(768, 256)
-        self.prelu1 = nn.PReLU()
+        self.prelu1 = nn.ReLU()
         self.fc2 = nn.Linear(256, 128)
-        self.prelu2 = nn.PReLU()
+        self.prelu2 = nn.ReLU()
         self.fc3 = nn.Linear(128, num_hidden_units)
         # self.prelu3 = nn.PReLU()
 
         self.scale = s
 
-        # self.conv1_1 = nn.Conv2d(1, 32, kernel_size=5, padding=2)
-        # self.prelu1_1 = nn.PReLU()
-        # self.conv1_2 = nn.Conv2d(32, 32, kernel_size=5, padding=2)
-        # self.prelu1_2 = nn.PReLU()
-        # self.conv2_1 = nn.Conv2d(32, 64, kernel_size=5, padding=2)
-        # self.prelu2_1 = nn.PReLU()
-        # self.conv2_2 = nn.Conv2d(64, 64, kernel_size=5, padding=2)
-        # self.prelu2_2 = nn.PReLU()
-        # self.conv3_1 = nn.Conv2d(64, 128, kernel_size=5, padding=2)
-        # self.prelu3_1 = nn.PReLU()
-        # self.conv3_2 = nn.Conv2d(128, 128, kernel_size=5, padding=2)
-        # self.prelu3_2 = nn.PReLU()
-        # self.preluip1 = nn.PReLU()
-
-        # self.ip1 = nn.Linear(128 * 3 * 3, num_hidden_units)
         self.dce = dce_loss(num_classes, num_hidden_units)
         self.init_dce_loss(train_dataset)
 
     def init_dce_loss(self, train_dataset):
         train_dl = torch.utils.data.DataLoader(
             train_dataset,
-            batch_size=128,
+            batch_size=64,
             shuffle=True,
             collate_fn=train_dataset.collate_fn,
         )
@@ -71,10 +59,12 @@ class Net(nn.Module):
             ):
                 input_ids = input_ids.cuda()
                 attention_mask = attention_mask.cuda()
-                labels = labels.cuda()
                 x1, _, _, _ = model(input_ids, attention_mask)
+                x1 = x1.cpu()
                 for one_bert_feature, label in zip(x1, labels):
                     train_dl_bert_features[label.item()].append(one_bert_feature)
+
+        model = model.cpu()
 
         train_dl_bert_features_mean = {
             key: torch.stack(train_dl_bert_features[key]).mean(dim=0)
@@ -86,7 +76,7 @@ class Net(nn.Module):
 
         self.dce.centers.data = train_dl_bert_features_mean
 
-    def forward(self, input_ids, attention_mask):
+    def forward(self, input_ids, attention_mask, begin_epoch=False):
         x = self.encoder(input_ids=input_ids, attention_mask=attention_mask)[1]
         x = self.dropout_1(x)
 
@@ -100,20 +90,13 @@ class Net(nn.Module):
 
         x1 = self.fc3(x)
 
-        # x = self.prelu1_1(self.conv1_1(x))
-        # x = self.prelu1_2(self.conv1_2(x))
-        # x = F.max_pool2d(x, 2)
-        # x = self.prelu2_1(self.conv2_1(x))
-        # x = self.prelu2_2(self.conv2_2(x))
-        # x = F.max_pool2d(x, 2)
-        # x = self.prelu3_1(self.conv3_1(x))
-        # x = self.prelu3_2(self.conv3_2(x))
-        # x = F.max_pool2d(x, 2)
-        # x = x.view(-1, 128 * 3 * 3)
-
-        # x1 = self.preluip1(self.fc3(x))
         centers, x = self.dce(x1)
+
         output = F.log_softmax(self.scale * x, dim=1)
+
+        if begin_epoch:
+            embed()
+
         return x1, centers, x, output
 
 
