@@ -9,21 +9,20 @@ from datasets import Dataset, DatasetDict
 import pandas as pd
 import argparse
 import os
-import evaluate
 import numpy as np
 
 
 def preprocess_data(tokenizer, dataset, args):
     def tokenize_function(examples):
         return tokenizer(
-            examples["sentence"],
+            examples["text"],
             padding="max_length",
             truncation=True,
             max_length=args.max_length,
         )
 
     tokenized_dataset = dataset.map(
-        tokenize_function, batched=True, remove_columns=["sentence"]
+        tokenize_function, batched=True, remove_columns=["text"]
     )
     return tokenized_dataset
 
@@ -31,7 +30,12 @@ def preprocess_data(tokenizer, dataset, args):
 def load_data(data_dir):
     train_df = pd.read_csv(os.path.join(data_dir, "train.csv"))
 
-    test_names = [file for file in os.listdir(data_dir) if file.startswith("test")]
+    test_names = [
+        file
+        for file in os.listdir(data_dir)
+        if (file.startswith("test") and file.endswith("csv"))
+    ]
+    
     test_dfs = [pd.read_csv(os.path.join(data_dir, file)) for file in test_names]
 
     adv_attack_names = [file for file in os.listdir(data_dir) if file.startswith("adv")]
@@ -42,9 +46,12 @@ def load_data(data_dir):
     dataset = DatasetDict(
         {
             "train": Dataset.from_pandas(train_df),
-            **{file: Dataset.from_pandas(df) for file, df in zip(test_names, test_dfs)},
             **{
-                file: Dataset.from_pandas(df)
+                file[: file.find(".csv")]: Dataset.from_pandas(df)
+                for file, df in zip(test_names, test_dfs)
+            },
+            **{
+                file[: file.find(".csv")]: Dataset.from_pandas(df)
                 for file, df in zip(adv_attack_names, adv_attack_dfs)
             },
         }
@@ -53,10 +60,16 @@ def load_data(data_dir):
 
 
 def compute_metrics(eval_preds):
-    clf_metrics = evaluate.combine(["accuracy", "f1", "precision", "recall"])
+    from datasets import load_metric
+
+    metric = load_metric("accuracy")
     predictions, labels = eval_preds
-    predictions = np.argmax(predictions[0], axis=1)
-    return clf_metrics.compute(predictions=predictions, references=labels)
+    predictions = np.argmax(predictions, axis=1)
+    # use classification report from sklearn
+    from sklearn.metrics import classification_report
+
+    print(classification_report(labels, predictions))
+    return metric.compute(predictions=predictions, references=labels)
 
 
 def main(args):
@@ -94,18 +107,19 @@ def main(args):
         load_best_model_at_end=True,
     )
 
-    os.environ["WANDB_PROJECT"] = "vanilla_bart_model"
+    os.environ["WANDB_PROJECT"] = f"bert-{args.data_dir.split('/')[-1]}"
 
     trainer = Trainer(
         model,
         training_args,
         train_dataset=tokenized_dataset["train"],
-        eval_dataset=tokenized_dataset["test"],
+        eval_dataset=tokenized_dataset["test_textfooler"],
         tokenizer=tokenizer,
         compute_metrics=compute_metrics,
     )
 
     if args.mode == "train":
+        trainer.evaluate(tokenized_dataset["test_textfooler"])
         trainer.train()
         trainer.save_model(args.model_dir)
 

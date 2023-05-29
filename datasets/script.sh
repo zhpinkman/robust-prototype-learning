@@ -1,4 +1,5 @@
-for attack_type in "hotflip" "iga" "pso" "kuleshov" "alzantot" "textfooler" "checklist" "pwws" "textbugger"; do
-    echo "Running attack: $attack_type"
-    CUDA_VISIBLE_DEVICES=4 python adv_attack.py --attack_type "$attack_type"
+for dataset in "ag_news" "imdb"; do
+    for attack_type in "textfooler" "textbugger"; do
+        python adv_attack.py --dataset $dataset --attack_type $attack_type
+    done
 done

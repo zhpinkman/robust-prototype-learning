@@ -29,6 +29,7 @@ def main():
         "--attack_type", type=str, default="textfooler", help="attack type"
     )
     parser.add_argument("--dataset", type=str, default="imdb", help="dataset to use")
+    parser.add_argument("--mode", type = str)
 
     args = parser.parse_args()
 
@@ -45,17 +46,17 @@ def main():
 
     if args.dataset == "ag_news":
         model = transformers.AutoModelForSequenceClassification.from_pretrained(
-            "textattack/bert-base-uncased-ag-news"
+            "../normal_models/models/ag_news"
         )
         tokenizer = transformers.AutoTokenizer.from_pretrained(
-            "textattack/bert-base-uncased-ag-news"
+            "../normal_models/models/ag_news"
         )
     elif args.dataset == "imdb":
         model = transformers.AutoModelForSequenceClassification.from_pretrained(
-            "textattack/bert-base-uncased-imdb"
+            "../normal_models/models/imdb"
         )
         tokenizer = transformers.AutoTokenizer.from_pretrained(
-            "textattack/bert-base-uncased-imdb"
+            "../normal_models/models/imdb"
         )
 
     model_wrapper = textattack.models.wrappers.HuggingFaceModelWrapper(model, tokenizer)
@@ -72,7 +73,7 @@ def main():
     # Attack 20 samples with CSV logging and checkpoint saved every 5 interval
     attack_args = textattack.AttackArgs(
         random_seed=1234,
-        num_examples=200,
+        num_successful_examples=200,
         shuffle=True,
         log_to_csv=f"log_{args.dataset}_{args.attack_type}.csv",
         log_summary_to_json=f"summary_{args.dataset}_{args.attack_type}.json",
@@ -84,35 +85,37 @@ def main():
     print("Created attack")
     attacker = textattack.Attacker(attack, dataset, attack_args)
     print("Attacking")
-    attacker.attack_dataset()
+    
+    if args.mode == "attack":
+        attacker.attack_dataset()
+    
 
-    try:
-        if not os.path.exists(f"{args.dataset}_dataset"):
-            os.makedirs(f"{args.dataset}_dataset")
-            train_dataset = textattack.datasets.HuggingFaceDataset(
-                args.dataset, split="train"
-            )
-            sentences = []
-            labels = []
-            for text, label in train_dataset:
-                sentences.append(text["text"])
-                labels.append(label)
-            pd.DataFrame({"sentence": sentences, "label": labels}).to_csv(
-                f"{args.dataset}_dataset/train.csv", index=False
-            )
-        resulted_df = pd.read_csv(f"log_{args.dataset}_{args.attack_type}.csv")
-        test_sentences = resulted_df["original_text"].tolist()
-        test_labels = resulted_df["ground_truth_output"].tolist()
-        adv_sentences = resulted_df["perturbed_text"].tolist()
-        adv_labels = resulted_df["ground_truth_output"].tolist()
-        pd.DataFrame({"sentence": test_sentences, "label": test_labels}).to_csv(
-            f"{args.dataset}_dataset/test_{args.attack_type}.csv", index=False
+    if not os.path.exists(f"{args.dataset}_dataset"):
+        os.makedirs(f"{args.dataset}_dataset")
+        train_dataset = textattack.datasets.HuggingFaceDataset(
+            args.dataset, split="train"
         )
-        pd.DataFrame({"sentence": adv_sentences, "label": adv_labels}).to_csv(
-            f"{args.dataset}_dataset/adv_{args.attack_type}.csv", index=False
+        sentences = []
+        labels = []
+        for text, label in train_dataset:
+            sentences.append(text["text"])
+            labels.append(label)
+        pd.DataFrame({"text": sentences, "label": labels}).to_csv(
+            f"{args.dataset}_dataset/train.csv", index=False
         )
-    except Exception as e:
-        embed()
+    resulted_df = pd.read_csv(f"log_{args.dataset}_{args.attack_type}.csv")
+    resulted_df = resulted_df[resulted_df["result_type"] == "Successful"]
+    test_sentences = [i.replace("[", "").replace("]", "") for i in resulted_df["original_text"].tolist()]
+    test_labels = resulted_df["ground_truth_output"].tolist()
+    adv_sentences = [i.replace("[", "").replace("]", "") for i in resulted_df["perturbed_text"].tolist()]
+    adv_labels = resulted_df["ground_truth_output"].tolist()
+    pd.DataFrame({"text": test_sentences, "label": test_labels}).to_csv(
+        f"{args.dataset}_dataset/test_{args.attack_type}.csv", index=False
+    )
+    pd.DataFrame({"text": adv_sentences, "label": adv_labels}).to_csv(
+        f"{args.dataset}_dataset/adv_{args.attack_type}.csv", index=False
+    )
+    
 
 
 if __name__ == "__main__":
