@@ -105,6 +105,8 @@ class ProtoConvLitModule(pl.LightningModule):
         latent_space = self.conv1(embedding)
         if self.use_dce_loss:
             projection = self.fc(latent_space.reshape(batch_dim, -1))
+        else:
+            projection = None
 
         padded_tokens = F.pad(x, (self.conv_padding, self.conv_padding), 'constant')
         tokens_per_kernel = padded_tokens.unfold(1, self.conv_filter_size, 1)
@@ -114,7 +116,7 @@ class ProtoConvLitModule(pl.LightningModule):
         similarity = self.dist_to_sim[self.sim_func](min_dist)
         masked_similarity = similarity * self.enabled_prototypes_mask
         logits = self.fc1(masked_similarity).squeeze(1)
-        return PrototypeDetailPrediction(latent_space, distances, logits, min_dist, projection if projection else None, tokens_per_kernel)
+        return PrototypeDetailPrediction(latent_space, distances, logits, min_dist, projection, tokens_per_kernel)
 
     @torch.no_grad()
     def on_train_epoch_start(self, *args, **kwargs):
@@ -172,12 +174,12 @@ class ProtoConvLitModule(pl.LightningModule):
 
     def validation_step(self, batch, batch_nb):
         losses = self.learning_step(batch, self.valid_acc)
-        with open("/scratch/darshan/prototype-learning/robust-prototype-learning/ProtoCNN/src/models/protoconv/emb_textbugger.pkl", "wb+") as f:
-            similarity = self.dist_to_sim[self.sim_func](losses.outputs.min_distances)
-            masked_similarity = similarity * self.enabled_prototypes_mask
-            # print(masked_similarity)
-            pickle.dump(masked_similarity.cpu().numpy(), f)
-            # print("Dumping outputs")
+        # with open("/scratch/darshan/prototype-learning/robust-prototype-learning/ProtoCNN/src/models/protoconv/emb_textbugger.pkl", "wb+") as f:
+        #     similarity = self.dist_to_sim[self.sim_func](losses.outputs.min_distances)
+        #     masked_similarity = similarity * self.enabled_prototypes_mask
+        #     # print(masked_similarity)
+        #     pickle.dump(masked_similarity.cpu().numpy(), f)
+        #     # print("Dumping outputs")
         self.log_all_metrics('val', losses)
 
     def learning_step(self, batch, acc_score):

@@ -1,16 +1,18 @@
 import argparse
-
+from IPython import embed
 from models.protoconv.lit_module import ProtoConvLitModule
 from models.protoconv.data_visualizer import DataVisualizer
 from utils import plot_html
-
+import os
 from datasets import load_dataset
 from transformers import AutoTokenizer
+import pandas as pd
 from datasets import load_dataset
 from datasets import Features, Value
 from torch.utils.data import DataLoader
+import torch
 
-def load_preprocess(tokenizer_name="bert-base-uncased", ds_path=""):
+def load_preprocess(dataset_dir, tokenizer_name="bert-base-uncased"):
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
 
     features = Features(
@@ -19,33 +21,43 @@ def load_preprocess(tokenizer_name="bert-base-uncased", ds_path=""):
                 "label": Value("float"),
             }
         )
+    
+    test_adv_files_paths = [
+        file for file in os.listdir(dataset_dir) if ((file.endswith(".csv")) and (file.startswith("test") or file.startswith("adv")))
+    ]
 
-    val_dataset = load_dataset(
-        "csv",
-        data_files={
-            "val": ds_path,
-        },
-        delimiter=",",
-        column_names=[
-            "text", "label"
-        ],
-        skiprows=1,
-        features=features,
-        keep_in_memory=True,
-    )["val"]
+
+    try:
+        all_datasets = load_dataset(
+            "csv",
+            data_files={
+                file_name[:file_name.find(".csv")]: os.path.join(dataset_dir, file_name)
+                for file_name in test_adv_files_paths
+            },
+            delimiter=",",
+            column_names=[
+                "text", "label"
+            ],
+            skiprows=1,
+            features=features,
+            keep_in_memory=True,
+        )
+        
+    except Exception as e:
+        embed()
 
     def preprocess_function(examples):
         return tokenizer(examples["text"], padding="max_length", truncation=True)
 
-    val_dataset = val_dataset.map(preprocess_function, batched=True)
-    visual_val_dataset = DataLoader(val_dataset.with_format("torch"), batch_size=1)
-    return visual_val_dataset
+    all_datasets = all_datasets.map(preprocess_function, batched=True)
+    for dataset_name in all_datasets.keys():
+        yield dataset_name, DataLoader(all_datasets[dataset_name].with_format("torch"), batch_size=1)
+    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--ds_path",
-        default="dataset.csv",
+        "--dataset_dir",
         type=str,
         required=True,
     )
@@ -58,8 +70,27 @@ if __name__ == "__main__":
 
     parser.add_argument("--tokenizer_name", default="bert-base-uncased", type=str, required=False)
     args = parser.parse_args()
-    visual_val_dataset = load_preprocess(ds_path=args.ds_path, tokenizer_name=args.tokenizer_name)
+
     model = ProtoConvLitModule.load_from_checkpoint(checkpoint_path=args.model_checkpoint)
-    data_visualizer = DataVisualizer(model)
-    plot_html(data_visualizer.visualize_prototypes())
-    plot_html(data_visualizer.visualize_random_predictions(visual_val_dataset, n=5))
+    # data_visualizer = DataVisualizer(model)
+    # plot_html(data_visualizer.visualize_prototypes())
+    # plot_html(data_visualizer.visualize_random_predictions(visual_val_dataset, n=5))
+    
+    for name, loader in load_preprocess(tokenizer_name=args.tokenizer_name, dataset_dir=args.dataset_dir):
+            
+        print('Testing model on the validation set on the {} dataset'.format(name))
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = model.to(device)
+        model.eval()
+        all_preds = []
+        all_labels = []
+        with torch.no_grad():
+            for batch in loader:
+                all_labels.extend(batch["label"].cpu().numpy())
+                outputs = model(batch["input_ids"].to(device))
+                preds = torch.round(torch.sigmoid(outputs.logits))
+                all_preds.extend(preds.cpu().numpy())
+        all_preds = [int(i) for i in all_preds]
+                
+        from sklearn.metrics import classification_report
+        print(classification_report(all_labels, all_preds))
