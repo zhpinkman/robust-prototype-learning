@@ -129,34 +129,34 @@ tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased",)
 
 dataset = load_dataset("imdb", keep_in_memory=True)
 train_dataset = dataset["train"]
-val_dataset = dataset["test"]
+# val_dataset = dataset["test"]
 
-# features = Features(
-#         {
-#             # "cogency_mean": Value("float"),
-#             # "effectiveness_mean": Value("float"),
-#             # "reasonableness_mean": Value("float"),
-#             # "text": Value("string"),
-#             # "title": Value("string"),
-#             # "similar": Value("string"),
-#             "text": Value("string"),
-#             "label": Value("float"),
-#         }
-#     )
+features = Features(
+        {
+            # "cogency_mean": Value("float"),
+            # "effectiveness_mean": Value("float"),
+            # "reasonableness_mean": Value("float"),
+            # "text": Value("string"),
+            # "title": Value("string"),
+            # "similar": Value("string"),
+            "text": Value("string"),
+            "label": Value("float"),
+        }
+    )
 
-# val_dataset = load_dataset(
-#     "csv",
-#     data_files={
-#         "val": "/scratch/darshan/prototype-learning/robust-prototype-learning/ProtoCNN/data/textbugger_imdb.csv",
-#     },
-#     delimiter=",",
-#     column_names=[
-#         "text", "label"
-#     ],
-#     skiprows=1,
-#     features=features,
-#     keep_in_memory=True,
-# )["val"]
+val_dataset = load_dataset(
+    "csv",
+    data_files={
+        "val": "/scratch/darshan/prototype-learning/robust-prototype-learning/ProtoCNN/data/textbugger_imdb.csv",
+    },
+    delimiter=",",
+    column_names=[
+        "text", "label"
+    ],
+    skiprows=1,
+    features=features,
+    keep_in_memory=True,
+)["val"]
 
 
 # tokenizer = tokenizer.train_new_from_iterator(train_dataset, vocab_size=10_000)
