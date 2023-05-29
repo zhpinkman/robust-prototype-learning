@@ -1,7 +1,10 @@
+from IPython import embed
 import argparse
 import textattack
 from textattack.transformations import WordSwapRandomCharacterDeletion, BackTranslation
 import transformers
+import os
+import pandas as pd
 from textattack.transformations import CompositeTransformation
 from textattack.constraints.pre_transformation import (
     RepeatModification,
@@ -18,7 +21,6 @@ from textattack.augmentation import (
     EmbeddingAugmenter,
     WordNetAugmenter,
 )
-import pandas as pd
 
 
 def main():
@@ -41,7 +43,7 @@ def main():
     # dataset = pd.read_csv("test.csv")
     # sentences = dataset["sentence"].tolist()
 
-    if args.dataset == "agnews":
+    if args.dataset == "ag_news":
         model = transformers.AutoModelForSequenceClassification.from_pretrained(
             "textattack/bert-base-uncased-ag-news"
         )
@@ -58,15 +60,14 @@ def main():
 
     model_wrapper = textattack.models.wrappers.HuggingFaceModelWrapper(model, tokenizer)
 
-    if args.dataset == "agnews":
-        dataset = textattack.datasets.HuggingFaceDataset("ag_news", split="test")
-    elif args.dataset == "imdb":
-        dataset = textattack.datasets.HuggingFaceDataset("imdb", split="test")
+    dataset = textattack.datasets.HuggingFaceDataset(args.dataset, split="test")
 
     if args.attack_type == "textfooler":
         attack = textattack.attack_recipes.TextFoolerJin2019.build(model_wrapper)
     elif args.attack_type == "textbugger":
         attack = textattack.attack_recipes.TextBuggerLi2018.build(model_wrapper)
+
+    print("Loaded attack and dataset")
 
     # Attack 20 samples with CSV logging and checkpoint saved every 5 interval
     attack_args = textattack.AttackArgs(
@@ -80,8 +81,38 @@ def main():
         disable_stdout=True,
         parallel=True,
     )
+    print("Created attack")
     attacker = textattack.Attacker(attack, dataset, attack_args)
+    print("Attacking")
     attacker.attack_dataset()
+
+    try:
+        if not os.path.exists(f"{args.dataset}_dataset"):
+            os.makedirs(f"{args.dataset}_dataset")
+            train_dataset = textattack.datasets.HuggingFaceDataset(
+                args.dataset, split="train"
+            )
+            sentences = []
+            labels = []
+            for text, label in train_dataset:
+                sentences.append(text["text"])
+                labels.append(label)
+            pd.DataFrame({"sentence": sentences, "label": labels}).to_csv(
+                f"{args.dataset}_dataset/train.csv", index=False
+            )
+        resulted_df = pd.read_csv(f"log_{args.dataset}_{args.attack_type}.csv")
+        test_sentences = resulted_df["original_text"].tolist()
+        test_labels = resulted_df["ground_truth_output"].tolist()
+        adv_sentences = resulted_df["perturbed_text"].tolist()
+        adv_labels = resulted_df["ground_truth_output"].tolist()
+        pd.DataFrame({"sentence": test_sentences, "label": test_labels}).to_csv(
+            f"{args.dataset}_dataset/test_{args.attack_type}.csv", index=False
+        )
+        pd.DataFrame({"sentence": adv_sentences, "label": adv_labels}).to_csv(
+            f"{args.dataset}_dataset/adv_{args.attack_type}.csv", index=False
+        )
+    except Exception as e:
+        embed()
 
 
 if __name__ == "__main__":
