@@ -7,7 +7,7 @@ import html
 
 from IPython.core.display import display, HTML
 from sklearn.model_selection import StratifiedKFold, train_test_split
-from torchtext.data import Dataset
+# from torchtext.data import Dataset
 
 
 def call_click_wrapper(f, run_params: dict):
@@ -47,20 +47,20 @@ def log_splits(n_splits, logger):
     logger.experiment.log_table('kfold_split_indices.csv', tabular_data=df)
 
 
-def save_torchtext_dataset(dataset, path):
-    if not isinstance(path, Path):
-        path = Path(path)
-    path.mkdir(parents=True, exist_ok=True)
-    torch.save(dataset.examples, path / "examples.pkl", pickle_module=dill)
-    torch.save(dataset.fields, path / "fields.pkl", pickle_module=dill)
+# def save_torchtext_dataset(dataset, path):
+#     if not isinstance(path, Path):
+#         path = Path(path)
+#     path.mkdir(parents=True, exist_ok=True)
+#     torch.save(dataset.examples, path / "examples.pkl", pickle_module=dill)
+#     torch.save(dataset.fields, path / "fields.pkl", pickle_module=dill)
 
 
-def load_torchtext_dataset(path):
-    if not isinstance(path, Path):
-        path = Path(path)
-    examples = torch.load(path / "examples.pkl", pickle_module=dill)
-    fields = torch.load(path / "fields.pkl", pickle_module=dill)
-    return Dataset(examples, fields)
+# def load_torchtext_dataset(path):
+#     if not isinstance(path, Path):
+#         path = Path(path)
+#     examples = torch.load(path / "examples.pkl", pickle_module=dill)
+#     fields = torch.load(path / "fields.pkl", pickle_module=dill)
+#     return Dataset(examples, fields)
 
 
 def get_pad_to_min_len_fn(min_length):
