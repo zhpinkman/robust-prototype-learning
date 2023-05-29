@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import torch
+from IPython import embed
 
 from utils import html_escape
 
@@ -36,7 +37,7 @@ class DataVisualizer:
             self.prototypes.append(' '.join(words))
 
     @torch.no_grad()
-    def visualize_prototypes(self, output_file_path=None):
+    def visualize_prototypes(self, output_file_path="/scratch/darshan/prototype-learning/robust-prototype-learning/ProtoCNN/src/models/protoconv/plots/proto.html"):
         lines = []
         used_ids = self.used_prototypes_ids()
         sorted_by_weights = sorted(used_ids, key=lambda x: self.fc_weights[x], reverse=True)
@@ -54,7 +55,7 @@ class DataVisualizer:
     @torch.no_grad()
     def predict(self, tokens, true_label=None, output_file_path=None, top3=True):
         from models.protoconv.return_wrappers import PrototypeDetailPrediction
-        output: PrototypeDetailPrediction = self.model(tokens)
+        output: PrototypeDetailPrediction = self.model(tokens.to("cuda"))
         similarities = self.local(self.model.dist_to_sim['log'](output.min_distances.squeeze(0)))
         evidence = (similarities * self.fc_weights)
         sorting_indexes = np.argsort(evidence)
@@ -68,8 +69,9 @@ class DataVisualizer:
         }
 
         y_pred: int = int(output.logits > 0)
-
-        words = [self.model.itos[j] for j in list(tokens[0]) if self.model.itos[j] not in ['<START>', '<END>']]
+        # print("TOKENS", tokens.shape)
+        # embed()
+        words = [self.model.itos[j.cpu().item()] for j in list(tokens[0]) if self.model.itos[j.cpu().item()] not in ['<START>', '<END>']]
         text = html_escape(" ".join(words))
 
         VisRepresentation = namedtuple("VisRepresentation", "patch_text proto_text similarity weight evidence")
@@ -139,14 +141,14 @@ class DataVisualizer:
         return ax
 
     @torch.no_grad()
-    def visualize_random_predictions(self, dataloader, n=5, output_file_path=None):
-        dataloader.batch_size = 1
+    def visualize_random_predictions(self, dataloader, n=5, output_file_path="/scratch/darshan/prototype-learning/robust-prototype-learning/ProtoCNN/src/models/protoconv/plots/output.html"):
+        # dataloader.batch_size = 1
         indexes = np.random.choice(len(dataloader.dataset), n, replace=False)
         lines = []
 
         for i, batch in enumerate(dataloader):
             if i in indexes:
-                lines.append(self.predict(batch.text, true_label=batch.label.int().tolist()[0]))
+                lines.append(self.predict(batch["input_ids"], true_label=batch["label"].int().tolist()[0]))
                 lines.append(self.separator)
 
         text = '<br>'.join(lines)
