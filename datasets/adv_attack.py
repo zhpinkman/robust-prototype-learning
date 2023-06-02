@@ -29,41 +29,21 @@ def main():
         "--attack_type", type=str, default="textfooler", help="attack type"
     )
     parser.add_argument("--dataset", type=str, default="imdb", help="dataset to use")
-    parser.add_argument("--mode", type = str)
-    parser.add_argument("--model_checkpoint", type = str)
+    parser.add_argument("--mode", type=str)
+    parser.add_argument("--model_checkpoint", type=str)
 
     args = parser.parse_args()
-    
-    
-    if os.path.exists(f"summary_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.json"):
+
+    if os.path.exists(
+        f"summary_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.json"
+    ):
         print("Already attacked")
         return
 
-    # print(args.attack_type)
-
-    # from textattack.augmentation import CLAREAugmenter
-
-    # augmenter = CLAREAugmenter(pct_words_to_swap=0.2, transformations_per_example=5)
-    # s = "I'd love to go to Japan but the tickets are 500 dollars"
-    # print(augmenter.augment(s))
-
-    # dataset = pd.read_csv("test.csv")
-    # sentences = dataset["sentence"].tolist()
-
-    if args.dataset == "ag_news":
-        model = transformers.AutoModelForSequenceClassification.from_pretrained(
-            "../normal_models/models/ag_news"
-        )
-        tokenizer = transformers.AutoTokenizer.from_pretrained(
-            "../normal_models/models/ag_news"
-        )
-    elif args.dataset == "imdb":
-        model = transformers.AutoModelForSequenceClassification.from_pretrained(
-            "../normal_models/models/imdb"
-        )
-        tokenizer = transformers.AutoTokenizer.from_pretrained(
-            "../normal_models/models/imdb"
-        )
+    model = transformers.AutoModelForSequenceClassification.from_pretrained(
+        args.model_checkpoint
+    )
+    tokenizer = transformers.AutoTokenizer.from_pretrained(args.model_checkpoint)
 
     model_wrapper = textattack.models.wrappers.HuggingFaceModelWrapper(model, tokenizer)
 
@@ -88,15 +68,14 @@ def main():
         checkpoint_interval=None,
         checkpoint_dir="checkpoints",
         disable_stdout=True,
-        parallel=True,
+        # parallel=True,
     )
     print("Created attack")
     attacker = textattack.Attacker(attack, dataset, attack_args)
     print("Attacking")
-    
+
     if args.mode == "attack":
         attacker.attack_dataset()
-    
 
     if not os.path.exists(f"{args.dataset}_dataset"):
         os.makedirs(f"{args.dataset}_dataset")
@@ -111,19 +90,29 @@ def main():
         pd.DataFrame({"text": sentences, "label": labels}).to_csv(
             f"{args.dataset}_dataset/train.csv", index=False
         )
-    resulted_df = pd.read_csv(f"log_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.csv")
+    resulted_df = pd.read_csv(
+        f"log_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.csv"
+    )
     resulted_df = resulted_df[resulted_df["result_type"] == "Successful"]
-    test_sentences = [i.replace("[", "").replace("]", "") for i in resulted_df["original_text"].tolist()]
+    test_sentences = [
+        i.replace("[", "").replace("]", "")
+        for i in resulted_df["original_text"].tolist()
+    ]
     test_labels = resulted_df["ground_truth_output"].tolist()
-    adv_sentences = [i.replace("[", "").replace("]", "") for i in resulted_df["perturbed_text"].tolist()]
-    adv_labels = resulted_df["ground_truth_output"].tolist()
-    pd.DataFrame({"text": test_sentences, "label": test_labels}).to_csv(
-        f"{args.dataset}_dataset/test_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.csv", index=False
+    adv_sentences = [
+        i.replace("[", "").replace("]", "")
+        for i in resulted_df["perturbed_text"].tolist()
+    ]
+    pd.DataFrame(
+        {
+            "original_text": test_sentences,
+            "perturbed_text": adv_sentences,
+            "label": test_labels,
+        }
+    ).to_csv(
+        f"{args.dataset}_dataset/adv_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.csv",
+        index=False,
     )
-    pd.DataFrame({"text": adv_sentences, "label": adv_labels}).to_csv(
-        f"{args.dataset}_dataset/adv_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.csv", index=False
-    )
-    
 
 
 if __name__ == "__main__":
