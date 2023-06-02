@@ -91,7 +91,7 @@ def main(args):
 
     training_args = TrainingArguments(
         output_dir=args.model_dir,
-        num_train_epochs=3,
+        num_train_epochs=args.num_epochs,
         per_device_train_batch_size=args.batch_size,
         per_device_eval_batch_size=args.batch_size,
         weight_decay=0.01,
@@ -113,13 +113,15 @@ def main(args):
         model,
         training_args,
         train_dataset=tokenized_dataset["train"],
-        eval_dataset=tokenized_dataset["test_textfooler"],
+        eval_dataset=tokenized_dataset["test"],
         tokenizer=tokenizer,
         compute_metrics=compute_metrics,
     )
 
     if args.mode == "train":
-        trainer.evaluate(tokenized_dataset["test_textfooler"])
+        if not os.path.exists(args.model_dir):
+            os.makedirs(args.model_dir)
+        trainer.evaluate(tokenized_dataset["test"])
         trainer.train()
         trainer.save_model(args.model_dir)
 
@@ -131,8 +133,7 @@ def main(args):
         ]
         for split in splits_for_test_and_adv_in_dataset:
             print("results for split: ", split)
-            metrics = trainer.evaluate(tokenized_dataset[split])
-            print(metrics)
+            trainer.evaluate(tokenized_dataset[split])
 
 
 if __name__ == "__main__":
@@ -163,6 +164,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--model_checkpoint", type=str, default="bert-base-uncased")
     parser.add_argument("--batch_size", type=int, default=128)
+    parser.add_argument("--num_epochs", type=int, default=3)
 
     parser.add_argument("--log_dir", type=str, default="./logs")
 
