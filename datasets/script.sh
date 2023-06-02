@@ -1,5 +1,5 @@
 for dataset in "ag_news" "imdb"; do
-    for attack_type in "deepwordbug"; do
+    for attack_type in "textfooler" "textbugger" "deepwordbug"; do
         if [ "$dataset" = "ag_news" ]; then
             for model_checkpoint in "textattack/roberta-base-ag-news" "textattack/bert-base-uncased-ag-news" "andi611/distilbert-base-uncased-ner-agnews"; do
                 echo " Attack type: " $attack_type
