@@ -25,7 +25,6 @@ from sklearn.model_selection import train_test_split
 # from models.protoconv.data_visualizer import DataVisualizer
 from models.protoconv.lit_module import ProtoConvLitModule
 import torchtext
-from torchtext.datasets import IMDB, SST2
 from torch.utils.data import DataLoader
 from torchtext.vocab import vocab
 from torchtext.data.utils import get_tokenizer
@@ -47,8 +46,9 @@ from datasets import Features, Value
 
 tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased",)
 batch_size = 32
-
-dataset = load_dataset("imdb", keep_in_memory=True)
+dataset_name = "ag_news"
+num_labels = 4
+dataset = load_dataset(dataset_name, keep_in_memory=True)
 train_dataset = dataset["train"]
 val_dataset = dataset["test"]
 
@@ -64,7 +64,7 @@ train_dataset = DataLoader(train_dataset.shuffle().with_format("torch"), batch_s
 validation_dataset = DataLoader(val_dataset.with_format("torch"), batch_size=batch_size)
 visual_val_dataset = DataLoader(val_dataset.with_format("torch"), batch_size=1)
 
-model_checkpoint = ModelCheckpoint(dirpath='checkpoints/', filename='{epoch_0:02d}-{val_loss_0:.4f}-{val_acc_0:.4f}',
+model_checkpoint = ModelCheckpoint(dirpath=f'checkpoints/{dataset_name}', filename='{epoch_0:02d}-{val_loss_0:.4f}-{val_acc_0:.4f}',
                                    save_weights_only=True, save_top_k=1, monitor='val_acc_0', mode='max')
 
 callbacks = [
@@ -73,7 +73,7 @@ callbacks = [
     model_checkpoint
 ]
 
-model = ProtoConvLitModule(vocab_size=tokenizer.vocab_size, embedding_dim=300, fold_id=0, lr=1e-3,
+model = ProtoConvLitModule(vocab_size=tokenizer.vocab_size, embedding_dim=300, fold_id=0, lr=5e-3, num_labels=num_labels,
                            itos={y: x for x, y in tokenizer.vocab.items()}, verbose_proto=False)
 
 

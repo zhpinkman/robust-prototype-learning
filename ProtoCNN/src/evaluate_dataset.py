@@ -11,6 +11,8 @@ from datasets import load_dataset
 from datasets import Features, Value
 from torch.utils.data import DataLoader
 import torch
+import warnings
+warnings.filterwarnings("ignore")
 
 def load_preprocess(dataset_dir, tokenizer_name="bert-base-uncased"):
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
@@ -67,6 +69,11 @@ if __name__ == "__main__":
         type=str,
         required=True,
     )
+    parser.add_argument(
+        '--num_labels',
+        type=int,
+        required=True,
+    )
 
     parser.add_argument("--tokenizer_name", default="bert-base-uncased", type=str, required=False)
     args = parser.parse_args()
@@ -88,9 +95,9 @@ if __name__ == "__main__":
             for batch in loader:
                 all_labels.extend(batch["label"].cpu().numpy())
                 outputs = model(batch["input_ids"].to(device))
-                preds = torch.round(torch.sigmoid(outputs.logits))
+                preds = torch.softmax(outputs.logits, dim=1).argmax(dim=1) if args.num_labels > 2 else torch.round(torch.sigmoid(outputs.logits))
                 all_preds.extend(preds.cpu().numpy())
         all_preds = [int(i) for i in all_preds]
                 
         from sklearn.metrics import classification_report
-        print(classification_report(all_labels, all_preds))
+        print(classification_report(all_labels, all_preds, zero_division=0))

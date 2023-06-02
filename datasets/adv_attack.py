@@ -30,8 +30,14 @@ def main():
     )
     parser.add_argument("--dataset", type=str, default="imdb", help="dataset to use")
     parser.add_argument("--mode", type = str)
+    parser.add_argument("--model_checkpoint", type = str)
 
     args = parser.parse_args()
+    
+    
+    if os.path.exists(f"summary_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.json"):
+        print("Already attacked")
+        return
 
     # print(args.attack_type)
 
@@ -67,16 +73,18 @@ def main():
         attack = textattack.attack_recipes.TextFoolerJin2019.build(model_wrapper)
     elif args.attack_type == "textbugger":
         attack = textattack.attack_recipes.TextBuggerLi2018.build(model_wrapper)
+    elif args.attack_type == "deepwordbug":
+        attack = textattack.attack_recipes.DeepWordBugGao2018.build(model_wrapper)
 
     print("Loaded attack and dataset")
 
     # Attack 20 samples with CSV logging and checkpoint saved every 5 interval
     attack_args = textattack.AttackArgs(
         random_seed=1234,
-        num_successful_examples=200,
+        num_successful_examples=800,
         shuffle=True,
-        log_to_csv=f"log_{args.dataset}_{args.attack_type}.csv",
-        log_summary_to_json=f"summary_{args.dataset}_{args.attack_type}.json",
+        log_to_csv=f"log_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.csv",
+        log_summary_to_json=f"summary_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.json",
         checkpoint_interval=None,
         checkpoint_dir="checkpoints",
         disable_stdout=True,
@@ -103,17 +111,17 @@ def main():
         pd.DataFrame({"text": sentences, "label": labels}).to_csv(
             f"{args.dataset}_dataset/train.csv", index=False
         )
-    resulted_df = pd.read_csv(f"log_{args.dataset}_{args.attack_type}.csv")
+    resulted_df = pd.read_csv(f"log_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.csv")
     resulted_df = resulted_df[resulted_df["result_type"] == "Successful"]
     test_sentences = [i.replace("[", "").replace("]", "") for i in resulted_df["original_text"].tolist()]
     test_labels = resulted_df["ground_truth_output"].tolist()
     adv_sentences = [i.replace("[", "").replace("]", "") for i in resulted_df["perturbed_text"].tolist()]
     adv_labels = resulted_df["ground_truth_output"].tolist()
     pd.DataFrame({"text": test_sentences, "label": test_labels}).to_csv(
-        f"{args.dataset}_dataset/test_{args.attack_type}.csv", index=False
+        f"{args.dataset}_dataset/test_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.csv", index=False
     )
     pd.DataFrame({"text": adv_sentences, "label": adv_labels}).to_csv(
-        f"{args.dataset}_dataset/adv_{args.attack_type}.csv", index=False
+        f"{args.dataset}_dataset/adv_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.csv", index=False
     )
     
 
