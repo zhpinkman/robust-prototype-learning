@@ -34,11 +34,11 @@ def main():
 
     args = parser.parse_args()
 
-    if os.path.exists(
-        f"summary_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.json"
-    ):
-        print("Already attacked")
-        return
+    # if os.path.exists(
+    #     f"summary_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.json"
+    # ):
+    #     print("Already attacked")
+    #     return
 
     model = transformers.AutoModelForSequenceClassification.from_pretrained(
         args.model_checkpoint
@@ -68,13 +68,13 @@ def main():
         checkpoint_interval=None,
         checkpoint_dir="checkpoints",
         disable_stdout=True,
-        # parallel=True,
+        parallel=True,
     )
     print("Created attack")
     attacker = textattack.Attacker(attack, dataset, attack_args)
-    print("Attacking")
 
     if args.mode == "attack":
+        print("Attacking")
         attacker.attack_dataset()
 
     if not os.path.exists(f"{args.dataset}_dataset"):
@@ -94,15 +94,10 @@ def main():
         f"log_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.csv"
     )
     resulted_df = resulted_df[resulted_df["result_type"] == "Successful"]
-    test_sentences = [
-        i.replace("[", "").replace("]", "")
-        for i in resulted_df["original_text"].tolist()
-    ]
+    test_sentences = resulted_df["original_text"].tolist()
     test_labels = resulted_df["ground_truth_output"].tolist()
-    adv_sentences = [
-        i.replace("[", "").replace("]", "")
-        for i in resulted_df["perturbed_text"].tolist()
-    ]
+    adv_sentences = resulted_df["perturbed_text"].tolist()
+
     pd.DataFrame(
         {
             "original_text": test_sentences,
