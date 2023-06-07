@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
-
+import argparse
 
 
 
@@ -36,26 +36,13 @@ from datasets import load_dataset
 from transformers import AutoTokenizer
 from datasets import Features, Value
 
-tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased",)
-batch_size = 32
-dataset_name = "imdb"
-num_labels = 2
-dir_path = f"../../datasets/{dataset_name}/"
-mappings = ["Agent", "Work", "Place", "Species", "UnitOfWork", "Event", "SportsSeason", "Device", "TopicalConcept"]
-
-try:
-    dataset = load_dataset(dataset_name, keep_in_memory=True)
-    train_dataset = dataset["train"]
-    val_dataset = dataset["test"]
-except Exception as e:
-    def mapper(x):
-        return {"label": mappings.index(x["label"])}
-
+def load_datasets(dataset_name, dir_path):
     def data_loader(split_name, path):
+        print("PATH", path)
         features = Features(
             {
                 "text": Value("string"),
-                "label": Value("string"),
+                "label": Value("float"),
             }
         )
 
@@ -76,11 +63,8 @@ except Exception as e:
         return dataset
     
     train_dataset = data_loader("train", os.path.join(dir_path, "train.csv"))["train"]
-    train_dataset = train_dataset.map(mapper)
-
     val_dataset = data_loader("test", os.path.join(dir_path, "test.csv"))["test"]
-    val_dataset = val_dataset.map(mapper)
-
+    return train_dataset, val_dataset
 
 
 # tokenizer = tokenizer.train_new_from_iterator(train_dataset, vocab_size=10_000)
@@ -88,35 +72,50 @@ except Exception as e:
 def preprocess_function(examples):
     return tokenizer(examples["text"], padding="max_length", truncation=True)
 
-train_dataset = train_dataset.map(preprocess_function, batched=True)
-val_dataset = val_dataset.map(preprocess_function, batched=True)
 
-train_dataset = DataLoader(train_dataset.shuffle().with_format("torch"), batch_size=batch_size)
-validation_dataset = DataLoader(val_dataset.with_format("torch"), batch_size=batch_size)
-# visual_val_dataset = DataLoader(val_dataset.with_format("torch"), batch_size=1)
+if __name__ == "__main__":
 
-model_checkpoint = ModelCheckpoint(dirpath=f'checkpoints/{dataset_name}', filename='{epoch_0:02d}-{val_loss_0:.4f}-{val_acc_0:.4f}',
-                                   save_weights_only=True, save_top_k=1, monitor='val_acc_0', mode='max')
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--tokenizer", default="bert-base-uncased", required=False, type=str)
+    parser.add_argument("--batch_size", default=32, required=False, type=int)
+    parser.add_argument("--dataset_name", default="imdb_dataset", required=False, type=str)
+    parser.add_argument("--num_labels", default=2, required=False, type=int)
+    parser.add_argument("--dir_path", default="../../datasets/", required=False, type=str)
+    parser.add_argument("--type", default="", required=False, type=str)
+    args = parser.parse_args()
+    
+    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
+    dir_path = os.path.join(args.dir_path, args.dataset_name)
 
-callbacks = [
-    LearningRateMonitor(logging_interval='epoch'),
-    EarlyStopping(monitor=f'val_loss_0', patience=10, verbose=True, mode='min', min_delta=0.005),
-    model_checkpoint
-]
+    train_dataset, val_dataset = load_datasets(args.dataset_name, dir_path)
+    train_dataset = train_dataset.map(preprocess_function, batched=True)
+    val_dataset = val_dataset.map(preprocess_function, batched=True)
 
-# LR: 5e-3 works best for ag_news
-# Lr: 1e-3:2.5, 5e-3:2.56, 1e-2:best for logic
-# LR: 1e-2 is best for dbpedia
+    train_dataset = DataLoader(train_dataset.shuffle().with_format("torch"), batch_size=args.batch_size)
+    validation_dataset = DataLoader(val_dataset.with_format("torch"), batch_size=args.batch_size)
 
-model = ProtoConvLitModule(vocab_size=tokenizer.vocab_size, embedding_dim=300, fold_id=0, lr=1e-3, num_labels=num_labels, pc_conv_filters=64, pc_conv_filter_size=5,
-                           itos={y: x for x, y in tokenizer.vocab.items()}, verbose_proto=False)
+    model_checkpoint = ModelCheckpoint(dirpath=f'checkpoints/{args.dataset_name}', filename=f'{args.type}-'+'{epoch_0:02d}-{val_loss_0:.4f}-{val_acc_0:.4f}',
+                                    save_weights_only=True, save_top_k=1, monitor='val_acc_0', mode='max')
+
+    callbacks = [
+        LearningRateMonitor(logging_interval='epoch'),
+        EarlyStopping(monitor=f'val_loss_0', patience=10, verbose=True, mode='min', min_delta=0.005),
+        model_checkpoint
+    ]
+
+    # LR: 5e-3 works best for ag_news
+    # Lr: 1e-3:2.5, 5e-3:2.56, 1e-2:best for logic
+    # LR: 1e-2 is best for dbpedia
+    separation_loss = False if args.type == "without_separation_loss" else True
+    clustering_loss = False if args.type == "without_clustering_loss" else True
+    use_dynamic_prototypes = False if args.type == "without_dynamic" else True
+    with_linear = "linear" if args.type == "with_linear" else "log"
+
+    model = ProtoConvLitModule(vocab_size=tokenizer.vocab_size, embedding_dim=300, fold_id=0, lr=1e-2, num_labels=args.num_labels, pc_conv_filters=64, pc_conv_filter_size=5,
+                            itos={y: x for x, y in tokenizer.vocab.items()}, verbose_proto=False, pc_dynamic_number=use_dynamic_prototypes, use_clustering_loss=clustering_loss, use_separation_loss=separation_loss, pc_sim_func=with_linear)
 
 
-trainer = Trainer(max_epochs=35, callbacks=callbacks, deterministic=True, num_sanity_val_steps=0)
-trainer.fit(model, train_dataloaders=train_dataset, val_dataloaders=validation_dataset)
+    trainer = Trainer(max_epochs=35, callbacks=callbacks, deterministic=True, num_sanity_val_steps=0)
+    trainer.fit(model, train_dataloaders=train_dataset, val_dataloaders=validation_dataset)
 
-# embed()
-model = ProtoConvLitModule.load_from_checkpoint(model_checkpoint.best_model_path)
-# data_visualizer = DataVisualizer(model)
-# plot_html(data_visualizer.visualize_prototypes())
-# plot_html(data_visualizer.visualize_random_predictions(visual_val_dataset, n=5))
+    model = ProtoConvLitModule.load_from_checkpoint(model_checkpoint.best_model_path)
