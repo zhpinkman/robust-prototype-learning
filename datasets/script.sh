@@ -1,4 +1,4 @@
-for dataset in "ag_news" "imdb"; do
+for dataset in "dbpedia"; do
     for attack_type in "textfooler" "textbugger" "deepwordbug"; do
         if [ "$dataset" = "ag_news" ]; then
             for model_checkpoint in "textattack/roberta-base-ag-news" "textattack/bert-base-uncased-ag-news" "andi611/distilbert-base-uncased-ner-agnews"; do
@@ -21,6 +21,17 @@ for dataset in "ag_news" "imdb"; do
                     --attack_type $attack_type \
                     --model_checkpoint $model_checkpoint
                 # --mode "attack"
+            done
+        elif [ "$dataset" = "dbpedia" ]; then
+            for model_checkpoint in "../normal_models/models/dbpedia_bert-base-uncased" "../normal_models/models/dbpedia_distilbert-base-uncased" "../normal_models/models/dbpedia_roberta-base"; do
+                echo " Attack type: " $attack_type
+                echo " Dataset: " $dataset
+                echo " Model checkpoint: " $model_checkpoint
+                CUDA_VISIBLE_DEVICES=1,2,3,4,5 python adv_attack.py \
+                    --dataset $dataset \
+                    --attack_type $attack_type \
+                    --model_checkpoint $model_checkpoint \
+                    --mode "attack"
             done
         else
             echo "Invalid dataset"

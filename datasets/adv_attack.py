@@ -3,6 +3,7 @@ import argparse
 import textattack
 from textattack.transformations import WordSwapRandomCharacterDeletion, BackTranslation
 import transformers
+from datasets import Dataset
 import os
 import pandas as pd
 from textattack.transformations import CompositeTransformation
@@ -47,7 +48,12 @@ def main():
 
     model_wrapper = textattack.models.wrappers.HuggingFaceModelWrapper(model, tokenizer)
 
-    dataset = textattack.datasets.HuggingFaceDataset(args.dataset, split="test")
+    if args.dataset == "dbpedia":
+        dataset = textattack.datasets.HuggingFaceDataset(
+            Dataset.from_pandas(pd.read_csv(f"{args.dataset}_dataset/test.csv"))
+        )
+    else:
+        dataset = textattack.datasets.HuggingFaceDataset(args.dataset, split="test")
 
     if args.attack_type == "textfooler":
         attack = textattack.attack_recipes.TextFoolerJin2019.build(model_wrapper)
@@ -59,12 +65,16 @@ def main():
     print("Loaded attack and dataset")
 
     # Attack 20 samples with CSV logging and checkpoint saved every 5 interval
+
+    log_file = f"log_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('.', '').replace('/', '_')}.csv"
+    summary_file = f"summary_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('.', '').replace('/', '_')}.json"
+
     attack_args = textattack.AttackArgs(
         random_seed=1234,
         num_successful_examples=800,
         shuffle=True,
-        log_to_csv=f"log_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.csv",
-        log_summary_to_json=f"summary_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.json",
+        log_to_csv=log_file,
+        log_summary_to_json=summary_file,
         checkpoint_interval=None,
         checkpoint_dir="checkpoints",
         disable_stdout=True,
@@ -90,9 +100,7 @@ def main():
         pd.DataFrame({"text": sentences, "label": labels}).to_csv(
             f"{args.dataset}_dataset/train.csv", index=False
         )
-    resulted_df = pd.read_csv(
-        f"log_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.csv"
-    )
+    resulted_df = pd.read_csv(log_file)
     resulted_df = resulted_df[resulted_df["result_type"] == "Successful"]
     test_sentences = resulted_df["original_text"].tolist()
     test_labels = resulted_df["ground_truth_output"].tolist()
