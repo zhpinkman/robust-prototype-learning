@@ -35,7 +35,7 @@ def load_data(data_dir):
         for file in os.listdir(data_dir)
         if (file.startswith("test") and file.endswith("csv"))
     ]
-    
+
     test_dfs = [pd.read_csv(os.path.join(data_dir, file)) for file in test_names]
 
     adv_attack_names = [file for file in os.listdir(data_dir) if file.startswith("adv")]
@@ -121,8 +121,12 @@ def main(args):
     if args.mode == "train":
         if not os.path.exists(args.model_dir):
             os.makedirs(args.model_dir)
-        trainer.evaluate(tokenized_dataset["test"])
-        trainer.train()
+        # trainer.evaluate(tokenized_dataset["test"])
+        try:
+            trainer.train()
+        except Exception as e:
+            print(e)
+            embed()
         trainer.save_model(args.model_dir)
 
     elif args.mode == "test":
@@ -164,7 +168,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--model_checkpoint", type=str, default="bert-base-uncased")
     parser.add_argument("--batch_size", type=int, default=128)
-    parser.add_argument("--num_epochs", type=int, default=3)
+    parser.add_argument("--num_epochs", type=float, default=3)
 
     parser.add_argument("--log_dir", type=str, default="./logs")
 
