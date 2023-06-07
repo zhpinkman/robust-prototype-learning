@@ -50,6 +50,8 @@ class ProtoConvLitModule(pl.LightningModule):
         verbose_proto=1,
         use_dce_loss=False,
         num_labels=2,
+        use_separation_loss=True,
+        use_clustering_loss=True,
         *args,
         **kwargs,
     ):
@@ -91,6 +93,8 @@ class ProtoConvLitModule(pl.LightningModule):
         self.dynamic_number = pc_dynamic_number
         self.num_labels = num_labels
         self.use_dce_loss = use_dce_loss
+        self.use_separation_loss = use_separation_loss
+        self.use_clustering_loss = use_clustering_loss
 
         self.current_prototypes_number = self.number_of_prototypes
         self.enabled_prototypes_mask = nn.Parameter(
@@ -273,10 +277,18 @@ class ProtoConvLitModule(pl.LightningModule):
             else torch.argmax(torch.softmax(outputs.logits, dim=1), dim=1)
         )
 
-        clustering_loss = self.calculate_clustering_loss(outputs)
-        separation_loss = self.calculate_separation_loss(
-            self.prototypes.prototypes, threshold=self.separation_threshold
-        )
+        if self.use_clustering_loss:
+            clustering_loss = self.calculate_clustering_loss(outputs)
+        else:
+            clustering_loss = 0
+        
+        if self.use_separation_loss:
+            separation_loss = self.calculate_separation_loss(
+                self.prototypes.prototypes, threshold=self.separation_threshold
+            )
+        else:
+            separation_loss = 0
+        
         l1 = self.fc1.weight.norm(p=1)
 
         if self.use_dce_loss:
