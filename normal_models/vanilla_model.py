@@ -27,9 +27,7 @@ def preprocess_data(tokenizer, dataset, args):
     return tokenized_dataset
 
 
-def load_data(data_dir):
-    train_df = pd.read_csv(os.path.join(data_dir, "train.csv"))
-
+def load_data(data_dir, mode):
     test_names = [
         file
         for file in os.listdir(data_dir)
@@ -42,20 +40,35 @@ def load_data(data_dir):
     adv_attack_dfs = [
         pd.read_csv(os.path.join(data_dir, file)) for file in adv_attack_names
     ]
-
-    dataset = DatasetDict(
-        {
-            "train": Dataset.from_pandas(train_df),
-            **{
-                file[: file.find(".csv")]: Dataset.from_pandas(df)
-                for file, df in zip(test_names, test_dfs)
-            },
-            **{
-                file[: file.find(".csv")]: Dataset.from_pandas(df)
-                for file, df in zip(adv_attack_names, adv_attack_dfs)
-            },
-        }
-    )
+    if mode == "test":
+        dataset = DatasetDict(
+            {
+                **{
+                    file[: file.find(".csv")]: Dataset.from_pandas(df)
+                    for file, df in zip(test_names, test_dfs)
+                },
+                **{
+                    file[: file.find(".csv")]: Dataset.from_pandas(df)
+                    for file, df in zip(adv_attack_names, adv_attack_dfs)
+                },
+            }
+        )
+    else:
+        dataset = DatasetDict(
+            {
+                "train": Dataset.from_pandas(
+                    pd.read_csv(os.path.join(data_dir, "train.csv"))
+                ),
+                **{
+                    file[: file.find(".csv")]: Dataset.from_pandas(df)
+                    for file, df in zip(test_names, test_dfs)
+                },
+                **{
+                    file[: file.find(".csv")]: Dataset.from_pandas(df)
+                    for file, df in zip(adv_attack_names, adv_attack_dfs)
+                },
+            }
+        )
     return dataset
 
 
@@ -86,7 +99,7 @@ def main(args):
             args.model_dir, num_labels=args.num_labels, ignore_mismatched_sizes=True
         )
 
-    dataset = load_data(args.data_dir)
+    dataset = load_data(args.data_dir, args.mode)
     tokenized_dataset = preprocess_data(tokenizer, dataset, args)
 
     training_args = TrainingArguments(
@@ -109,16 +122,15 @@ def main(args):
 
     os.environ["WANDB_PROJECT"] = f"bert-{args.data_dir.split('/')[-1]}"
 
-    trainer = Trainer(
-        model,
-        training_args,
-        train_dataset=tokenized_dataset["train"],
-        eval_dataset=tokenized_dataset["test"],
-        tokenizer=tokenizer,
-        compute_metrics=compute_metrics,
-    )
-
     if args.mode == "train":
+        trainer = Trainer(
+            model,
+            training_args,
+            train_dataset=tokenized_dataset["train"],
+            eval_dataset=tokenized_dataset["test"],
+            tokenizer=tokenizer,
+            compute_metrics=compute_metrics,
+        )
         if not os.path.exists(args.model_dir):
             os.makedirs(args.model_dir)
         # trainer.evaluate(tokenized_dataset["test"])
@@ -130,6 +142,12 @@ def main(args):
         trainer.save_model(args.model_dir)
 
     elif args.mode == "test":
+        trainer = Trainer(
+            model,
+            training_args,
+            tokenizer=tokenizer,
+            compute_metrics=compute_metrics,
+        )
         splits_for_test_and_adv_in_dataset = [
             key
             for key in tokenized_dataset.keys()
@@ -174,7 +192,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--max_length", type=int, default=250)
 
-    parser.add_argument("--logging_steps", type=int)
+    parser.add_argument("--logging_steps", type=int, default=100)
 
     args = parser.parse_args()
     main(args)
