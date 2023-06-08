@@ -4,4 +4,4 @@ final_model.pt
 mnist.pkl
 wandb/
 **/checkpoints/*
-**/dbpedia_dataset/*
+datasets/dbpedia_dataset/train.csv

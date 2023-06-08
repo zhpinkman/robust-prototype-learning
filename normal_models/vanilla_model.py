@@ -11,6 +11,12 @@ import argparse
 import os
 import numpy as np
 
+dataset_to_max_length = {
+    "imdb": 512,
+    "dbpedia": 512,
+    "ag_news": 64,
+}
+
 
 def preprocess_data(tokenizer, dataset, args):
     def tokenize_function(examples):
@@ -18,7 +24,7 @@ def preprocess_data(tokenizer, dataset, args):
             examples["text"],
             padding="max_length",
             truncation=True,
-            max_length=args.max_length,
+            max_length=dataset_to_max_length[args.dataset],
         )
 
     tokenized_dataset = dataset.map(
@@ -54,11 +60,13 @@ def load_data(data_dir, mode):
             }
         )
     else:
+        train_df = pd.read_csv(os.path.join(data_dir, "train.csv"))
+        # if args.dataset == "dbpedia":
+        #     train_df = train_df.sample(frac=0.1)
+        #     print("number of labels in train: ", len(train_df["label"].unique()))
         dataset = DatasetDict(
             {
-                "train": Dataset.from_pandas(
-                    pd.read_csv(os.path.join(data_dir, "train.csv"))
-                ),
+                "train": Dataset.from_pandas(train_df),
                 **{
                     file[: file.find(".csv")]: Dataset.from_pandas(df)
                     for file, df in zip(test_names, test_dfs)
@@ -109,7 +117,7 @@ def main(args):
         per_device_eval_batch_size=args.batch_size,
         weight_decay=0.01,
         logging_dir=args.log_dir,
-        report_to="wandb",
+        report_to=None,
         evaluation_strategy="steps",
         save_strategy="steps",
         save_total_limit=2,
@@ -120,7 +128,7 @@ def main(args):
         load_best_model_at_end=True,
     )
 
-    os.environ["WANDB_PROJECT"] = f"bert-{args.data_dir.split('/')[-1]}"
+    # os.environ["WANDB_PROJECT"] = f"bert-{args.data_dir.split('/')[-1]}"
 
     if args.mode == "train":
         trainer = Trainer(
@@ -134,11 +142,8 @@ def main(args):
         if not os.path.exists(args.model_dir):
             os.makedirs(args.model_dir)
         # trainer.evaluate(tokenized_dataset["test"])
-        try:
-            trainer.train()
-        except Exception as e:
-            print(e)
-            embed()
+
+        trainer.train()
         trainer.save_model(args.model_dir)
 
     elif args.mode == "test":
@@ -190,7 +195,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--log_dir", type=str, default="./logs")
 
-    parser.add_argument("--max_length", type=int, default=250)
+    parser.add_argument("--dataset", type=str, required=True)
 
     parser.add_argument("--logging_steps", type=int, default=100)
 
