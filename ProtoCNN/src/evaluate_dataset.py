@@ -100,4 +100,4 @@ if __name__ == "__main__":
         all_preds = [int(i) for i in all_preds]
                 
         from sklearn.metrics import classification_report
-        print(classification_report(all_labels, all_preds, zero_division=0))
+        print(classification_report(all_labels, all_preds, zero_division=0, digits=4))
