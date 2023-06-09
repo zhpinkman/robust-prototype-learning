@@ -139,5 +139,4 @@ if __name__ == "__main__":
             )
 
         from sklearn.metrics import classification_report
-
-        print(classification_report(all_labels, all_preds, zero_division=0))
+        print(classification_report(all_labels, all_preds, zero_division=0, digits=4))
