@@ -127,7 +127,7 @@ class ProtoConvLitModule(pl.LightningModule):
             self.fc = nn.Linear(32768, 100, bias=False)
         self.fc1 = nn.Linear(
             self.max_number_of_prototypes,
-            1 if num_labels == 2 else num_labels,
+            num_labels,
             bias=False,
         )
 
@@ -154,7 +154,7 @@ class ProtoConvLitModule(pl.LightningModule):
             if num_labels == 2
             else torchmetrics.Accuracy("multiclass", num_classes=num_labels)
         )
-        self.loss = BCEWithLogitsLoss() if num_labels == 2 else nn.CrossEntropyLoss()
+        self.loss = nn.CrossEntropyLoss()
 
     def forward(self, x):
         batch_dim = x.shape[0]
@@ -172,11 +172,7 @@ class ProtoConvLitModule(pl.LightningModule):
         min_dist = self._min_pooling(distances)
         similarity = self.dist_to_sim[self.sim_func](min_dist)
         masked_similarity = similarity * self.enabled_prototypes_mask
-        logits = (
-            self.fc1(masked_similarity).squeeze(1)
-            if self.num_labels == 2
-            else self.fc1(masked_similarity)
-        )
+        logits = self.fc1(masked_similarity)
         
         return PrototypeDetailPrediction(
             latent_space,
@@ -278,11 +274,7 @@ class ProtoConvLitModule(pl.LightningModule):
     def learning_step(self, batch, acc_score):
         # outputs = self(TTF.to_tensor(batch["text"], padding_value=1).to(self.device))
         outputs = self(batch["input_ids"].to(self.device))
-        preds = (
-            torch.sigmoid(outputs.logits)
-            if self.num_labels == 2
-            else torch.argmax(torch.softmax(outputs.logits, dim=1), dim=1)
-        )
+        preds = torch.argmax(torch.softmax(outputs.logits, dim=1), dim=1)
 
         if self.use_clustering_loss:
             clustering_loss = self.calculate_clustering_loss(outputs)
@@ -309,7 +301,7 @@ class ProtoConvLitModule(pl.LightningModule):
                 outputs.logits,
                 torch.tensor(
                     batch["label"],
-                    dtype=(torch.float32 if self.num_labels == 2 else torch.long),
+                    dtype=torch.long,
                 ).to(self.device),
             )
 

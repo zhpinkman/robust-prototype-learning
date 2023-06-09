@@ -99,8 +99,8 @@ if __name__ == "__main__":
     dir_path = os.path.join(args.dir_path, args.dataset_name)
 
     train_dataset, val_dataset = load_datasets(args.dataset_name, dir_path)
-    train_dataset = train_dataset.map(preprocess_function, batched=True)
-    val_dataset = val_dataset.map(preprocess_function, batched=True)
+    train_dataset = train_dataset.map(preprocess_function, batched=True, batch_size=25000)
+    val_dataset = val_dataset.map(preprocess_function, batched=True, batch_size=25000)
 
     train_dataset = DataLoader(
         train_dataset.shuffle().with_format("torch"), batch_size=args.batch_size
