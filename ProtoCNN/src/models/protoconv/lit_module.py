@@ -177,8 +177,15 @@ class ProtoConvLitModule(pl.LightningModule):
             if self.num_labels == 2
             else self.fc1(masked_similarity)
         )
+        
         return PrototypeDetailPrediction(
-            latent_space, distances, logits, min_dist, projection, tokens_per_kernel
+            latent_space,
+            distances,
+            logits,
+            min_dist,
+            projection,
+            masked_similarity,
+            tokens_per_kernel,
         )
 
     @torch.no_grad()
@@ -281,14 +288,14 @@ class ProtoConvLitModule(pl.LightningModule):
             clustering_loss = self.calculate_clustering_loss(outputs)
         else:
             clustering_loss = 0
-        
+
         if self.use_separation_loss:
             separation_loss = self.calculate_separation_loss(
                 self.prototypes.prototypes, threshold=self.separation_threshold
             )
         else:
             separation_loss = 0
-        
+
         l1 = self.fc1.weight.norm(p=1)
 
         if self.use_dce_loss:
