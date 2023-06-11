@@ -1,16 +1,16 @@
 ################################ Training ################################
 
-dataset="dbpedia"
+dataset="ag_news"
 
 echo "Dataset" ${dataset}
 
 echo "Mode" $1
-# for model_checkpoint in "prajjwal1/bert-small" "funnel-transformer/small-base"; do
-for model_checkpoint in "bert-base-uncased" "distilbert-base-uncased" "roberta-base"; do
+for model_checkpoint in "prajjwal1/bert-small" "funnel-transformer/small-base"; do
+    # for model_checkpoint in "bert-base-uncased" "distilbert-base-uncased" "roberta-base"; do
     echo "Model checkpoint" ${model_checkpoint}
     if [ "$1" = "train" ]; then
 
-        CUDA_VISIBLE_DEVICES=4,5 python vanilla_model.py \
+        CUDA_VISIBLE_DEVICES=6,7 python vanilla_model.py \
             --mode train \
             --batch_size 4 \
             --logging_steps 400 \
@@ -24,7 +24,7 @@ for model_checkpoint in "bert-base-uncased" "distilbert-base-uncased" "roberta-b
 
     else
 
-        WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=4,5 python vanilla_model.py \
+        WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=6,7 python vanilla_model.py \
             --mode test \
             --batch_size 64 \
             --dataset ${dataset} \

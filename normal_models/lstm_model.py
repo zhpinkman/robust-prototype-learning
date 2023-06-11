@@ -14,6 +14,9 @@ import re
 from nltk.corpus import stopwords
 from nltk import word_tokenize
 from sklearn.metrics import classification_report
+import warnings
+
+warnings.filterwarnings("ignore")
 
 dataset_to_max_length = {
     "imdb": 512,
@@ -110,9 +113,24 @@ def load_dataset(dataset):
 
     X_train, Y_train = tokenize_df(train_df)
 
-    test_df = pd.read_csv(os.path.join("../datasets", f"{dataset}_dataset", "test.csv"))
-    test_df["text"] = test_df["text"].apply(clean_text)
-    X_test, Y_test = tokenize_df(test_df)
+    test_files = {
+        file[: file.find(".")]: os.path.join("../datasets", f"{dataset}_dataset", file)
+        for file in os.listdir(os.path.join("../datasets", f"{dataset}_dataset"))
+        if (file.startswith("test") or file.startswith("adv"))
+    }
+    test_dfs = {
+        key: pd.read_csv(value)
+        for key, value in test_files.items()
+        for key, value in test_files.items()
+    }
+
+    for df in test_dfs.values():
+        df["text"] = df["text"].apply(clean_text)
+
+    X_test = {}
+    Y_test = {}
+    for key, df in test_dfs.items():
+        X_test[key], Y_test[key] = tokenize_df(df)
 
     return X_train, Y_train, X_test, Y_test, MAX_NB_WORDS, EMBEDDING_DIM
 
@@ -146,16 +164,18 @@ def main(args):
     else:
         model.load_weights(args.model_dir)
 
-    print("Evaluating the model on the test set...")
-    accr = model.evaluate(X_test, Y_test)
-    all_predictions = model.predict(X_test)
-    print("Test set\n  Loss: {:0.3f}".format(accr[0]))
-    print("The classification report for the model is:")
-    print(
-        classification_report(
-            np.argmax(Y_test, axis=1), np.argmax(all_predictions, axis=1)
+    for key in X_test.keys():
+        print(f"Results for {key}:")
+        print("Evaluating the model on the test set...")
+        all_predictions = model.predict(X_test[key])
+        print("The classification report for the model is:")
+        print(
+            classification_report(
+                np.argmax(Y_test[key], axis=1), np.argmax(all_predictions, axis=1)
+            )
         )
-    )
+        print("-" * 100)
+        print("\n\n")
 
 
 if __name__ == "__main__":
