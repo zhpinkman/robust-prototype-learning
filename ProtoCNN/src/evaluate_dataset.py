@@ -33,7 +33,7 @@ def load_preprocess(dataset_dir, tokenizer_name="bert-base-uncased"):
         for file in os.listdir(dataset_dir)
         if (
             (file.endswith(".csv"))
-            and (file.startswith("test") or file.startswith("adv"))
+            and (file.startswith("test_") or file.startswith("adv"))
         )
     ]
 
@@ -122,21 +122,21 @@ if __name__ == "__main__":
                 similarities.append(outputs.masked_similarity.cpu().numpy().tolist())
                 preds = (
                     torch.softmax(outputs.logits, dim=1).argmax(dim=1)
-                    if args.num_labels > 2
-                    else torch.round(torch.sigmoid(outputs.logits))
+                    # if args.num_labels > 2
+                    # else torch.round(torch.sigmoid(outputs.logits))
                 )
                 all_preds.extend(preds.cpu().numpy())
         all_preds = [int(i) for i in all_preds]
         all_similarities[name] = similarities
 
-        with open(f"similarities_{args.name}.json", "w") as f:
-            json.dump(
-                {
-                    "similarities": all_similarities,
-                    "mask": model.enabled_prototypes_mask.numpy().tolist(),
-                },
-                f,
-            )
+        # with open(f"similarities_{args.name}.json", "w") as f:
+        #     json.dump(
+        #         {
+        #             "similarities": all_similarities,
+        #             "mask": model.enabled_prototypes_mask.numpy().tolist(),
+        #         },
+        #         f,
+        #     )
 
         from sklearn.metrics import classification_report
         print(classification_report(all_labels, all_preds, zero_division=0, digits=4))
