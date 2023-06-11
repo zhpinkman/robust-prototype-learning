@@ -35,7 +35,6 @@ from textattack.augmentation import (
     CLAREAugmenter,
     BackTranslationAugmenter,
     CharSwapAugmenter,
-    CheckListAugmenter,
     DeletionAugmenter,
     EasyDataAugmenter,
     EmbeddingAugmenter,
@@ -67,7 +66,6 @@ def main():
     parser.add_argument("--dataset", type=str, default="imdb", help="dataset to use")
     parser.add_argument("--mode", type=str)
     parser.add_argument("--model_checkpoint", type=str, required=True)
-    parser.add_argument("--num_labels", type=int, required=True)
     parser.add_argument(
         "--name",
         type=str,
@@ -123,8 +121,6 @@ def main():
     if args.mode == "attack":
         print("Attacking")
         attacker.attack_dataset()
-
-    embed()
 
     # if not os.path.exists(f"{args.dataset}_dataset"):
     #     os.makedirs(f"{args.dataset}_dataset")
