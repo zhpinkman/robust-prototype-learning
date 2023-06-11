@@ -24,6 +24,16 @@ dbpedia_dataset_classes = [
     "Device",
     "TopicalConcept",
 ]
+from textattack.augmentation import (
+    CLAREAugmenter,
+    BackTranslationAugmenter,
+    CharSwapAugmenter,
+    CheckListAugmenter,
+    DeletionAugmenter,
+    EasyDataAugmenter,
+    EmbeddingAugmenter,
+    WordNetAugmenter,
+)
 
 
 def main():
