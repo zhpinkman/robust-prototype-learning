@@ -10,11 +10,20 @@ import pandas as pd
 import argparse
 import os
 import numpy as np
+import warnings
+
+warnings.filterwarnings("ignore")
 
 dataset_to_max_length = {
     "imdb": 512,
     "dbpedia": 512,
     "ag_news": 64,
+}
+
+dataset_to_num_labels = {
+    "imdb": 2,
+    "dbpedia": 9,
+    "ag_news": 4,
 }
 
 
@@ -98,13 +107,15 @@ def main(args):
         tokenizer = AutoTokenizer.from_pretrained(args.model_checkpoint)
         model = AutoModelForSequenceClassification.from_pretrained(
             args.model_checkpoint,
-            num_labels=args.num_labels,
+            num_labels=dataset_to_num_labels[args.dataset],
             ignore_mismatched_sizes=True,
         )
     else:
         tokenizer = AutoTokenizer.from_pretrained(args.model_dir)
         model = AutoModelForSequenceClassification.from_pretrained(
-            args.model_dir, num_labels=args.num_labels, ignore_mismatched_sizes=True
+            args.model_dir,
+            num_labels=dataset_to_num_labels[args.dataset],
+            ignore_mismatched_sizes=True,
         )
 
     dataset = load_data(args.data_dir, args.mode)
@@ -171,12 +182,6 @@ if __name__ == "__main__":
         type=str,
         choices=["train", "test"],
         default="train",
-    )
-
-    parser.add_argument(
-        "--num_labels",
-        type=int,
-        required=True,
     )
 
     parser.add_argument(

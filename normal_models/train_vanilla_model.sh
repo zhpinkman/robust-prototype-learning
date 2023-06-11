@@ -1,21 +1,22 @@
 ################################ Training ################################
 
 dataset="dbpedia"
-num_labels=9
+
+echo "Dataset" ${dataset}
 
 echo "Mode" $1
-for model_checkpoint in "prajjwal1/bert-small"; do
-
+# for model_checkpoint in "prajjwal1/bert-small" "funnel-transformer/small-base"; do
+for model_checkpoint in "bert-base-uncased" "distilbert-base-uncased" "roberta-base"; do
+    echo "Model checkpoint" ${model_checkpoint}
     if [ "$1" = "train" ]; then
 
-        TOKENIZERS_PARALLELISM=false CUDA_VISIBLE_DEVICES=2,3,4,5,6 python vanilla_model.py \
+        CUDA_VISIBLE_DEVICES=4,5 python vanilla_model.py \
             --mode train \
             --batch_size 4 \
             --logging_steps 400 \
             --num_epochs 0.08 \
             --dataset ${dataset} \
             --data_dir "../datasets/${dataset}_dataset" \
-            --num_labels ${num_labels} \
             --model_dir "models/${dataset}_${model_checkpoint}" \
             --model_checkpoint "${model_checkpoint}"
 
@@ -23,13 +24,13 @@ for model_checkpoint in "prajjwal1/bert-small"; do
 
     else
 
-        TOKENIZERS_PARALLELISM=false WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=2,3,4,5,6 python vanilla_model.py \
+        WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=4,5 python vanilla_model.py \
             --mode test \
-            --batch_size 4 \
+            --batch_size 64 \
             --dataset ${dataset} \
             --data_dir "../datasets/${dataset}_dataset" \
-            --num_labels ${num_labels} \
             --model_dir "models/${dataset}_${model_checkpoint}"
 
     fi
+    echo "-----------------------------------------------------------------"
 done
