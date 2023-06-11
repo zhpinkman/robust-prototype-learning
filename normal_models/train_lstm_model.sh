@@ -7,7 +7,7 @@ for dataset in "imdb" "ag_news" "dbpedia"; do
     echo "Mode" $1
     if [ "$1" = "train" ]; then
 
-        TOKENIZERS_PARALLELISM=false CUDA_VISIBLE_DEVICES=4,5 python lstm_model.py \
+        CUDA_VISIBLE_DEVICES=6,7 python lstm_model.py \
             --mode train \
             --batch_size 256 \
             --num_epochs 3 \
@@ -18,7 +18,7 @@ for dataset in "imdb" "ag_news" "dbpedia"; do
 
     else
 
-        TOKENIZERS_PARALLELISM=false WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=4,5 python lstm_model.py \
+        WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=6,7 python lstm_model.py \
             --mode test \
             --batch_size 256 \
             --dataset ${dataset} \
