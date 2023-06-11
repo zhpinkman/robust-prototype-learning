@@ -5,7 +5,7 @@ import csv
 import argparse
 from time import sleep
 
-openai.api_key = "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"
+openai.api_key = os.environ["OPEN_AI_KEY"]
 
 def sample_paraphrase(text):
     response = openai.ChatCompletion.create(
@@ -51,7 +51,7 @@ if __name__=="__main__":
                 text, label = row
 
                 if index == 0:
-                    csv_writer.writerow(["text", "label"])
+                    csv_writer.writerow(["original_text", "perturbed_text", "label"])
                 
                 elif count == 300:
                     print("Finished paraphrasing 300 samples. Exiting")
@@ -60,7 +60,7 @@ if __name__=="__main__":
                 else:
                     try:
                         paraphrased = sample_paraphrase(text)
-                        csv_writer.writerow([paraphrased, label])
+                        csv_writer.writerow([text, paraphrased, label])
                         count += 1
                     except Exception as e:
                         print("Sleeping...")

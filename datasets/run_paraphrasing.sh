@@ -3,12 +3,12 @@ pwd
 eval "$(conda shell.bash hook)"
 conda activate prototype_learning
 
-# echo "starting with 'IMDB'"
+echo "starting with 'IMDB'"
 
-# input="imdb_dataset/test_deepwordbug.csv"
-# output="imdb_dataset/adv_paraphrased.csv"
+input="imdb_dataset/test_deepwordbug.csv"
+output="imdb_dataset/adv_paraphrased.csv"
 
-# python paraphrase.py --input_file=$input --output_file=$output
+python paraphrase.py --input_file=$input --output_file=$output
 
 
 echo "starting with 'DBPedia'"
@@ -27,13 +27,13 @@ output="ag_news_dataset/adv_paraphrased.csv"
 python paraphrase.py --input_file=$input --output_file=$output
 
 
-# echo "starting with 'SST2'"
+echo "starting with 'SST2'"
 
-# input="sst2_dataset/test.csv"
-# output="sst2_dataset/adv_paraphrased.csv"
+input="sst2_dataset/test.csv"
+output="sst2_dataset/adv_paraphrased.csv"
 
-# python paraphrase.py --input_file=$input --output_file=$output
+python paraphrase.py --input_file=$input --output_file=$output
 
-# echo "Finished"
+echo "Finished"
 
 conda deactivate
