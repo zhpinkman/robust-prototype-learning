@@ -1,6 +1,6 @@
 ################################ Training ################################
 
-dataset="ag_news"
+dataset="dbpedia"
 
 echo "Dataset" ${dataset}
 
