@@ -142,7 +142,7 @@ if __name__ == "__main__":
         vocab_size=tokenizer.vocab_size,
         embedding_dim=300,
         fold_id=0,
-        lr=1e-2,
+        lr=1e-1,
         num_labels=args.num_labels,
         pc_conv_filters=64,
         pc_conv_filter_size=5,
