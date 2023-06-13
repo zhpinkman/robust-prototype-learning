@@ -52,6 +52,7 @@ class ProtoConvLitModule(pl.LightningModule):
         num_labels=2,
         use_separation_loss=True,
         use_clustering_loss=True,
+        use_larger_version=False,
         *args,
         **kwargs,
     ):
@@ -95,6 +96,7 @@ class ProtoConvLitModule(pl.LightningModule):
         self.use_dce_loss = use_dce_loss
         self.use_separation_loss = use_separation_loss
         self.use_clustering_loss = use_clustering_loss
+        self.use_larger_version = use_larger_version
 
         self.current_prototypes_number = self.number_of_prototypes
         self.enabled_prototypes_mask = nn.Parameter(
@@ -118,6 +120,16 @@ class ProtoConvLitModule(pl.LightningModule):
             stride=1,
             padding_mode=self.conv_padding_mode,
         )
+        if self.use_larger_version:
+            self.conv2 = ConvolutionalBlock(
+            self.conv_filters,
+            self.conv_filters,
+            kernel_size=self.conv_filter_size,
+            padding=self.conv_padding,
+            stride=1,
+            padding_mode=self.conv_padding_mode,
+            )   
+
         self.prototypes = PrototypeLayer(
             channels_in=self.conv_filters,
             number_of_prototypes=self.max_number_of_prototypes,
@@ -159,7 +171,14 @@ class ProtoConvLitModule(pl.LightningModule):
     def forward(self, x):
         batch_dim = x.shape[0]
         embedding = self.embedding(x).permute((0, 2, 1))
+
+        # print("Embedding output dim", embedding.shape)
         latent_space = self.conv1(embedding)
+
+        if self.use_larger_version:
+            # print("INPUT dim", latent_space.shape)
+            latent_space = self.conv2(latent_space)
+        
         if self.use_dce_loss:
             projection = self.fc(latent_space.reshape(batch_dim, -1))
         else:
