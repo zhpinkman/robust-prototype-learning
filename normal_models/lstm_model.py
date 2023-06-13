@@ -1,6 +1,8 @@
 import argparse
 import numpy as np
 import pandas as pd
+from transformers import AutoTokenizer
+from IPython import embed
 import matplotlib.pyplot as plt
 import seaborn as sns
 from keras.preprocessing.text import Tokenizer
@@ -48,7 +50,7 @@ def get_model(X, MAX_NB_WORDS, EMBEDDING_DIM, num_labels):
     model.add(Dense(num_labels, activation="softmax"))
     model.compile(
         loss="categorical_crossentropy",
-        optimizer=keras.optimizers.Adam(learning_rate=0.01),
+        optimizer=keras.optimizers.Adam(learning_rate=0.05),
         metrics=["accuracy"],
     )
     print(model.summary())
@@ -56,25 +58,25 @@ def get_model(X, MAX_NB_WORDS, EMBEDDING_DIM, num_labels):
     return model
 
 
-def clean_text(text):
-    """
-    text: a string
+# def clean_text(text):
+#     """
+#     text: a string
 
-    return: modified initial string
-    """
-    text = text.lower()  # lowercase text
-    text = REPLACE_BY_SPACE_RE.sub(
-        " ", text
-    )  # replace REPLACE_BY_SPACE_RE symbols by space in text. substitute the matched string in REPLACE_BY_SPACE_RE with space.
-    text = BAD_SYMBOLS_RE.sub(
-        "", text
-    )  # remove symbols which are in BAD_SYMBOLS_RE from text. substitute the matched string in BAD_SYMBOLS_RE with nothing.
-    text = text.replace("x", "")
-    #    text = re.sub(r'\W+', '', text)
-    text = " ".join(
-        word for word in text.split() if word not in STOPWORDS
-    )  # remove stopwors from text
-    return text
+#     return: modified initial string
+#     """
+#     text = text.lower()  # lowercase text
+#     text = REPLACE_BY_SPACE_RE.sub(
+#         " ", text
+#     )  # replace REPLACE_BY_SPACE_RE symbols by space in text. substitute the matched string in REPLACE_BY_SPACE_RE with space.
+#     text = BAD_SYMBOLS_RE.sub(
+#         "", text
+#     )  # remove symbols which are in BAD_SYMBOLS_RE from text. substitute the matched string in BAD_SYMBOLS_RE with nothing.
+#     text = text.replace("x", "")
+#     #    text = re.sub(r'\W+', '', text)
+#     text = " ".join(
+#         word for word in text.split() if word not in STOPWORDS
+#     )  # remove stopwors from text
+#     return text
 
 
 import keras.backend as K
@@ -84,29 +86,30 @@ def size(model):  # Compute number of params in a model (the actual number of fl
     return sum([np.prod(K.get_value(w).shape) for w in model.trainable_weights])
 
 
-def load_dataset(dataset):
+def load_dataset(tokenizer, dataset):
     train_df = pd.read_csv(
         os.path.join("../datasets", f"{dataset}_dataset", "train.csv")
     )
-    train_df["text"] = train_df["text"].apply(clean_text)
-
-    # The maximum number of words to be used. (most frequent)
+    # train_df["text"] = train_df["text"].apply(clean_text)
     MAX_NB_WORDS = 50000
-    # Max number of words in each complaint.
     MAX_SEQUENCE_LENGTH = dataset_to_max_length[dataset]
-    # This is fixed.
-    EMBEDDING_DIM = 100
+    EMBEDDING_DIM = 300
 
-    tokenizer = Tokenizer(
-        num_words=MAX_NB_WORDS, filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~', lower=True
-    )
-    tokenizer.fit_on_texts(train_df["text"].values)
-    word_index = tokenizer.word_index
-    print("Found %s unique tokens." % len(word_index))
+    # tokenizer = Tokenizer(
+    #     num_words=MAX_NB_WORDS, filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~', lower=True
+    # )
+    # tokenizer.fit_on_texts(train_df["text"].values)
+    # word_index = tokenizer.word_index
+    # print("Found %s unique tokens." % len(word_index))
 
     def tokenize_df(df):
-        X = tokenizer.texts_to_sequences(df["text"].values)
-        X = pad_sequences(X, maxlen=MAX_SEQUENCE_LENGTH)
+        X = tokenizer(
+            df["text"].tolist(),
+            padding="max_length",
+            truncation=True,
+            max_length=MAX_SEQUENCE_LENGTH,
+            return_tensors="np",
+        )["input_ids"]
 
         Y = pd.get_dummies(df["label"]).values
         return X, Y
@@ -124,20 +127,18 @@ def load_dataset(dataset):
         for key, value in test_files.items()
     }
 
-    for df in test_dfs.values():
-        df["text"] = df["text"].apply(clean_text)
-
     X_test = {}
     Y_test = {}
     for key, df in test_dfs.items():
         X_test[key], Y_test[key] = tokenize_df(df)
 
-    return X_train, Y_train, X_test, Y_test, MAX_NB_WORDS, EMBEDDING_DIM
+    return X_train, Y_train, X_test, Y_test, tokenizer.vocab_size, EMBEDDING_DIM
 
 
 def main(args):
+    tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
     X_train, Y_train, X_test, Y_test, MAX_NB_WORDS, EMBEDDING_DIM = load_dataset(
-        args.dataset
+        tokenizer=tokenizer, dataset=args.dataset
     )
 
     model = get_model(
