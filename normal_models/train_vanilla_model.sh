@@ -1,36 +1,37 @@
 ################################ Training ################################
 
-dataset="ag_news"
+for dataset in "imdb" "ag_news" "dbpedia"; do
+    echo "Dataset" ${dataset}
+    echo "Mode" $1
+    for model_checkpoint in "prajjwal1/bert-small"; do
+        # "funnel-transformer/small-base"
+        # for model_checkpoint in "bert-base-uncased" "distilbert-base-uncased" "roberta-base"; do
+        echo "Model checkpoint" ${model_checkpoint}
+        if [ "$1" = "train" ]; then
 
-echo "Dataset" ${dataset}
+            CUDA_VISIBLE_DEVICES=6,7 python vanilla_model.py \
+                --mode train \
+                --batch_size 4 \
+                --logging_steps 400 \
+                --num_epochs 0.08 \
+                --dataset ${dataset} \
+                --data_dir "../datasets/${dataset}_dataset" \
+                --model_dir "models/${dataset}_${model_checkpoint}" \
+                --model_checkpoint "${model_checkpoint}"
 
-echo "Mode" $1
-for model_checkpoint in "prajjwal1/bert-small" "funnel-transformer/small-base"; do
-    # for model_checkpoint in "bert-base-uncased" "distilbert-base-uncased" "roberta-base"; do
-    echo "Model checkpoint" ${model_checkpoint}
-    if [ "$1" = "train" ]; then
+        ################################ Testing ################################
 
-        CUDA_VISIBLE_DEVICES=6,7 python vanilla_model.py \
-            --mode train \
-            --batch_size 4 \
-            --logging_steps 400 \
-            --num_epochs 0.08 \
-            --dataset ${dataset} \
-            --data_dir "../datasets/${dataset}_dataset" \
-            --model_dir "models/${dataset}_${model_checkpoint}" \
-            --model_checkpoint "${model_checkpoint}"
+        else
 
-    ################################ Testing ################################
+            WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=6,7 python vanilla_model.py \
+                --mode test \
+                --batch_size 64 \
+                --dataset ${dataset} \
+                --data_dir "../datasets/${dataset}_dataset" \
+                --model_dir "models/${dataset}_${model_checkpoint}"
 
-    else
+        fi
+        echo "-----------------------------------------------------------------"
+    done
 
-        WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=6,7 python vanilla_model.py \
-            --mode test \
-            --batch_size 64 \
-            --dataset ${dataset} \
-            --data_dir "../datasets/${dataset}_dataset" \
-            --model_dir "models/${dataset}_${model_checkpoint}"
-
-    fi
-    echo "-----------------------------------------------------------------"
 done

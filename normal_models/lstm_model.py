@@ -165,17 +165,24 @@ def main(args):
         model.load_weights(args.model_dir)
 
     for key in X_test.keys():
+        if not (key.startswith("test_") or key.startswith("adv_")):
+            continue
         print(f"Results for {key}:")
         print("Evaluating the model on the test set...")
         all_predictions = model.predict(X_test[key])
         print("The classification report for the model is:")
         print(
             classification_report(
-                np.argmax(Y_test[key], axis=1), np.argmax(all_predictions, axis=1)
+                np.argmax(Y_test[key], axis=1),
+                np.argmax(all_predictions, axis=1),
+                digits=3,
             )
         )
         print("-" * 100)
         print("\n\n")
+        from IPython import embed
+
+        embed()
 
 
 if __name__ == "__main__":

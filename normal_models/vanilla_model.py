@@ -98,7 +98,7 @@ def compute_metrics(eval_preds):
     # use classification report from sklearn
     from sklearn.metrics import classification_report
 
-    print(classification_report(labels, predictions))
+    print(classification_report(labels, predictions, digits=3))
     return metric.compute(predictions=predictions, references=labels)
 
 
@@ -172,6 +172,7 @@ def main(args):
         for split in splits_for_test_and_adv_in_dataset:
             print("results for split: ", split)
             trainer.evaluate(tokenized_dataset[split])
+            embed()
 
 
 if __name__ == "__main__":
