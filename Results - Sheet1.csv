@@ -69,7 +69,7 @@ PBM,Clustering,dbpedia,test - textfooler,0.693,0.701,0.683
 PBM,Clustering,dbpedia,adv - textfooler,0.484,0.283,0.335
 PBM,Clustering,dbpedia,test - textbugger,0.558,0.569,0.551
 PBM,Clustering,dbpedia,adv - textbugger,0.41,0.232,0.279
-PBM,clustering,dbpedia,test - paraphrased,,,
+PBM,Clustering,dbpedia,test - paraphrased,,,
 PBM,Clustering,dbpedia,adv - paraphrased,,,
 PBM,Separation,imdb,test - textfooler,0.855,0.846,0.845
 PBM,Separation,imdb,adv - textfooler,0.692,0.681,0.676
@@ -185,3 +185,9 @@ bert-small,attack on protocnn,dbpedia,test - textfooler,0.994,0.994,0.994
 bert-small,attack on protocnn,dbpedia,adv - textfooler,0.979,0.976,0.977
 bert-small,attack on protocnn,dbpedia,test - textbugger,0.994,0.994,0.994
 bert-small,attack on protocnn,dbpedia,adv - textbugger,0.985,0.984,0.984
+PBM,larger model,imdb,test - textfooler,0.8794,0.8767,0.8766
+PBM,larger model,imdb,adv - textfooler,0.7451,0.7384,0.7371
+PBM,larger model,imdb,test - textbugger,0.8536,0.8505,0.8496
+PBM,larger model,imdb,adv - textbugger,0.7439,0.7383,0.7349
+PBM,larger model,imdb,test - paraphrased,0.8312,0.8333,0.8316
+PBM,larger model,imdb,adv - paraphrased,0.8711,0.87,0.8704
