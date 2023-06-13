@@ -93,6 +93,7 @@ if __name__ == "__main__":
         "--dir_path", default="../../datasets/", required=False, type=str
     )
     parser.add_argument("--type", default="", required=False, type=str)
+    parser.add_argument('--use_bigger', default=False, action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
 
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
@@ -140,9 +141,9 @@ if __name__ == "__main__":
 
     model = ProtoConvLitModule(
         vocab_size=tokenizer.vocab_size,
-        embedding_dim=300,
+        embedding_dim=500,
         fold_id=0,
-        lr=1e-1,
+        lr=1e-3,
         num_labels=args.num_labels,
         pc_conv_filters=64,
         pc_conv_filter_size=5,
@@ -152,6 +153,7 @@ if __name__ == "__main__":
         use_clustering_loss=clustering_loss,
         use_separation_loss=separation_loss,
         pc_sim_func=with_linear,
+        use_larger_version=args.use_bigger,
     )
 
     # model_parameters = filter(lambda p: p.requires_grad, model.parameters())
