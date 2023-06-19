@@ -1,22 +1,22 @@
 Model,comments,dataset,dataset type,Precision Performance,Recall Performance,F1 performance
-LSTM,,imdb,test - textfooler,0.896,0.893,0.893
-LSTM,,imdb,adv - textfooler,0.807,0.802,0.802
-LSTM,,imdb,test - textbugger,0.875,0.872,0.872
-LSTM,,imdb,adv - textbugger,0.782,0.78,0.779
-LSTM,,imdb,test - paraphrased,0.822,0.823,0.823
-LSTM,,imdb,adv - paraphrased,0.828,0.827,0.827
-LSTM,,ag_news,test - textfooler,0.946,0.946,0.946
-LSTM,,ag_news,adv - textfooler,0.825,0.818,0.818
-LSTM,,ag_news,test - textbugger,0.889,0.887,0.887
-LSTM,,ag_news,adv - textbugger,0.745,0.737,0.737
-LSTM,,ag_news,test - paraphrased,0.923,0.92,0.92
-LSTM,,ag_news,adv - paraphrased,0.836,0.827,0.827
-LSTM,,dbpedia,test - textfooler,0.973,0.972,0.972
-LSTM,,dbpedia,adv - textfooler,0.685,0.669,0.669
-LSTM,,dbpedia,test - textbugger,0.952,0.951,0.951
-LSTM,,dbpedia,adv - textbugger,0.717,0.685,0.693
-LSTM,,dbpedia,test - paraphrased,0.957,0.957,0.957
-LSTM,,dbpedia,adv - paraphrased,0.945,0.94,0.942
+LSTM,,imdb,test - textfooler,0.816,0.808,0.807
+LSTM,,imdb,adv - textfooler,0.731,0.724,0.723
+LSTM,,imdb,test - textbugger,0.782,0.776,0.773
+LSTM,,imdb,adv - textbugger,0.725,0.722,0.719
+LSTM,,imdb,test - paraphrased,0.772,0.771,0.77
+LSTM,,imdb,adv - paraphrased,0.821,0.817,0.815
+LSTM,,ag_news,test - textfooler,0.941,0.941,0.941
+LSTM,,ag_news,adv - textfooler,0.745,0.734,0.735
+LSTM,,ag_news,test - textbugger,0.906,0.907,0.906
+LSTM,,ag_news,adv - textbugger,0.688,0.683,0.682
+LSTM,,ag_news,test - paraphrased,0.902,0.902,0.902
+LSTM,,ag_news,adv - paraphrased,0.858,0.858,0.858
+LSTM,,dbpedia,test - textfooler,0.984,0.984,0.984
+LSTM,,dbpedia,adv - textfooler,0.659,0.655,0.652
+LSTM,,dbpedia,test - textbugger,0.962,0.96,0.96
+LSTM,,dbpedia,adv - textbugger,0.682,0.665,0.669
+LSTM,,dbpedia,test - paraphrased,0.988,0.988,0.988
+LSTM,,dbpedia,adv - paraphrased,0.967,0.967,0.967
 PBM,,imdb,test - textfooler,0.87,0.863,0.862
 PBM,,imdb,adv - textfooler,0.725,0.725,0.725
 PBM,,imdb,test - textbugger,0.836,0.828,0.826
@@ -125,50 +125,50 @@ Prototex,,dbpedia,test - textbugger,0.942,0.937,0.936
 Prototex,,dbpedia,adv - textbugger,0.751,0.73,0.729
 Prototex,,dbpedia,test - paraphrased,0.965,0.96,0.96
 Prototex,,dbpedia,adv - paraphrased,0.975,0.973,0.974
-bert-small,,imdb,test - textfooler,0.96,0.96,0.96
-bert-small,,imdb,adv - textfooler,0.86,0.86,0.86
-bert-small,,imdb,test - textbugger,0.95,0.95,0.95
-bert-small,,imdb,adv - textbugger,0.85,0.85,0.85
-bert-small,,imdb,test - paraphrased,0.94,0.94,0.94
-bert-small,,imdb,adv - paraphrased,0.93,0.93,0.93
-bert-small,,ag_news,test - textfooler,0.93,0.93,0.93
-bert-small,,ag_news,adv - textfooler,0.81,0.81,0.81
-bert-small,,ag_news,test - textbugger,0.84,0.83,0.83
-bert-small,,ag_news,adv - textbugger,0.69,0.69,0.69
-bert-small,,ag_news,test - paraphrased,0.87,0.87,0.87
-bert-small,,ag_news,adv - paraphrased,0.86,0.85,0.85
-bert-small,,dbpedia,test - textfooler,0.99,0.99,0.99
-bert-small,,dbpedia,adv - textfooler,0.6,0.6,0.59
-bert-small,,dbpedia,test - textbugger,0.97,0.97,0.97
-bert-small,,dbpedia,adv - textbugger,0.62,0.61,0.6
-bert-small,,dbpedia,test - paraphrased,0.98,0.98,0.98
-bert-small,,dbpedia,adv - paraphrased,0.97,0.97,0.97
-funnel-transformer,,imdb,test - textfooler,0.99,0.99,0.99
-funnel-transformer,,imdb,adv - textfooler,0.95,0.95,0.95
-funnel-transformer,,imdb,test - textbugger,0.99,0.99,0.99
-funnel-transformer,,imdb,adv - textbugger,0.94,0.93,0.93
-funnel-transformer,,imdb,test - paraphrased,0.98,0.98,0.98
-funnel-transformer,,imdb,adv - paraphrased,0.96,0.96,0.96
-funnel-transformer,,ag_news,test - textfooler,0.86,0.85,0.85
-funnel-transformer,,ag_news,adv - textfooler,0.78,0.76,0.76
-funnel-transformer,,ag_news,test - textbugger,0.72,0.71,0.71
-funnel-transformer,,ag_news,adv - textbugger,0.65,0.63,0.63
-funnel-transformer,,ag_news,test - paraphrased,0.76,0.76,0.75
-funnel-transformer,,ag_news,adv - paraphrased,0.74,0.74,0.73
-funnel-transformer,,dbpedia,test - textfooler,1,1,1
-funnel-transformer,,dbpedia,adv - textfooler,0.73,0.72,0.72
-funnel-transformer,,dbpedia,test - textbugger,1,1,1
-funnel-transformer,,dbpedia,adv - textbugger,0.73,0.7,0.7
-funnel-transformer,,dbpedia,test - paraphrased,0.99,0.98,0.98
-funnel-transformer,,dbpedia,adv - paraphrased,0.97,0.97,0.97
-LSTM,attack on protocnn,imdb,test - textfooler,0.861,0.861,0.861
-LSTM,attack on protocnn,imdb,adv - textfooler,0.826,0.826,0.826
-LSTM,attack on protocnn,imdb,test - textbugger,0.855,0.855,0.855
-LSTM,attack on protocnn,imdb,adv - textbugger,0.819,0.819,0.818
-LSTM,attack on protocnn,ag_news,test - textfooler,0.965,0.965,0.965
-LSTM,attack on protocnn,ag_news,adv - textfooler,0.953,0.953,0.953
-LSTM,attack on protocnn,ag_news,test - textbugger,0.961,0.961,0.961
-LSTM,attack on protocnn,ag_news,adv - textbugger,0.941,0.94,0.94
+bert-small,,imdb,test - textfooler,0.97,0.97,0.97
+bert-small,,imdb,adv - textfooler,0.867,0.864,0.864
+bert-small,,imdb,test - textbugger,0.964,0.964,0.964
+bert-small,,imdb,adv - textbugger,0.854,0.846,0.846
+bert-small,,imdb,test - paraphrased,0.912,0.912,0.912
+bert-small,,imdb,adv - paraphrased,0.913,0.913,0.913
+bert-small,,ag_news,test - textfooler,0.987,0.987,0.987
+bert-small,,ag_news,adv - textfooler,0.807,0.798,0.799
+bert-small,,ag_news,test - textbugger,0.966,0.965,0.965
+bert-small,,ag_news,adv - textbugger,0.741,0.734,0.734
+bert-small,,ag_news,test - paraphrased,0.944,0.944,0.944
+bert-small,,ag_news,adv - paraphrased,0.882,0.882,0.881
+bert-small,,dbpedia,test - textfooler,0.994,0.993,0.993
+bert-small,,dbpedia,adv - textfooler,0.589,0.578,0.579
+bert-small,,dbpedia,test - textbugger,0.979,0.979,0.979
+bert-small,,dbpedia,adv - textbugger,0.615,0.587,0.588
+bert-small,,dbpedia,test - paraphrased,0.99,0.989,0.989
+bert-small,,dbpedia,adv - paraphrased,0.978,0.978,0.978
+bert-medium,,imdb,test - textfooler,0.955,0.955,0.955
+bert-medium,,imdb,adv - textfooler,0.855,0.855,0.855
+bert-medium,,imdb,test - textbugger,0.947,0.947,0.947
+bert-medium,,imdb,adv - textbugger,0.843,0.842,0.842
+bert-medium,,imdb,test - paraphrased,0.9,0.9,0.9
+bert-medium,,imdb,adv - paraphrased,0.922,0.922,0.922
+bert-medium,,ag_news,test - textfooler,0.986,0.986,0.986
+bert-medium,,ag_news,adv - textfooler,0.796,0.787,0.788
+bert-medium,,ag_news,test - textbugger,0.964,0.963,0.963
+bert-medium,,ag_news,adv - textbugger,0.726,0.711,0.711
+bert-medium,,ag_news,test - paraphrased,0.939,0.939,0.939
+bert-medium,,ag_news,adv - paraphrased,0.884,0.884,0.883
+bert-medium,,dbpedia,test - textfooler,0.992,0.992,0.992
+bert-medium,,dbpedia,adv - textfooler,0.617,0.608,0.605
+bert-medium,,dbpedia,test - textbugger,0.984,0.984,0.984
+bert-medium,,dbpedia,adv - textbugger,0.677,0.663,0.662
+bert-medium,,dbpedia,test - paraphrased,0.991,0.991,0.991
+bert-medium,,dbpedia,adv - paraphrased,0.98,0.98,0.98
+LSTM,attack on protocnn,imdb,test - textfooler,0.866,0.865,0.865
+LSTM,attack on protocnn,imdb,adv - textfooler,0.808,0.806,0.805
+LSTM,attack on protocnn,imdb,test - textbugger,0.854,0.854,0.853
+LSTM,attack on protocnn,imdb,adv - textbugger,0.823,0.823,0.822
+LSTM,attack on protocnn,ag_news,test - textfooler,0.963     0.963     0.963,0.965,0.965
+LSTM,attack on protocnn,ag_news,adv - textfooler,0.938     0.938     0.938,0.953,0.953
+LSTM,attack on protocnn,ag_news,test - textbugger,0.961     0.960     0.960,0.961,0.961
+LSTM,attack on protocnn,ag_news,adv - textbugger,0.931     0.930     0.930,0.94,0.94
 LSTM,attack on protocnn,dbpedia,test - textfooler,0.908,0.91,0.909
 LSTM,attack on protocnn,dbpedia,adv - textfooler,0.869,0.849,0.857
 LSTM,attack on protocnn,dbpedia,test - textbugger,0.903,0.905,0.904
@@ -221,3 +221,315 @@ PBM,larger model,dbpedia,test - textbugger,0.8936,0.8899,0.8883
 PBM,larger model,dbpedia,adv - textbugger,0.5531,0.4621,0.4955
 PBM,larger model,dbpedia,test - paraphrased,0.9213,0.926,0.9221
 PBM,larger model,dbpedia,adv - paraphrased,0.8667,0.834,0.8396
+bert-tiny,,imdb,test - textfooler,0.902,0.901,0.901
+bert-tiny,,imdb,adv - textfooler,0.814,0.814,0.814
+bert-tiny,,imdb,test - textbugger,0.882,0.882,0.881
+bert-tiny,,imdb,adv - textbugger,0.804,0.804,0.804
+bert-tiny,,imdb,test - paraphrased,0.848,0.848,0.848
+bert-tiny,,imdb,adv - paraphrased,0.862,0.858,0.857
+bert-tiny,,ag_news,test - textfooler,0.954,0.954,0.954
+bert-tiny,,ag_news,adv - textfooler,0.804,0.795,0.794
+bert-tiny,,ag_news,test - textbugger,0.908,0.905,0.904
+bert-tiny,,ag_news,adv - textbugger,0.704,0.697,0.694
+bert-tiny,,ag_news,test - paraphrased,0.906,0.905,0.905
+bert-tiny,,ag_news,adv - paraphrased,0.864,0.863,0.863
+bert-tiny,,dbpedia,test - textfooler,0.947,0.959,0.953
+bert-tiny,,dbpedia,adv - textfooler,0.637,0.627,0.626
+bert-tiny,,dbpedia,test - textbugger,0.93,0.939,0.934
+bert-tiny,,dbpedia,adv - textbugger,0.652,0.624,0.628
+bert-tiny,,dbpedia,test - paraphrased,0.966,0.969,0.967
+bert-tiny,,dbpedia,adv - paraphrased,0.951,0.954,0.952
+bert-tiny,attack on protocnn,imdb,test - textfooler,0.924,0.924,0.924
+bert-tiny,attack on protocnn,imdb,adv - textfooler,0.895,0.895,0.895
+bert-tiny,attack on protocnn,imdb,test - textbugger,0.919,0.919,0.919
+bert-tiny,attack on protocnn,imdb,adv - textbugger,0.886,0.876,0.877
+bert-tiny,attack on protocnn,ag_news,test - textfooler,0.967,0.966,0.966
+bert-tiny,attack on protocnn,ag_news,adv - textfooler,0.949,0.948,0.947
+bert-tiny,attack on protocnn,ag_news,test - textbugger,0.968,0.968,0.967
+bert-tiny,attack on protocnn,ag_news,adv - textbugger,0.943,0.941,0.941
+bert-tiny,attack on protocnn,dbpedia,test - textfooler,0.994,0.994,0.994
+bert-tiny,attack on protocnn,dbpedia,adv - textfooler,0.95,0.945,0.946
+bert-tiny,attack on protocnn,dbpedia,test - textbugger,0.99,0.99,0.99
+bert-tiny,attack on protocnn,dbpedia,adv - textbugger,0.956,0.954,0.954
+bert-medium,attack on protocnn,imdb,test - textfooler,0.961,0.961,0.961
+bert-medium,attack on protocnn,imdb,adv - textfooler,0.936,0.936,0.936
+bert-medium,attack on protocnn,imdb,test - textbugger,0.95,0.95,0.95
+bert-medium,attack on protocnn,imdb,adv - textbugger,0.926,0.926,0.926
+bert-medium,attack on protocnn,ag_news,test - textfooler,0.973,0.973,0.973
+bert-medium,attack on protocnn,ag_news,adv - textfooler,0.969,0.969,0.969
+bert-medium,attack on protocnn,ag_news,test - textbugger,0.973,0.973,0.973
+bert-medium,attack on protocnn,ag_news,adv - textbugger,0.967,0.966,0.966
+bert-medium,attack on protocnn,dbpedia,test - textfooler,0.995,0.995,0.995
+bert-medium,attack on protocnn,dbpedia,adv - textfooler,0.971,0.968,0.968
+bert-medium,attack on protocnn,dbpedia,test - textbugger,0.995,0.995,0.995
+bert-medium,attack on protocnn,dbpedia,adv - textbugger,0.979,0.978,0.978
+CNN,,imdb,test - textfooler,0.879,0.878,0.878
+CNN,,imdb,adv - textfooler,0.776,0.771,0.769
+CNN,,imdb,test - textbugger,0.859,0.857,0.857
+CNN,,imdb,adv - textbugger,0.762,0.755,0.755
+CNN,,imdb,test - paraphrased,0.825,0.821,0.821
+CNN,,imdb,adv - paraphrased,0.862,0.862,0.862
+CNN,,ag_news,test - textfooler,0.907,0.903,0.904
+CNN,,ag_news,adv - textfooler,0.697,0.676,0.677
+CNN,,ag_news,test - textbugger,0.827,0.822,0.821
+CNN,,ag_news,adv - textbugger,0.593,0.594,0.589
+CNN,,ag_news,test - paraphrased,0.861,0.856,0.857
+CNN,,ag_news,adv - paraphrased,0.781,0.758,0.759
+CNN,,dbpedia,test - textfooler,0.98,0.979,0.979
+CNN,,dbpedia,adv - textfooler,0.723,0.721,0.719
+CNN,,dbpedia,test - textbugger,0.962,0.96,0.96
+CNN,,dbpedia,adv - textbugger,0.725,0.696,0.7
+CNN,,dbpedia,test - paraphrased,0.982,0.981,0.981
+CNN,,dbpedia,adv - paraphrased,0.945,0.944,0.944
+BART,,imdb,test - textfooler,,,0.984
+BART,,imdb,adv - textfooler,,,0.921
+BART,,imdb,test - textbugger,,,0.981
+BART,,imdb,adv - textbugger,,,0.893
+BART,,imdb,test - paraphrased,,,0.948
+BART,,imdb,adv - paraphrased,,,0.949
+BART,,ag_news,test - textfooler,,,0.991
+BART,,ag_news,adv - textfooler,,,0.792
+BART,,ag_news,test - textbugger,,,0.974
+BART,,ag_news,adv - textbugger,,,0.742
+BART,,ag_news,test - paraphrased,,,0.945
+BART,,ag_news,adv - paraphrased,,,0.901
+BART,,dbpedia,test - textfooler,,,0.985
+BART,,dbpedia,adv - textfooler,,,0.688
+BART,,dbpedia,test - textbugger,,,0.963
+BART,,dbpedia,adv - textbugger,,,0.695
+BART,,dbpedia,test - paraphrased,,,0.982
+BART,,dbpedia,adv - paraphrased,,,0.97
+Prototex,DP=4,ag_news,test - textfooler,,,0.953
+Prototex,DP=4,ag_news,adv - textfooler,,,0.811
+Prototex,DP=4,ag_news,test - textbugger,,,0.896
+Prototex,DP=4,ag_news,adv - textbugger,,,0.735
+Prototex,DP=4,ag_news,test - paraphrased,,,0.93
+Prototex,DP=4,ag_news,adv - paraphrased,,,0.867
+Prototex,DP=64,ag_news,test - textfooler,,,0.953
+Prototex,DP=64,ag_news,adv - textfooler,,,0.829
+Prototex,DP=64,ag_news,test - textbugger,,,0.874
+Prototex,DP=64,ag_news,adv - textbugger,,,0.734
+Prototex,DP=64,ag_news,test - paraphrased,,,0.934
+Prototex,DP=64,ag_news,adv - paraphrased,,,0.847
+Prototex,DP=2,imdb,test - textfooler,,,0.468
+Prototex,DP=2,imdb,adv - textfooler,,,0.467
+Prototex,DP=2,imdb,test - textbugger,,,0.447
+Prototex,DP=2,imdb,adv - textbugger,,,0.45
+Prototex,DP=2,imdb,test - paraphrased,,,0.319
+Prototex,DP=2,imdb,adv - paraphrased,,,0.176
+Prototex,DP=64,imdb,test - textfooler,,,0.96
+Prototex,DP=64,imdb,adv - textfooler,,,0.873
+Prototex,DP=64,imdb,test - textbugger,,,0.95
+Prototex,DP=64,imdb,adv - textbugger,,,0.843
+Prototex,DP=64,imdb,test - paraphrased,,,0.921
+Prototex,DP=64,imdb,adv - paraphrased,,,0.905
+Prototex,DP=64,dbpedia,test - textfooler,,,0.987
+Prototex,DP=64,dbpedia,adv - textfooler,,,0.684
+Prototex,DP=64,dbpedia,test - textbugger,,,0.97
+Prototex,DP=64,dbpedia,adv - textbugger,,,0.685
+Prototex,DP=64,dbpedia,test - paraphrased,,,0.97
+Prototex,DP=64,dbpedia,adv - paraphrased,,,0.96
+Prototex,DP=9,dbpedia,test - textfooler,,,0.754
+Prototex,DP=9,dbpedia,adv - textfooler,,,0.548
+Prototex,DP=9,dbpedia,test - textbugger,,,0.725
+Prototex,DP=9,dbpedia,adv - textbugger,,,0.555
+Prototex,DP=9,dbpedia,test - paraphrased,,,0.84
+Prototex,DP=9,dbpedia,adv - paraphrased,,,0.917
+Prototex,w/o interpretability,imdb,test - textfooler,,,0.956
+Prototex,w/o interpretability,imdb,adv - textfooler,,,0.851
+Prototex,w/o interpretability,imdb,test - textbugger,,,0.944
+Prototex,w/o interpretability,imdb,adv - textbugger,,,0.823
+Prototex,w/o interpretability,imdb,test - paraphrased,,,0.916
+Prototex,w/o interpretability,imdb,adv - paraphrased,,,0.927
+Prototex,w/o interpretability,ag_news,test - textfooler,,,0.938
+Prototex,w/o interpretability,ag_news,adv - textfooler,,,0.828
+Prototex,w/o interpretability,ag_news,test - textbugger,,,0.872
+Prototex,w/o interpretability,ag_news,adv - textbugger,,,0.737
+Prototex,w/o interpretability,ag_news,test - paraphrased,,,0.923
+Prototex,w/o interpretability,ag_news,adv - paraphrased,,,0.867
+Prototex,w/o interpretability,dbpedia,test - textfooler,,,0.997
+Prototex,w/o interpretability,dbpedia,adv - textfooler,,,0.743
+Prototex,w/o interpretability,dbpedia,test - textbugger,,,0.988
+Prototex,w/o interpretability,dbpedia,adv - textbugger,,,0.773
+Prototex,w/o interpretability,dbpedia,test - paraphrased,,,0.99
+Prototex,w/o interpretability,dbpedia,adv - paraphrased,,,0.977
+Prototex,w/o clustering,imdb,test - textfooler,,,0.973
+Prototex,w/o clustering,imdb,adv - textfooler,,,0.898
+Prototex,w/o clustering,imdb,test - textbugger,,,0.967
+Prototex,w/o clustering,imdb,adv - textbugger,,,0.886
+Prototex,w/o clustering,imdb,test - paraphrased,,,0.95
+Prototex,w/o clustering,imdb,adv - paraphrased,,,0.96
+Prototex,w/o clustering,ag_news,test - textfooler,,,0.967
+Prototex,w/o clustering,ag_news,adv - textfooler,,,0.875
+Prototex,w/o clustering,ag_news,test - textbugger,,,0.913
+Prototex,w/o clustering,ag_news,adv - textbugger,,,0.778
+Prototex,w/o clustering,ag_news,test - paraphrased,,,0.943
+Prototex,w/o clustering,ag_news,adv - paraphrased,,,0.877
+Prototex,w/o clustering,dbpedia,test - textfooler,,,0.989
+Prototex,w/o clustering,dbpedia,adv - textfooler,,,0.75
+Prototex,w/o clustering,dbpedia,test - textbugger,,,0.972
+Prototex,w/o clustering,dbpedia,adv - textbugger,,,0.749
+Prototex,w/o clustering,dbpedia,test - paraphrased,,,0.983
+Prototex,w/o clustering,dbpedia,adv - paraphrased,,,0.957
+Prototex,separability_0,imdb,test - textfooler,,,0.968
+Prototex,separability_0,imdb,adv - textfooler,,,0.881
+Prototex,separability_0,imdb,test - textbugger,,,0.961
+Prototex,separability_0,imdb,adv - textbugger,,,0.857
+Prototex,separability_0,imdb,test - paraphrased,,,0.94
+Prototex,separability_0,imdb,adv - paraphrased,,,0.957
+Prototex,separability_0,ag_news,test - textfooler,,,0.962
+Prototex,separability_0,ag_news,adv - textfooler,,,0.82
+Prototex,separability_0,ag_news,test - textbugger,,,0.896
+Prototex,separability_0,ag_news,adv - textbugger,,,0.708
+Prototex,separability_0,ag_news,test - paraphrased,,,0.937
+Prototex,separability_0,ag_news,adv - paraphrased,,,0.867
+Prototex,separability_0,dbpedia,test - textfooler,,,0.998
+Prototex,separability_0,dbpedia,adv - textfooler,,,0.764
+Prototex,separability_0,dbpedia,test - textbugger,,,0.995
+Prototex,separability_0,dbpedia,adv - textbugger,,,0.775
+Prototex,separability_0,dbpedia,test - paraphrased,,,0.993
+Prototex,separability_0,dbpedia,adv - paraphrased,,,0.973
+Prototex,separability_2,imdb,test - textfooler,,,0.949
+Prototex,separability_2,imdb,adv - textfooler,,,0.872
+Prototex,separability_2,imdb,test - textbugger,,,0.936
+Prototex,separability_2,imdb,adv - textbugger,,,0.838
+Prototex,separability_2,imdb,test - paraphrased,,,0.922
+Prototex,separability_2,imdb,adv - paraphrased,,,0.867
+Prototex,separability_2,ag_news,test - textfooler,,,0.943
+Prototex,separability_2,ag_news,adv - textfooler,,,0.825
+Prototex,separability_2,ag_news,test - textbugger,,,0.881
+Prototex,separability_2,ag_news,adv - textbugger,,,0.744
+Prototex,separability_2,ag_news,test - paraphrased,,,0.907
+Prototex,separability_2,ag_news,adv - paraphrased,,,0.834
+Prototex,separability_2,dbpedia,test - textfooler,,,0.984
+Prototex,separability_2,dbpedia,adv - textfooler,,,0.704
+Prototex,separability_2,dbpedia,test - textbugger,,,0.962
+Prototex,separability_2,dbpedia,adv - textbugger,,,0.738
+Prototex,separability_2,dbpedia,test - paraphrased,,,0.97
+Prototex,separability_2,dbpedia,adv - paraphrased,,,0.97
+Prototex,separability_4,imdb,test - textfooler,,,0.958
+Prototex,separability_4,imdb,adv - textfooler,,,0.862
+Prototex,separability_4,imdb,test - textbugger,,,0.947
+Prototex,separability_4,imdb,adv - textbugger,,,0.827
+Prototex,separability_4,imdb,test - paraphrased,,,0.923
+Prototex,separability_4,imdb,adv - paraphrased,,,0.924
+Prototex,separability_4,ag_news,test - textfooler,,,0.946
+Prototex,separability_4,ag_news,adv - textfooler,,,0.872
+Prototex,separability_4,ag_news,test - textbugger,,,0.876
+Prototex,separability_4,ag_news,adv - textbugger,,,0.774
+Prototex,separability_4,ag_news,test - paraphrased,,,0.927
+Prototex,separability_4,ag_news,adv - paraphrased,,,0.864
+Prototex,separability_4,dbpedia,test - textfooler,,,0.971
+Prototex,separability_4,dbpedia,adv - textfooler,,,0.727
+Prototex,separability_4,dbpedia,test - textbugger,,,0.967
+Prototex,separability_4,dbpedia,adv - textbugger,,,0.741
+Prototex,separability_4,dbpedia,test - paraphrased,,,0.984
+Prototex,separability_4,dbpedia,adv - paraphrased,,,0.967
+Prototex,base,imdb,test - textfooler,,,0.974
+Prototex,base,imdb,adv - textfooler,,,0.881
+Prototex,base,imdb,test - textbugger,,,0.969
+Prototex,base,imdb,adv - textbugger,,,0.867
+Prototex,base,imdb,test - paraphrased,,,0.954
+Prototex,base,imdb,adv - paraphrased,,,0.944
+Prototex,base,ag_news,test - textfooler,,,0.962
+Prototex,base,ag_news,adv - textfooler,,,0.875
+Prototex,base,ag_news,test - textbugger,,,0.9
+Prototex,base,ag_news,adv - textbugger,,,0.755
+Prototex,base,ag_news,test - paraphrased,,,0.937
+Prototex,base,ag_news,adv - paraphrased,,,0.874
+Prototex,base,dbpedia,test - textfooler,,,0.993
+Prototex,base,dbpedia,adv - textfooler,,,0.771
+Prototex,base,dbpedia,test - textbugger,,,0.981
+Prototex,base,dbpedia,adv - textbugger,,,0.774
+Prototex,base,dbpedia,test - paraphrased,,,0.99
+Prototex,base,dbpedia,adv - paraphrased,,,0.967
+Prototex,cosine,imdb,test - textfooler,,,0.905
+Prototex,cosine,imdb,adv - textfooler,,,0.797
+Prototex,cosine,imdb,test - textbugger,,,0.969
+Prototex,cosine,imdb,adv - textbugger,,,0.9
+Prototex,cosine,imdb,test - paraphrased,,,0.866
+Prototex,cosine,imdb,adv - paraphrased,,,0.742
+Prototex,cosine,ag_news,test - textfooler,,,0.957
+Prototex,cosine,ag_news,adv - textfooler,,,0.807
+Prototex,cosine,ag_news,test - textbugger,,,0.88
+Prototex,cosine,ag_news,adv - textbugger,,,0.693
+Prototex,cosine,ag_news,test - paraphrased,,,0.917
+Prototex,cosine,ag_news,adv - paraphrased,,,0.836
+Prototex,cosine,dbpedia,test - textfooler,,,0.981
+Prototex,cosine,dbpedia,adv - textfooler,,,0.706
+Prototex,cosine,dbpedia,test - textbugger,,,0.972
+Prototex,cosine,dbpedia,adv - textbugger,,,0.748
+Prototex,cosine,dbpedia,test - paraphrased,,,0.98
+Prototex,cosine,dbpedia,adv - paraphrased,,,0.97
+ELECTRATEX,,imdb,test - textfooler,,,0.96
+ELECTRATEX,,imdb,adv - textfooler,,,0.912
+ELECTRATEX,,imdb,test - textbugger,,,0.949
+ELECTRATEX,,imdb,adv - textbugger,,,0.885
+ELECTRATEX,,imdb,test - paraphrased,,,0.923
+ELECTRATEX,,imdb,adv - paraphrased,,,0.918
+ELECTRATEX,,ag_news,test - textfooler,,,0.987
+ELECTRATEX,,ag_news,adv - textfooler,,,0.804
+ELECTRATEX,,ag_news,test - textbugger,,,0.842
+ELECTRATEX,,ag_news,adv - textbugger,,,0.679
+ELECTRATEX,,ag_news,test - paraphrased,,,0.878
+ELECTRATEX,,ag_news,adv - paraphrased,,,0.828
+ELECTRATEX,,dbpedia,test - textfooler,,,0.993
+ELECTRATEX,,dbpedia,adv - textfooler,,,0.705
+ELECTRATEX,,dbpedia,test - textbugger,,,0.991
+ELECTRATEX,,dbpedia,adv - textbugger,,,0.767
+ELECTRATEX,,dbpedia,test - paraphrased,,,0.994
+ELECTRATEX,,dbpedia,adv - paraphrased,,,0.984
+ELECTRA,,imdb,test - textfooler,,,0.986
+ELECTRA,,imdb,adv - textfooler,,,0.94
+ELECTRA,,imdb,test - textbugger,,,0.984
+ELECTRA,,imdb,adv - textbugger,,,0.928
+ELECTRA,,imdb,test - paraphrased,,,0.946
+ELECTRA,,imdb,adv - paraphrased,,,0.945
+ELECTRA,,ag_news,test - textfooler,,,0.976
+ELECTRA,,ag_news,adv - textfooler,,,0.787
+ELECTRA,,ag_news,test - textbugger,,,0.95
+ELECTRA,,ag_news,adv - textbugger,,,0.758
+ELECTRA,,ag_news,test - paraphrased,,,0.939
+ELECTRA,,ag_news,adv - paraphrased,,,0.887
+ELECTRA,,dbpedia,test - textfooler,,,0.937
+ELECTRA,,dbpedia,adv - textfooler,,,0.65
+ELECTRA,,dbpedia,test - textbugger,,,0.886
+ELECTRA,,dbpedia,adv - textbugger,,,0.618
+ELECTRA,,dbpedia,test - paraphrased,,,0.945
+ELECTRA,,dbpedia,adv - paraphrased,,,0.945
+Prototex,separability_10,imdb,test - textfooler,,,0.904
+Prototex,separability_10,imdb,adv - textfooler,,,0.82
+Prototex,separability_10,imdb,test - textbugger,,,0.891
+Prototex,separability_10,imdb,adv - textbugger,,,0.776
+Prototex,separability_10,imdb,test - paraphrased,,,0.856
+Prototex,separability_10,imdb,adv - paraphrased,,,0.904
+Prototex,separability_10,ag_news,test - textfooler,,,0.94
+Prototex,separability_10,ag_news,adv - textfooler,,,0.855
+Prototex,separability_10,ag_news,test - textbugger,,,0.856
+Prototex,separability_10,ag_news,adv - textbugger,,,0.76
+Prototex,separability_10,ag_news,test - paraphrased,,,0.902
+Prototex,separability_10,ag_news,adv - paraphrased,,,0.886
+Prototex,separability_10,dbpedia,test - textfooler,,,0.985
+Prototex,separability_10,dbpedia,adv - textfooler,,,0.737
+Prototex,separability_10,dbpedia,test - textbugger,,,0.972
+Prototex,separability_10,dbpedia,adv - textbugger,,,0.739
+Prototex,separability_10,dbpedia,test - paraphrased,,,0.989
+Prototex,separability_10,dbpedia,adv - paraphrased,,,0.974
+Prototex,separability_20,imdb,test - textfooler,,,0.953
+Prototex,separability_20,imdb,adv - textfooler,,,0.858
+Prototex,separability_20,imdb,test - textbugger,,,0.939
+Prototex,separability_20,imdb,adv - textbugger,,,0.822
+Prototex,separability_20,imdb,test - paraphrased,,,0.895
+Prototex,separability_20,imdb,adv - paraphrased,,,0.936
+Prototex,separability_20,ag_news,test - textfooler,,,0.941
+Prototex,separability_20,ag_news,adv - textfooler,,,0.858
+Prototex,separability_20,ag_news,test - textbugger,,,0.859
+Prototex,separability_20,ag_news,adv - textbugger,,,0.732
+Prototex,separability_20,ag_news,test - paraphrased,,,0.9
+Prototex,separability_20,ag_news,adv - paraphrased,,,0.883
+Prototex,separability_20,dbpedia,test - textfooler,,,0.99
+Prototex,separability_20,dbpedia,adv - textfooler,,,0.711
+Prototex,separability_20,dbpedia,test - textbugger,,,0.979
+Prototex,separability_20,dbpedia,adv - textbugger,,,0.728
+Prototex,separability_20,dbpedia,test - paraphrased,,,0.991
+Prototex,separability_20,dbpedia,adv - paraphrased,,,0.979
