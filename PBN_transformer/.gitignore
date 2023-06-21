@@ -1,0 +1,18 @@
+# OS generated files #
+######################
+
+.DS_Store
+.DS_Store?
+._*
+.Trashes
+__pycache__/
+Models/*
+artifacts/*
+Logs/*
+**/*.err
+**/*.out
+wandb/*
+data/glue_data/*
+!data/glue_data/sst2
+data/glue_data.zip
+datasets/dbpedia_dataset/train.csv
