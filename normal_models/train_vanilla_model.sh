@@ -4,8 +4,9 @@
 dataset=$2
 echo "Dataset" ${dataset}
 echo "Mode" $1
-for model_checkpoint in "google/electra-base-discriminator"; do
-    # "ModelTC/bart-base-mnli"
+for model_checkpoint in "ModelTC/bart-base-mnli" "google/electra-base-discriminator" "prajjwal1/bert-medium" "prajjwal1/bert-small"; do
+    #
+    #
     # "prajjwal1/bert-medium"
     # "funnel-transformer/small-base"
     # "prajjwal1/bert-tiny"

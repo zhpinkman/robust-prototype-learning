@@ -15,17 +15,9 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-dataset_to_max_length = {
-    "imdb": 512,
-    "dbpedia": 512,
-    "ag_news": 64,
-}
+dataset_to_max_length = {"imdb": 512, "dbpedia": 512, "ag_news": 64, "sst2": 64}
 
-dataset_to_num_labels = {
-    "imdb": 2,
-    "dbpedia": 9,
-    "ag_news": 4,
-}
+dataset_to_num_labels = {"imdb": 2, "dbpedia": 9, "ag_news": 4, "sst2": 2}
 
 
 def preprocess_data(tokenizer, dataset, args):
@@ -47,14 +39,12 @@ def load_data(data_dir, mode):
     test_names = [
         file
         for file in os.listdir(data_dir)
-        if (file.startswith("test_") and file.endswith("csv"))
+        if (file.startswith("test") and file.endswith("csv"))
     ]
 
     test_dfs = [pd.read_csv(os.path.join(data_dir, file)) for file in test_names]
 
-    adv_attack_names = [
-        file for file in os.listdir(data_dir) if file.startswith("adv_")
-    ]
+    adv_attack_names = [file for file in os.listdir(data_dir) if file.startswith("adv")]
     adv_attack_dfs = [
         pd.read_csv(os.path.join(data_dir, file)) for file in adv_attack_names
     ]
@@ -165,7 +155,7 @@ def main(args):
             model,
             training_args,
             train_dataset=tokenized_dataset["train"],
-            eval_dataset=tokenized_dataset["test_paraphrased"],
+            eval_dataset=tokenized_dataset["test"],
             tokenizer=tokenizer,
             compute_metrics=compute_metrics,
         )
