@@ -1,16 +1,20 @@
 ################################ Training ################################
 
-# for dataset in "imdb" "ag_news" "dbpedia"; do
+# Model checkpoints can be chosen from the following list
+# as well as any other checkpoint from the HuggingFace library
+# "ModelTC/bart-base-mnli"
+# "google/electra-base-discriminator"
+# "prajjwal1/bert-medium"
+# "funnel-transformer/small-base"
+# "prajjwal1/bert-tiny"
+# "bert-base-uncased"
+# "distilbert-base-uncased"
+# "roberta-base"
+
 dataset=$2
 echo "Dataset" ${dataset}
 echo "Mode" $1
 for model_checkpoint in "ModelTC/bart-base-mnli" "google/electra-base-discriminator" "prajjwal1/bert-medium" "prajjwal1/bert-small"; do
-    #
-    #
-    # "prajjwal1/bert-medium"
-    # "funnel-transformer/small-base"
-    # "prajjwal1/bert-tiny"
-    # for model_checkpoint in "bert-base-uncased" "distilbert-base-uncased" "roberta-base"; do
     echo "Model checkpoint" ${model_checkpoint}
     if [ "$1" = "train" ]; then
 
@@ -38,5 +42,3 @@ for model_checkpoint in "ModelTC/bart-base-mnli" "google/electra-base-discrimina
     fi
     echo "-----------------------------------------------------------------"
 done
-
-# done
