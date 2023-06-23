@@ -1,8 +1,0 @@
-scikit-learn
-pandas
-pytorch_lightning 
-torchtext 
-portalocker>=2.0.0 
-dill 
-torchmetrics
-IPython

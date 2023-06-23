@@ -93,14 +93,18 @@ if __name__ == "__main__":
         "--dir_path", default="../../datasets/", required=False, type=str
     )
     parser.add_argument("--type", default="", required=False, type=str)
-    parser.add_argument('--use_bigger', default=False, action=argparse.BooleanOptionalAction)
+    parser.add_argument(
+        "--use_bigger", default=False, action=argparse.BooleanOptionalAction
+    )
     args = parser.parse_args()
 
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
     dir_path = os.path.join(args.dir_path, args.dataset_name)
 
     train_dataset, val_dataset = load_datasets(args.dataset_name, dir_path)
-    train_dataset = train_dataset.map(preprocess_function, batched=True, batch_size=25000)
+    train_dataset = train_dataset.map(
+        preprocess_function, batched=True, batch_size=25000
+    )
     val_dataset = val_dataset.map(preprocess_function, batched=True, batch_size=25000)
 
     train_dataset = DataLoader(
