@@ -5,4 +5,3 @@ mnist.pkl
 wandb/
 **/checkpoints/*
 datasets/dbpedia_dataset/train.csv
-Results - Sheet1.csv
