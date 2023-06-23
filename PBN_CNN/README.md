@@ -13,7 +13,7 @@ conda env create -f conda_environment.yml
 ## Training and Evaluating the Models
 
 
-Be sure to run the scripts and other files from `src` directory. The `train_custom.py` contains the code for training and `evaluate_dataset.py` contains the code for evaluation. The script `run_training.sh` contains the script for running the training code. For example, to train the version of ProtoCNN in the paper on the imdb dataset, run the following:
+Be sure to run the scripts and other files from `src` directory. The `train_custom.py` contains the code for training and `evaluate_dataset.py` contains the code for evaluation. The script `run_training.sh` contains the script for running the training code. For example, to train the version of PBN with CNN in the paper on the imdb dataset, run the following:
 
 ```bash
 CUDA_VISIBLE_DEVICES=1,2,3 python train_custom.py \
@@ -32,6 +32,7 @@ CUDA_VISIBLE_DEVICES=1,2,3 python evaluate_dataset.py \
     --num_labels 2
 ```
 
+
 ## Pretrained model weights
 
-Models will be saved in the directory `src/checkpoints/`. In case you wanted to use the model that we have trained, you can put them in the same directory. 
+Models will be saved in the directory `src/checkpoints/`. All pretrained model weights are available upon request. Please contact the authors for the pretrained model weights.
