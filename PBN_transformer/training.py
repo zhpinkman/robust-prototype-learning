@@ -87,6 +87,7 @@ def train_ProtoTEx_w_neg(
     p1_lamb=0.9,
     p2_lamb=0.9,
     p3_lamb=0.9,
+    use_cosine_dist=False,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -103,6 +104,7 @@ def train_ProtoTEx_w_neg(
             special_classfn=True,  # special_classfn=False, # apply dropout only on bias
             p=1,  # p=0.75,
             batchnormlp1=True,
+            use_cosine_dist=use_cosine_dist,
         )
     elif architecture == "ELECTRA":
         model = ProtoTEx_Electra(
