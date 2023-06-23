@@ -22,4 +22,4 @@ conda env create -f conda_environment.yml
 
 ## Visualizing the Results
 
-All the results by all the experiments are saved in the `Results - Sheet1.csv` file. You can use the `result_analyzer.ipynb` notebook to explore and visualize the results the same way we did in the paper.
+All the results by all the experiments are saved in the `Results - Sheet1.csv` file. In this csv file, `Model` column shows the model that is being tested, `comments` note on the variation of the model, `dataset` shows the dataset of interest, `dataset type` specifies the perturbation strategy used for perturbation, and `Precision Performance`, `Recall Performance`, `F1 performance` columns show the performance of the model on the dataset. You can use the `result_analyzer.ipynb` notebook to explore and visualize the results the same way we did in the paper.
