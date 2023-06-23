@@ -40,3 +40,7 @@ CUDA_VISIBLE_DEVICES=1,2,3 python vanilla_model.py \
     --model_dir "models/dbpedia_ModelTC/bart-base-mnli
 
 ```
+
+## Pretrained model weights
+
+All pretrained model weights are available upon request. Please contact the authors for the pretrained model weights.

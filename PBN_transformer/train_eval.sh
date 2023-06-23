@@ -22,13 +22,6 @@ if [ "$1" = "train" ]; then
         done
     done
 
-# elif [ "$1" = "inference" ]; then
-
-#     WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=6,7 python inference_and_explanations.py \
-#         --num_prototypes 50 \
-#         --data_dir "data/glue_data/sst2" \
-#         --model_checkpoint "Models/finegrained_nli_bart_prototex_sst2"
-
 ################################ Testing ################################
 
 elif [ "$1" = "test" ]; then

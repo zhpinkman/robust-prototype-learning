@@ -11,7 +11,7 @@ conda env create -f conda_environment.yml
 
 ## Training and Evaluating the Models
 
-`main.py` python file contains the code for training the model and `evaluate_model.py` contains the code for evaluating a fine-tuned model. The script, `train_eval.sh` contains the code for using the mentioned python files that have sample arguments passed to them as well. 
+`main.py` and `training.py` python file contains the code for training the model and `evaluate_model.py` contains the code for evaluating a fine-tuned model. The script, `train_eval.sh` contains the code for using the mentioned python files that have sample arguments passed to them as well. 
 
 A sample script for training the prototype-based network with a `Electra` bone, batch size of 64 on `dbpedia` dataset with the given data directory and a directory path to save the model checkpoints i presented below:
 
@@ -42,3 +42,4 @@ CUDA_VISIBLE_DEVICES=1,2,3 python evaluate_model.py \
 
 ## Pretrained model weights
 
+All pretrained model weights are available upon request. Please contact the authors for the pretrained model weights.
