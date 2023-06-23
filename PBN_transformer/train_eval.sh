@@ -12,7 +12,7 @@ if [ "$1" = "train" ]; then
                 WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=$3 python main.py \
                     --batch_size $4 \
                     --dataset $dataset \
-                    --data_dir "datasets/${dataset}_dataset" \
+                    --data_dir "../datasets/${dataset}_dataset" \
                     --p1_lamb $p1_lamb \
                     --p2_lamb $p2_lamb \
                     --p3_lamb $p3_lamb \
@@ -32,7 +32,7 @@ elif [ "$1" = "test" ]; then
     WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=$3 python evaluate_model.py \
         --batch_size 512 \
         --dataset $dataset \
-        --data_dir "datasets/${dataset}_dataset" \
+        --data_dir "../datasets/${dataset}_dataset" \
         --modelname "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}"
 
 else

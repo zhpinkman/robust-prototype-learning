@@ -2,11 +2,11 @@ This repository contains the code for the paper "A Study of the Robustness of Pr
 
 ## Repository Structure
 
-The structure of the repository can be broken down to four parts: (1) adversarial attacks and dataset creation, (2) training and evaluation of the Prototype-based networks with transformer backbone, (3) training and evaluation of the Prototype-based networks with CNN backbone, and (4) training and evaluation of the baseline models and vanilla models with both Transformer and CNN backbones.
+The structure of the repository can be broken down to four parts: (1) adversarial attacks and dataset creation, (2) training and evaluation of the Prototype-based networks with transformer backbone, (3) training and evaluation of the Prototype-based networks with CNN backbone, and (4) training and evaluation of the baseline models and vanilla models with Transformer backbones.
 
 `datasets` directory contains the datasets used in the paper. This includes SST-2 from AdvGLUE, and IMDB, AGNews, and DBPedia that were further attacked by the authors. The script to run the attacks and extract the adversarial perturbed examples is also included in this directory.
 
-`normal_models` directory contains the code for training and evaluating the baseline models and vanilla models with both Transformer and CNN backbones. 
+`normal_models` directory contains the code for training and evaluating the baseline models and vanilla models with Transformer backbones. 
 
 `PBN_CNN` directory contains the code for training and evaluating the Prototype-based networks with CNN backbone.
 
