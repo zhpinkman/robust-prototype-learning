@@ -282,12 +282,6 @@ class ProtoConvLitModule(pl.LightningModule):
 
     def validation_step(self, batch, batch_nb):
         losses = self.learning_step(batch, self.valid_acc)
-        # with open("/scratch/darshan/prototype-learning/robust-prototype-learning/ProtoCNN/src/models/protoconv/emb_textbugger.pkl", "wb+") as f:
-        #     similarity = self.dist_to_sim[self.sim_func](losses.outputs.min_distances)
-        #     masked_similarity = similarity * self.enabled_prototypes_mask
-        #     # print(masked_similarity)
-        #     pickle.dump(masked_similarity.cpu().numpy(), f)
-        #     # print("Dumping outputs")
         self.log_all_metrics("val", losses)
 
     def learning_step(self, batch, acc_score):

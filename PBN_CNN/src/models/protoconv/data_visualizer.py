@@ -37,7 +37,7 @@ class DataVisualizer:
             self.prototypes.append(' '.join(words))
 
     @torch.no_grad()
-    def visualize_prototypes(self, output_file_path="/scratch/darshan/prototype-learning/robust-prototype-learning/ProtoCNN/src/models/protoconv/plots/proto.html"):
+    def visualize_prototypes(self, output_file_path="models/protoconv/plots/proto.html"):
         lines = []
         used_ids = self.used_prototypes_ids()
         sorted_by_weights = sorted(used_ids, key=lambda x: self.fc_weights[x], reverse=True)
@@ -141,7 +141,7 @@ class DataVisualizer:
         return ax
 
     @torch.no_grad()
-    def visualize_random_predictions(self, dataloader, n=5, output_file_path="/scratch/darshan/prototype-learning/robust-prototype-learning/ProtoCNN/src/models/protoconv/plots/output.html"):
+    def visualize_random_predictions(self, dataloader, n=5, output_file_path="models/protoconv/plots/output.html"):
         # dataloader.batch_size = 1
         indexes = np.random.choice(len(dataloader.dataset), n, replace=False)
         lines = []

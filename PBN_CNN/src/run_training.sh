@@ -16,6 +16,3 @@ for dataset in "dbpedia_dataset" "sst2_dataset" "ag_news_dataset"; do
 done
 
 conda deactivate
-
-
-CUDA_VISIBLE_DEVICES=1,4,5 python3 train_custom.py --type="bigger" --dataset_name="dbpedia_dataset" --num_labels=9 --use_bigger
