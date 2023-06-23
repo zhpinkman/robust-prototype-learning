@@ -11,7 +11,7 @@ conda env create -f conda_environment.yml
 
 ## Structure of Data
 
-Each dataset has its own directory named "${dataset_name}_dataset" with `dataset_name` being "imdb", "ag_news", "dbpedia", and "sst2". Inside each directory, different splits of the datasets are presented, categorized with the beginning of their names and ending with the attack type that is associated with them. For instance, `adv_paraphrased.csv` corresponds to the split of the data that is perturbed using paraphrasing strategy, and `test_paraphrased.csv` corresponds to the same split of the data that contains the unperturbed examples presented in the `adv_paraphrased.csv`. In each directory, `train.csv`, `dev.csv`, and `test.csv` correspond to the original splits of the data that were fetched from `Huggingface.com`.
+Each dataset has its own directory named "${dataset_name}_dataset" with `dataset_name` being "imdb", "ag_news", "dbpedia", and "sst2". Inside each directory, different splits of the datasets are presented, categorized with the beginning of their names and ending with the attack type that is associated with them. For instance, `adv_paraphrased.csv` corresponds to the split of the data that is perturbed using paraphrasing strategy, and `test_paraphrased.csv` corresponds to the same split of the data that contains the unperturbed examples presented in the `adv_paraphrased.csv`. In each directory, `train.csv`, `val.csv`, and `test.csv` correspond to the original splits of the data that were fetched from `Huggingface.com`.
 
 ## Scripts for Running the Char-level and Word-level Attacks
 
@@ -30,7 +30,7 @@ CUDA_VISIBLE_DEVICES=4,5,6 python adv_attack.py \
 ```
 
 
-As it is mentioned in the paper, we use target three different models for each attack to ensure the transferability of the perturbations. After getting the perturbed examples for each attack and checkpoint, you can use `aggregate_attacks.py`
+As it is mentioned in the paper, we use target three different models for each attack to ensure the transferability of the perturbations. After getting the perturbed examples for each attack and checkpoint, you can use `aggregate_attacks.py` without any arguments needed to pass to it.
 
 
 ## Scripts for Running the Sentence-level Attacks
