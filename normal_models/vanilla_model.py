@@ -173,9 +173,9 @@ def main(args):
             tokenizer=tokenizer,
             compute_metrics=compute_metrics,
             callbacks=[
-                # EarlyStoppingCallback(
-                #     early_stopping_patience=3, early_stopping_threshold=0.01
-                # )
+                EarlyStoppingCallback(
+                    early_stopping_patience=4, early_stopping_threshold=0.01
+                )
             ],
         )
         splits_for_test_and_adv_in_dataset = [

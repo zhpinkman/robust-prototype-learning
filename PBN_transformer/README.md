@@ -1,23 +1,45 @@
-# ProtoTEx: Explaining Model Decisions with Prototype Tensors 
+This directory contains the code for training and evaluating the Prototype-based networks with Transformer backbone. 
 
-This repository contains example implementations of Prototype tensors for providing case-based reasoning. It has been forked and modified from the original repository that comes with the paper here: https://utexas.app.box.com/v/das-acl-2022 .
+## Requirements
 
-
-## Quick Start
-
-To run ProtoTEx on the propganda detection task, first we need the following:
+Please install the requirements by running the following command:
 
 ```
-mkdir Logs
-mkdir Models
-mkdir artifacts
-pip install -r requirements.txt
+conda env create -f conda_environment.yml
 ```
 
-To train the model, use the script `general.sh` that contains all the arg parameters to adjust the training process. 
 
-Run `python main.py --help` to see all the available parameters.
+## Training and Evaluating the Models
 
-After running the `general.sh` that would train the model, the model will be saved in the `Models` folder. There are different scripts such as training and evaluation in the general.sh that you comment or uncomment to run the different parts of the pipeline. To run the explaratory analysis, run the `inference_and_explanation.sh` script. This will generate all the prototypes and the test / train examples that are close to prototypes in the `artifacts` folder. Other analysis are located in `Notebooks/post_hoc_analysis.ipynb`.
+`main.py` and `training.py` python file contains the code for training the model and `evaluate_model.py` contains the code for evaluating a fine-tuned model. The script, `train_eval.sh` contains the code for using the mentioned python files that have sample arguments passed to them as well. 
 
-glue dataset that is currently in the gitignore file and extract it under `data` directory. You can download it from here: https://drive.google.com/file/d/1XIapOHwt_m5Z5O5VyCkkozltEyApIMLX/view?usp=share_link
+A sample script for training the prototype-based network with a `Electra` bone, batch size of 64 on `dbpedia` dataset with the given data directory and a directory path to save the model checkpoints i presented below:
+
+```
+CUDA_VISIBLE_DEVICES=1,2,3 python main.py \
+    --batch_size 64 \
+    --dataset "dbpedia" \
+    --data_dir "datasets/dbpedia_dataset" \
+    --p1_lamb 0.9 \
+    --p2_lamb 0.9 \
+    --p3_lamb 0.9 \
+    --architecture "ELECTRA" \
+    --modelname "dbpedia_model_ELECTRA"
+```
+
+To evaluate the trained model, you can use the script below that evaluates the model on all csv files 
+
+
+```
+
+CUDA_VISIBLE_DEVICES=1,2,3 python evaluate_model.py \
+    --batch_size 512 \
+    --dataset "dbpedia" \
+    --data_dir "datasets/dbpedia_dataset" \
+    --modelname "dbpedia_model_ELECTRA"
+
+```
+
+## Pretrained model weights
+
+All pretrained model weights are available upon request. Please contact the authors for the pretrained model weights.
