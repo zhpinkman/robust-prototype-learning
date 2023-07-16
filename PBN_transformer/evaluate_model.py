@@ -34,7 +34,7 @@ def main(args):
         dataset_name: torch.utils.data.DataLoader(
             all_datasets[dataset_name],
             batch_size=args.batch_size,
-            shuffle=True,
+            shuffle=False,
             collate_fn=lambda batch: {
                 "input_ids": torch.LongTensor([i["input_ids"] for i in batch]),
                 "attention_mask": torch.Tensor([i["attention_mask"] for i in batch]),
@@ -55,8 +55,7 @@ def main(args):
                 n_classes=configs.dataset_to_num_labels[args.dataset],
                 max_length=configs.dataset_to_max_length[args.dataset],
                 bias=False,
-                dropout=False,
-                special_classfn=True,  # special_classfn=False, # apply dropout only on bias
+                special_classfn=True,
                 p=1,  # p=0.75,
                 batchnormlp1=True,
             )
@@ -67,8 +66,7 @@ def main(args):
                 n_classes=configs.dataset_to_num_labels[args.dataset],
                 max_length=configs.dataset_to_max_length[args.dataset],
                 bias=False,
-                dropout=False,
-                special_classfn=True,  # special_classfn=False, # apply dropout only on bias
+                special_classfn=True,
                 p=1,  # p=0.75,
                 batchnormlp1=True,
             )
@@ -76,56 +74,54 @@ def main(args):
         else:
             print(f"Invalid backbone architecture: {args.architecture}")
 
-        print(f"Loading model checkpoint: Models/{args.modelname}")
-        pretrained_dict = torch.load(f"Models/{args.modelname}")
-        # Fiter out unneccessary keys
-        model_dict = model.state_dict()
-        filtered_dict = {}
-        for k, v in pretrained_dict.items():
-            if k in model_dict and model_dict[k].shape == v.shape:
-                filtered_dict[k] = v
-            else:
-                print(f"Skipping weights for: {k}")
-        model_dict.update(filtered_dict)
-        model.load_state_dict(model_dict)
+    print(f"Loading model checkpoint: Models/{args.modelname}")
+    pretrained_dict = torch.load(f"Models/{args.modelname}")
+    # Fiter out unneccessary keys
+    model_dict = model.state_dict()
+    filtered_dict = {}
+    for k, v in pretrained_dict.items():
+        if k in model_dict and model_dict[k].shape == v.shape:
+            filtered_dict[k] = v
+        else:
+            print(f"Skipping weights for: {k}")
+    model_dict.update(filtered_dict)
+    model.load_state_dict(model_dict)
 
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # model = torch.nn.DataParallel(model)
-        model = model.to(device)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # model = torch.nn.DataParallel(model)
+    model = model.to(device)
 
+    # utils.print_predictions(
+    #     os.path.join("Logs", "test_predictions.csv"), y_pred, y_true
+    # )
+
+    for dataset_name, dataloader in all_dataloaders.items():
+        if not (dataset_name.startswith("test_") or dataset_name.startswith("adv_")):
+            continue
+        print(f"Evaluating on {dataset_name}")
+        (
+            total_loss,
+            mac_prec,
+            mac_recall,
+            mac_f1_score,
+            accuracy,
+            y_true,
+            y_pred,
+        ) = utils.evaluate(dataloader, model_new=model)
+        utils.print_logs(
+            None,
+            f"{dataset_name} TEST SCORES",
+            0,
+            total_loss,
+            mac_prec,
+            mac_recall,
+            mac_f1_score,
+            accuracy,
+        )
         # utils.print_predictions(
-        #     os.path.join("Logs", "test_predictions.csv"), y_pred, y_true
+        #     os.path.join("Logs", f"adv_predictions.csv"), y_pred, y_true
         # )
-
-        for dataset_name, dataloader in all_dataloaders.items():
-            if not (
-                dataset_name.startswith("test_") or dataset_name.startswith("adv_")
-            ):
-                continue
-            print(f"Evaluating on {dataset_name}")
-            (
-                total_loss,
-                mac_prec,
-                mac_recall,
-                mac_f1_score,
-                accuracy,
-                y_true,
-                y_pred,
-            ) = utils.evaluate(dataloader, model_new=model)
-            utils.print_logs(
-                None,
-                f"{dataset_name} TEST SCORES",
-                0,
-                total_loss,
-                mac_prec,
-                mac_recall,
-                mac_f1_score,
-                accuracy,
-            )
-            # utils.print_predictions(
-            #     os.path.join("Logs", f"adv_predictions.csv"), y_pred, y_true
-            # )
-            embed()
+        embed()
 
 
 if __name__ == "__main__":

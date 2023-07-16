@@ -287,9 +287,7 @@ def evaluate(dl, model_new=None):
             input_ids = input_ids.to(device)
             attn_mask = attn_mask.to(device)
             y = y.to(device)
-            classfn_out, loss = model_new(
-                input_ids, attn_mask, y, use_decoder=False, use_classfn=1
-            )
+            classfn_out, loss = model_new(input_ids, attn_mask, y, use_classfn=1)
             #             print(classfn_out.detach().cpu())
             if classfn_out.ndim == 1:
                 predict = torch.zeros_like(y)
@@ -328,11 +326,8 @@ def evaluate(dl, model_new=None):
 
 
 def get_best_k_protos_for_batch(
-    dataset_info,
-    dataset,
+    dataloader,
     model_new=None,
-    model_path=None,
-    model_class=None,
     topk=None,
     do_all=False,
 ):
@@ -341,18 +336,9 @@ def get_best_k_protos_for_batch(
     the "best" is in the sense that it has (or is one of those who has) the minimal distance
     from the encoded representation of the sentence.
     """
-    assert (model_new is not None) ^ (model_path is not None)
-    dl = torch.utils.data.DataLoader(
-        dataset,
-        batch_size=128,
-        shuffle=False,
-        collate_fn=lambda batch: {
-            "input_ids": torch.LongTensor([i["input_ids"] for i in batch]),
-            "attention_mask": torch.Tensor([i["attention_mask"] for i in batch]),
-            "label": torch.LongTensor([i["label"] for i in batch]),
-        },
-    )
-    loader = tqdm(dl, total=len(dl), unit="batches")
+    assert model_new is not None
+
+    loader = tqdm(dataloader, total=len(dataloader), unit="batches")
     model_new.eval()
     with torch.no_grad():
         # Updated for negative prototypes
@@ -391,7 +377,7 @@ def get_best_k_protos_for_batch(
             else:
                 predicted = torch.argmax(
                     model_new.classfn_model(input_for_classfn).view(
-                        batch_size, dataset_info.num_classes
+                        batch_size, model_new.n_classes
                     ),
                     dim=1,
                 )
@@ -408,35 +394,19 @@ def get_best_k_protos_for_batch(
     return best_protos, best_protos_dists
 
 
-def get_bestk_train_data_for_every_proto(
-    dataset_info, train_dataset_eval, model_new=None, top_k=3
-):
+def get_bestk_train_data_for_every_proto(train_dataset_loader, model_new=None, top_k=3):
     """
     for every prototype find out k best similar training examples
     """
-    batch_size = 128
-    dl = torch.utils.data.DataLoader(
-        train_dataset_eval,
-        batch_size=batch_size,
-        shuffle=False,
-        collate_fn=lambda batch: {
-            "input_ids": torch.LongTensor([i["input_ids"] for i in batch]),
-            "attention_mask": torch.Tensor([i["attention_mask"] for i in batch]),
-            "label": torch.LongTensor([i["label"] for i in batch]),
-        },
-    )
-    #     dl=torch.utils.data.DataLoader(test_dataset,batch_size=batch_size,shuffle=False,
-    #                                      collate_fn=test_dataset.collate_fn)
-    loader = tqdm(dl, total=len(dl), unit="batches")
+
+    loader = tqdm(train_dataset_loader, total=len(train_dataset_loader), unit="batches")
     model_new.eval()
-    #     model_new=model_new.cpu()
     with torch.no_grad():
         best_train_egs = []
         best_train_egs_values = []
         all_distances = torch.tensor([])
         predict_all = torch.tensor([])
         true_all = torch.tensor([])
-        # Updated for negative prototypes
 
         all_protos = model_new.prototypes
         for batch_index, batch in enumerate(loader):
@@ -465,15 +435,13 @@ def get_bestk_train_data_for_every_proto(
                 ).view(batch_size, model_new.num_protos)
             predicted = torch.argmax(
                 model_new.classfn_model(input_for_classfn).view(
-                    batch_size, dataset_info.num_classes
+                    batch_size, model_new.n_classes
                 ),
                 dim=1,
             )
             concerned_idxs = torch.nonzero((predicted == y.cuda())).view(-1)
-            #             concerned_idxs=torch.nonzero((predicted==y)).view(-1)
             input_for_classfn = input_for_classfn[concerned_idxs]
-            #             predict_all=torch.cat((predict_all,predicted.cpu()),dim=0)
-            #             true_all=torch.cat((true_all,y.cpu()),dim=0)
+
             if top_k is None:
                 all_distances = torch.cat(
                     (all_distances, input_for_classfn.cpu()), dim=0
@@ -487,8 +455,11 @@ def get_bestk_train_data_for_every_proto(
             (true_all.view(-1, 1), predict_all.view(-1, 1), all_distances), dim=1
         )
     else:
+        embed()
         best_train_egs = torch.cat(best_train_egs, dim=0)
         best_train_egs_values = torch.cat(best_train_egs_values, dim=0)
+        embed()
+        exit()
         best_of_all_examples_for_each_prototype = torch.topk(
             best_train_egs_values, dim=0, k=top_k, largest=False
         )
@@ -505,21 +476,11 @@ def get_bestk_train_data_for_every_proto(
         )
 
 
-def best_protos_for_test(test_dataset, model_new=None, top_k=5):
+def best_protos_for_test(test_dataloader, model_new=None, top_k=5):
     batch_size = 60
-    dl = torch.utils.data.DataLoader(
-        test_dataset,
-        batch_size=batch_size,
-        shuffle=True,
-        collate_fn=lambda batch: {
-            "input_ids": torch.LongTensor([i["input_ids"] for i in batch]),
-            "attention_mask": torch.Tensor([i["attention_mask"] for i in batch]),
-            "label": torch.LongTensor([i["label"] for i in batch]),
-        },
-    )
-    #     loader = tqdm(dl, total=len(dl), unit="batches")
+
     all_protos = model_new.prototypes
-    batch = next(iter(dl))
+    batch = next(iter(test_dataloader))
     input_ids = batch["input_ids"]
     attn_mask = batch["attention_mask"]
     y = batch["label"]

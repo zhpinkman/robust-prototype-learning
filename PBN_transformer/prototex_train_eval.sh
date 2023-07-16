@@ -22,12 +22,16 @@ if [ "$1" = "train" ]; then
         done
     done
 
-# elif [ "$1" = "inference" ]; then
+elif [ "$1" = "inference" ]; then
 
-#     WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=6,7 python inference_and_explanations.py \
-#         --num_prototypes 50 \
-#         --data_dir "data/glue_data/sst2" \
-#         --model_checkpoint "Models/finegrained_nli_bart_prototex_sst2"
+    p1_lamb=0.9
+    p2_lamb=0.9
+    p3_lamb=0.9
+    WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=$3 python inference_and_explanations.py \
+        --batch_size 256 \
+        --dataset $dataset \
+        --data_dir "datasets/${dataset}_dataset" \
+        --modelname "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}"
 
 ################################ Testing ################################
 

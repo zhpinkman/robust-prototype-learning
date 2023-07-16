@@ -16,3 +16,16 @@ logical_fallacy_labels_to_ids = {
 dataset_to_max_length = {"imdb": 512, "dbpedia": 512, "ag_news": 64, "sst2": 64}
 
 dataset_to_num_labels = {"imdb": 2, "dbpedia": 9, "ag_news": 4, "sst2": 2}
+
+
+dbpedia_dataset_labels2ids = {
+    "Agent": 0,
+    "Work": 1,
+    "Place": 2,
+    "Species": 3,
+    "UnitOfWork": 4,
+    "Event": 5,
+    "SportsSeason": 6,
+    "Device": 7,
+    "TopicalConcept": 8,
+}

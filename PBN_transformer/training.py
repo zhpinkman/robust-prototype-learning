@@ -99,8 +99,7 @@ def train_ProtoTEx_w_neg(
             n_classes=n_classes,
             max_length=max_length,
             bias=False,
-            dropout=False,
-            special_classfn=True,  # special_classfn=False, # apply dropout only on bias
+            special_classfn=True,
             p=1,  # p=0.75,
             batchnormlp1=True,
         )
@@ -111,8 +110,7 @@ def train_ProtoTEx_w_neg(
             n_classes=n_classes,
             max_length=max_length,
             bias=False,
-            dropout=False,
-            special_classfn=True,  # special_classfn=False, # apply dropout only on bias
+            special_classfn=True,
             p=1,  # p=0.75,
             batchnormlp1=True,
         )
@@ -228,7 +226,6 @@ def train_ProtoTEx_w_neg(
                     batch["input_ids"],
                     batch["attention_mask"],
                     batch["label"],
-                    use_decoder=0,
                     use_classfn=0,
                     use_rc=0,
                     use_p1=1,
@@ -269,7 +266,6 @@ def train_ProtoTEx_w_neg(
                     batch["input_ids"],
                     batch["attention_mask"],
                     batch["label"],
-                    use_decoder=0,
                     use_classfn=1,
                     use_rc=0,
                     use_p1=0,

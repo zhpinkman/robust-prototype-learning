@@ -15,7 +15,6 @@ class ProtoTEx_Electra(torch.nn.Module):
         max_length,
         class_weights=None,
         bias=True,
-        dropout=False,
         special_classfn=False,
         p=0.5,
         batchnormlp1=True,
@@ -55,10 +54,8 @@ class ProtoTEx_Electra(torch.nn.Module):
         #         self.set_decoder_status(False)
         #         self.set_protos_status(False)
         #         self.set_classfn_status(False)
-        self.do_dropout = dropout
         self.special_classfn = special_classfn
 
-        self.dropout = torch.nn.Dropout(p=p)
         self.dobatchnorm = (
             batchnormlp1  # This flag is actually for instance normalization
         )
@@ -112,7 +109,6 @@ class ProtoTEx_Electra(torch.nn.Module):
         input_ids,
         attn_mask,
         y,
-        use_decoder=1,
         use_classfn=0,
         use_rc=0,
         use_p1=0,
@@ -135,34 +131,18 @@ class ProtoTEx_Electra(torch.nn.Module):
         examples.
         """
         batch_size = input_ids.size(0)
-        if (
-            use_decoder
-        ):  ## Decoder is being trained in this loop -- Only when the model has the RC loss
-            labels = input_ids.cuda() + 0
-            labels[labels == self.electra_model.config.pad_token_id] = -100
-            electra_output = self.electra_model(
-                input_ids.cuda(),
-                attn_mask.cuda(),
-                labels=labels,
-                output_attentions=False,
-                output_hidden_states=False,
-            )
-            rc_loss, last_hidden_state = (
-                electra_output.loss,
-                electra_output.encoder_last_hidden_state,
-            )
-        else:
-            rc_loss = torch.tensor(0)
-            try:
-                last_hidden_state = self.electra_model(
-                    input_ids.cuda(), attn_mask.cuda()
-                ).last_hidden_state
-            except Exception as e:
-                from IPython import embed
 
-                print(e)
-                embed()
-                exit()
+        rc_loss = torch.tensor(0)
+        try:
+            last_hidden_state = self.electra_model(
+                input_ids.cuda(), attn_mask.cuda()
+            ).last_hidden_state
+        except Exception as e:
+            from IPython import embed
+
+            print(e)
+            embed()
+            exit()
 
         # Lp3 is minimize the negative of inter-prototype distances (maximize the distance)
         input_for_classfn, l_p1, l_p2, l_p3, _, classfn_out, classfn_loss = (
@@ -224,20 +204,9 @@ class ProtoTEx_Electra(torch.nn.Module):
                 torch.pdist(self.prototypes.view(self.num_protos, -1))
             )
         if use_classfn:
-            if self.do_dropout:
-                if self.special_classfn:
-                    classfn_out = (
-                        input_for_classfn @ self.classfn_model.weight.t()
-                        + self.dropout(self.classfn_model.bias.repeat(batch_size, 1))
-                    ).view(batch_size, self.n_classes)
-                else:
-                    classfn_out = self.classfn_model(
-                        self.dropout(input_for_classfn)
-                    ).view(batch_size, self.n_classes)
-            else:
-                classfn_out = self.classfn_model(input_for_classfn).view(
-                    batch_size, self.n_classes
-                )
+            classfn_out = self.classfn_model(input_for_classfn).view(
+                batch_size, self.n_classes
+            )
             classfn_loss = self.loss_fn(classfn_out, y.cuda())
         if not use_rc:
             rc_loss = torch.tensor(0)
