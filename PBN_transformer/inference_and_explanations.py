@@ -14,7 +14,7 @@ from models import ProtoTEx
 from models_electra import ProtoTEx_Electra
 import sys
 
-sys.path.append("datasets")
+sys.path.append("../datasets")
 import configs
 
 

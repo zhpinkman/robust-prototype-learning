@@ -5,7 +5,7 @@ import utils
 import argparse
 import sys
 
-sys.path.append("datasets")
+sys.path.append("../datasets")
 import configs
 
 # Custom modules
