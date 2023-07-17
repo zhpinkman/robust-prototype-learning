@@ -442,38 +442,26 @@ def get_bestk_train_data_for_every_proto(train_dataset_loader, model_new=None, t
             concerned_idxs = torch.nonzero((predicted == y.cuda())).view(-1)
             input_for_classfn = input_for_classfn[concerned_idxs]
 
-            if top_k is None:
-                all_distances = torch.cat(
-                    (all_distances, input_for_classfn.cpu()), dim=0
-                )
-            else:
-                best = torch.topk(input_for_classfn, dim=0, k=top_k, largest=False)
-                best_train_egs.append(best[1] + batch_index * batch_size)
-                best_train_egs_values.append(best[0])
-    if top_k is None:
-        return torch.cat(
-            (true_all.view(-1, 1), predict_all.view(-1, 1), all_distances), dim=1
-        )
-    else:
-        embed()
-        best_train_egs = torch.cat(best_train_egs, dim=0)
-        best_train_egs_values = torch.cat(best_train_egs_values, dim=0)
-        embed()
-        exit()
-        best_of_all_examples_for_each_prototype = torch.topk(
-            best_train_egs_values, dim=0, k=top_k, largest=False
-        )
-        topk_idxs = best_of_all_examples_for_each_prototype[1]
-        final_concerned_idxs = []
-        for i in range(best_train_egs.size(1)):
-            concerned_idxs = best_train_egs[topk_idxs[:, i], i]
-            final_concerned_idxs.append(concerned_idxs)
-        #         true_all=torch.cat(true_all,dim=0)
-        #         predict_all=torch.cat(predict_all,dim=0)
-        return (
-            torch.stack(final_concerned_idxs, dim=0).cpu().numpy(),
-            best_of_all_examples_for_each_prototype[0].cpu().numpy().T,
-        )
+            all_distances = torch.cat((all_distances, input_for_classfn.cpu()), dim=0)
+
+    return torch.topk(all_distances, dim=0, k=top_k, largest=False)
+    # else:
+    #     best_train_egs = torch.cat(best_train_egs, dim=0)
+    #     best_train_egs_values = torch.cat(best_train_egs_values, dim=0)
+    #     best_of_all_examples_for_each_prototype = torch.topk(
+    #         best_train_egs_values, dim=0, k=top_k, largest=False
+    #     )
+    #     topk_idxs = best_of_all_examples_for_each_prototype[1]
+    #     final_concerned_idxs = []
+    #     for i in range(best_train_egs.size(1)):
+    #         concerned_idxs = best_train_egs[topk_idxs[:, i], i]
+    #         final_concerned_idxs.append(concerned_idxs)
+    #     #         true_all=torch.cat(true_all,dim=0)
+    #     #         predict_all=torch.cat(predict_all,dim=0)
+    #     return (
+    #         torch.stack(final_concerned_idxs, dim=0).cpu().numpy(),
+    #         best_of_all_examples_for_each_prototype[0].cpu().numpy().T,
+    #     )
 
 
 def best_protos_for_test(test_dataloader, model_new=None, top_k=5):
