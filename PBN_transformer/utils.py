@@ -18,6 +18,13 @@ from tqdm import tqdm
 from preprocess import CustomNonBinaryClassDataset
 import json
 
+from models import ProtoTEx
+from models_electra import ProtoTEx_Electra
+import sys
+
+sys.path.append("../datasets")
+import configs
+
 
 class dce_loss(torch.nn.Module):
     def __init__(self, n_classes, feat_dim, init_weight=True):
@@ -324,6 +331,50 @@ def evaluate(dl, model_new=None):
         np.concatenate(y_true),
         np.concatenate(y_pred),
     )
+
+
+def load_model(modelname, num_prototypes, architecture, dataset):
+    print("ProtoTEx best model: {0}".format(num_prototypes))
+    if architecture == "BART":
+        print(f"Using backone: {architecture}")
+        torch.cuda.empty_cache()
+        model = ProtoTEx(
+            num_prototypes=num_prototypes,
+            class_weights=None,
+            n_classes=configs.dataset_to_num_labels[dataset],
+            max_length=configs.dataset_to_max_length[dataset],
+            bias=False,
+            special_classfn=True,
+            p=1,  # p=0.75,
+            batchnormlp1=True,
+        )
+    elif architecture == "ELECTRA":
+        model = ProtoTEx_Electra(
+            num_prototypes=num_prototypes,
+            class_weights=None,
+            n_classes=configs.dataset_to_num_labels[dataset],
+            max_length=configs.dataset_to_max_length[dataset],
+            bias=False,
+            special_classfn=True,
+            p=1,  # p=0.75,
+            batchnormlp1=True,
+        )
+
+    else:
+        print(f"Invalid backbone architecture: {architecture}")
+    print(f"Loading model checkpoint: Models/{modelname}")
+    pretrained_dict = torch.load(f"Models/{modelname}")
+    # Fiter out unneccessary keys
+    model_dict = model.state_dict()
+    filtered_dict = {}
+    for k, v in pretrained_dict.items():
+        if k in model_dict and model_dict[k].shape == v.shape:
+            filtered_dict[k] = v
+        else:
+            print(f"Skipping weights for: {k}")
+    model_dict.update(filtered_dict)
+    model.load_state_dict(model_dict)
+    return model
 
 
 # Functions for analyzing prototypes
