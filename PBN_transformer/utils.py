@@ -81,7 +81,11 @@ def load_dataset(data_dir, tokenizer, max_length):
         train_text = train_df["text"].tolist()
         train_labels = train_df["label"].tolist()
         train_text, _, train_labels, _ = train_test_split(
-            train_text, train_labels, test_size=0.9, stratify=train_labels
+            train_text,
+            train_labels,
+            test_size=0.9,
+            stratify=train_labels,
+            random_state=42,
         )
         train_df = pd.DataFrame({"text": train_text, "label": train_labels})
 

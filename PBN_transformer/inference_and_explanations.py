@@ -103,7 +103,7 @@ def main(args):
         os.mkdir(f"artifacts/{args.dataset}/{args.modelname}")
 
     bestk_train_data_per_proto = utils.get_bestk_train_data_for_every_proto(
-        all_dataloaders["train"], model_new=model, top_k=5
+        all_dataloaders["test"], model_new=model, top_k=5
     )
     joblib.dump(
         bestk_train_data_per_proto,
@@ -111,7 +111,7 @@ def main(args):
     )
 
     best_protos_per_traineg = utils.get_best_k_protos_for_batch(
-        dataloader=all_dataloaders["train"],
+        dataloader=all_dataloaders["test"],
         model_new=model,
         topk=5,
         do_all=True,
