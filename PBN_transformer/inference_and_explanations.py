@@ -102,18 +102,18 @@ def main(args):
     if not os.path.exists(f"artifacts/{args.dataset}/{args.modelname}"):
         os.mkdir(f"artifacts/{args.dataset}/{args.modelname}")
 
-    bestk_train_data_per_proto = utils.get_bestk_train_data_for_every_proto(
-        all_dataloaders["test"], model_new=model, top_k=5
-    )
-    joblib.dump(
-        bestk_train_data_per_proto,
-        f"artifacts/{args.dataset}/{args.modelname}/bestk_train_data_per_proto.joblib",
-    )
+    # bestk_train_data_per_proto = utils.get_bestk_train_data_for_every_proto(
+    #     all_dataloaders["test"], model_new=model, top_k=5
+    # )
+    # joblib.dump(
+    #     bestk_train_data_per_proto,
+    #     f"artifacts/{args.dataset}/{args.modelname}/bestk_train_data_per_proto.joblib",
+    # )
 
     best_protos_per_traineg = utils.get_best_k_protos_for_batch(
         dataloader=all_dataloaders["test"],
         model_new=model,
-        topk=5,
+        topk=16,
         do_all=True,
     )
     joblib.dump(
@@ -130,7 +130,7 @@ def main(args):
         best_protos_per_split[dataset_name] = utils.get_best_k_protos_for_batch(
             dataloader=dataloader,
             model_new=model,
-            topk=5,
+            topk=16,
             do_all=True,
         )
 

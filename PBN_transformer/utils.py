@@ -402,6 +402,7 @@ def get_best_k_protos_for_batch(
 
         best_protos = []
         best_protos_dists = []
+        all_predictions = []
         for batch in loader:
             input_ids = batch["input_ids"]
             attn_mask = batch["attention_mask"]
@@ -423,12 +424,19 @@ def get_best_k_protos_for_batch(
                     last_hidden_state.view(batch_size, -1),
                     all_protos.view(model_new.num_protos, -1),
                 )
+                # embed()
                 input_for_classfn = torch.nn.functional.instance_norm(
                     input_for_classfn.view(batch_size, 1, model_new.num_protos)
                 ).view(batch_size, model_new.num_protos)
 
             if do_all:
                 temp = torch.topk(input_for_classfn, dim=1, k=topk, largest=False)
+                predicted = torch.argmax(
+                    model_new.classfn_model(input_for_classfn).view(
+                        batch_size, model_new.n_classes
+                    ),
+                    dim=1,
+                )
             else:
                 predicted = torch.argmax(
                     model_new.classfn_model(input_for_classfn).view(
@@ -442,11 +450,13 @@ def get_best_k_protos_for_batch(
                 )
             best_protos.append(temp[1].cpu())
             best_protos_dists.append(temp[0].cpu())
+            all_predictions.append(predicted.cpu())
         #             best_protos.append((torch.topk(input_for_classfn,dim=1,
         #                                               k=topk,largest=False)[1]).cpu())
         best_protos = torch.cat(best_protos, dim=0)
         best_protos_dists = torch.cat(best_protos_dists, dim=0)
-    return best_protos, best_protos_dists
+        all_predictions = torch.cat(all_predictions, dim=0)
+    return best_protos, best_protos_dists, all_predictions
 
 
 def get_bestk_train_data_for_every_proto(train_dataset_loader, model_new=None, top_k=3):

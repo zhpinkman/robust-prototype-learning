@@ -6,6 +6,7 @@ from IPython import embed
 import utils
 from models import ProtoTEx
 from models_electra import ProtoTEx_Electra
+from models_bert import ProtoTEx_BERT
 import sys
 
 sys.path.append("../datasets")
@@ -21,6 +22,8 @@ def main(args):
         # tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
     elif args.architecture == "ELECTRA":
         tokenizer = AutoTokenizer.from_pretrained("google/electra-base-discriminator")
+    elif args.architecture == "BERT":
+        tokenizer = AutoTokenizer.from_pretrained("prajjwal1/bert-medium")
     else:
         print(f"Invalid backbone architecture: {args.architecture}")
 
@@ -70,7 +73,17 @@ def main(args):
                 p=1,  # p=0.75,
                 batchnormlp1=True,
             )
-
+        elif args.architecture == "BERT":
+            model = ProtoTEx_BERT(
+                num_prototypes=args.num_prototypes,
+                class_weights=None,
+                n_classes=configs.dataset_to_num_labels[args.dataset],
+                max_length=configs.dataset_to_max_length[args.dataset],
+                bias=False,
+                special_classfn=True,
+                p=1,  # p=0.75,
+                batchnormlp1=True,
+            )
         else:
             print(f"Invalid backbone architecture: {args.architecture}")
 

@@ -4,6 +4,7 @@ from transformers.optimization import AdamW
 from tqdm import tqdm
 import wandb
 import torch as th
+from models_bert import ProtoTEx_BERT
 
 # Custom modules
 from utils import EarlyStopping, print_logs, evaluate
@@ -107,6 +108,17 @@ def train_ProtoTEx_w_neg(
         )
     elif architecture == "ELECTRA":
         model = ProtoTEx_Electra(
+            num_prototypes=num_prototypes,
+            class_weights=class_weights,
+            n_classes=n_classes,
+            max_length=max_length,
+            bias=False,
+            special_classfn=True,
+            p=1,  # p=0.75,
+            batchnormlp1=True,
+        )
+    elif architecture == "BERT":
+        model = ProtoTEx_BERT(
             num_prototypes=num_prototypes,
             class_weights=class_weights,
             n_classes=n_classes,

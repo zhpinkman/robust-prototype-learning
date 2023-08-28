@@ -14,7 +14,8 @@
 dataset=$2
 echo "Dataset" ${dataset}
 echo "Mode" $1
-for model_checkpoint in "ModelTC/bart-base-mnli" "google/electra-base-discriminator" "prajjwal1/bert-medium" "prajjwal1/bert-small"; do
+# for model_checkpoint in "ModelTC/bart-base-mnli" "google/electra-base-discriminator" "prajjwal1/bert-medium" "prajjwal1/bert-small"; do
+for model_checkpoint in "prajjwal1/bert-medium"; do
     echo "Model checkpoint" ${model_checkpoint}
     if [ "$1" = "train" ]; then
 

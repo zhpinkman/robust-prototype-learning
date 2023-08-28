@@ -26,6 +26,8 @@ def main(args):
         tokenizer = AutoTokenizer.from_pretrained("cross-encoder/nli-roberta-base")
     elif args.architecture == "ELECTRA":
         tokenizer = AutoTokenizer.from_pretrained("google/electra-base-discriminator")
+    elif args.architecture == "BERT":
+        tokenizer = AutoTokenizer.from_pretrained("prajjwal1/bert-small")
     else:
         print(f"Invalid backbone architecture: {args.architecture}")
 

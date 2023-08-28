@@ -62,7 +62,21 @@ def load_data(data_dir, mode):
             }
         )
     else:
+        from sklearn.model_selection import train_test_split
+
         train_df = pd.read_csv(os.path.join(data_dir, "train.csv"))
+        if train_df.shape[0] > 20000:
+            train_text = train_df["text"].tolist()
+            train_labels = train_df["label"].tolist()
+            train_text, _, train_labels, _ = train_test_split(
+                train_text,
+                train_labels,
+                test_size=0.9,
+                stratify=train_labels,
+                random_state=42,
+            )
+            train_df = pd.DataFrame({"text": train_text, "label": train_labels})
+
         # if args.dataset == "dbpedia":
         #     train_df = train_df.sample(frac=0.1)
         #     print("number of labels in train: ", len(train_df["label"].unique()))
@@ -161,7 +175,7 @@ def main(args):
         )
         if not os.path.exists(args.model_dir):
             os.makedirs(args.model_dir)
-        # trainer.evaluate(tokenized_dataset["test"])
+        trainer.evaluate(tokenized_dataset["test"])
 
         trainer.train()
         trainer.save_model(args.model_dir)
