@@ -1,6 +1,6 @@
 # REVIEW 2
 
->>We thank the reviewers for their feedback and insightful suggestions. We are pleased that the paper idea is overall positively perceived by most of the reviewers. We now clarify the questions raised by the reviewers.
+>>We thank the reviewer for their feedback and insightful suggestions. We are pleased that the paper idea is overall positively perceived by the reviewer. We now clarify the questions raised by the reviewer.
 
 ## Paper Topic And Main Contributions:
 
@@ -16,13 +16,24 @@ This paper delves into an in-depth investigation of the robustness of prototype-
 1. One notable weakness of the paper lies in its limited analysis, as it primarily relies on experimental results without offering reasonable explanations for the observed phenomena. The fundamental principles guiding the experiments were not adequately elucidated, leaving important questions unanswered. For instance, the paper does not provide a clear rationale for why the absence of clustering loss leads to improved performance on the datasets of IMDB and AG News, nor does it explain the reasons behind the superior performance of Euclidean distance over cosine distance. Moreover, the significant performance disparity between PBNs with transformer-based backbones and CNNs remains unexplained, leaving a gap in our understanding.
 
 
->>Thorough explanations are provided in the section “Questions For The Authors”.
+>>Thorough explanation is provided in the section “Questions For The Authors”.
 
 --- 
 
 2. Another area of concern is the insufficient justification for certain experimental settings. Although the main goal of the paper is to explore the robustness of PBNs in text classification tasks, the experiments concerning the influence of backbone structures and parameter selection were conducted solely on BERT under different perturbations. The absence of an experiment on PBNs with BERT as the backbone under different perturbations raises questions about the comprehensiveness of the study. It is essential to address this limitation as it might deviate from the core claim of the paper and might not offer a holistic understanding of PBNs' robustness in various scenarios. Including additional experiments with PBNs and BERT as the backbone under different perturbations could bolster the paper's credibility and strengthen its conclusions.
 
->>We used BERT, RoBERTa, and DistilBERT to generate the perturbations that are generalizable enough (perturbations can change three different models' predictions) that could represent perturbations effect on a variety of models. We did not use BERT-base as a backbone for prototype-based reasoning models since we used BERT-base models as the target model for our perturbations. This separation ensures that our evaluation framework is generalizable and doesn't put PBNs nor their backbones in a direct targeted spot by perturbations. Nevertheless, for the sake of completeness of our experiments, we conducted additional experiments using BERT as backbone, which their performance aligned with the results using other backbones reported in the paper. We plan to include this additional results in the paper.
+>>We used BERT, RoBERTa, and DistilBERT to generate the perturbations that are generalizable enough (perturbations can change three different models' predictions) that could represent perturbations effect on a variety of models. We did not use BERT-base as a backbone for PBNs since we used BERT-base models as the target model for our perturbations. This separation ensures that our evaluation framework is generalizable and doesn't put PBNs nor their backbones in a direct targeted spot by perturbations. Nevertheless, for the sake of completeness of our experiments, we conducted additional experiments using BERT as backbone, which their performance aligned with the results using other backbones reported in the paper. We plan to include this additional results in the paper.
+
+|           |     IMDB |          |          |          |  AG News |          |          |          |  DBPedia |          |          |          |    SST-2 |          |
+|----------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|
+| **Model** | **Orig** | **Char** | **Word** | **Sent** | **Orig** | **Char** | **Word** | **Sent** | **Orig** | **Char** | **Word** | **Sent** | **Orig** |  **Adv** |
+|    BERT-S |     96.4 |     84.6 | **86.4** | **91.3** |     94.4 |     73.4 | **79.9** | **88.1** |     97.9 |     58.8 |     57.9 | **97.8** |     84.7 |     40.7 |
+|    \+ PBN |     91.0 | **84.7** |     86.0 |     87.3 |     91.9 | **74.5** |     79.0 |     84.9 |     98.9 | **67.4** | **73.5** |     97.0 |     76.2 | **44.0** |
+|       *Δ* |     -5.4 |     +0.1 |     -0.4 |     -4.0 |     -2.5 |     +1.1 |     -0.9 |     -3.2 |     +1.0 |     +8.6 |    +15.6 |     -0.8 |     -8.5 |     +3.3 |
+|    BERT-M |     94.7 | **84.2** |     85.5 | **92.2** |     93.9 |     71.1 |     78.8 |     88.3 |     98.4 |     66.2 |     60.5 | **98.0** |     83.9 |     40.9 |
+|    \+ PBN |     90.5 |     83.5 | **85.6** |     85.9 |     92.1 | **78.4** | **80.2** | **88.5** |     96.5 | **69.0** | **75.5** |     97.4 |     77.8 | **46.3** |
+|       *Δ* |     -4.2 |     -0.7 |     +0.1 |     -6.3 |     -1.8 |     +7.3 |     +1.4 |     +0.2 |     -1.9 |     +2.8 |    +15.0 |     -0.6 |     -6.1 |     +5.4 |
+
 
 
 ## Questions For The Authors:
@@ -34,13 +45,13 @@ This paper delves into an in-depth investigation of the robustness of prototype-
 1. Can you provide a comprehensive explanation for the observed improvement in performance on specific tasks, such as IMDB and AG News, when the clustering loss is absent?
 
 
->> The clustering loss is an additional regularization term in the overall loss function. As usual with regularization terms, the term forces the network to learn a trade-off between the competing goals. In our case, all loss terms, including the accuracy target loss, are somewhat competing goals. Therefore, the absence of a regularization term could cause an improvement of the other loss terms if the goals were competing. The clustering loss forces the backbone to project all samples to be close to a prototype in the embedding space; An objective that is useful for interpretability because it ensures that the closest prototype serves as a valid proxy for the sample. However, this loss lowers the possible achievable accuracy because forcing each sample to be close to a prototype lowers the diversity in the embedding space as our observations suggest as well (0.9 compared to 1.0).
+>> The clustering loss is an additional regularization term in the overall loss function. As usual with regularization terms, the term forces the network to learn a trade-off between the competing goals. In our case, all loss terms, including the accuracy target loss, are somewhat competing goals. Therefore, the absence of a regularization term could cause an improvement of the other loss terms if the goals were competing. The clustering loss forces the backbone to project all samples to be close to a prototype in the embedding space; An objective that is useful for interpretability because it ensures that the closest prototype serves as a valid proxy for the sample. However, this loss lowers the possible achievable accuracy because forcing each sample to be close to a prototype lowers the diversity in the embedding space as our observations suggest as well (0.93 compared to 1.00).
 
 ---
 
 2. What is the underlying rationale behind the selection of 16 as the optimal number of prototypes, and why does the model's performance deteriorate as the number of prototypes increases?
 
->>During training the optimal number of prototypes was automatically selected. From literature [1], it is known that the optimal number of prototypes is non-trivial and not necessarily the number of classes or training data points. Therefore, the number 16 is in accordance with results already published.
+>>During training the optimal number of prototypes was automatically selected. From literature [1], it is known that the optimal number of prototypes is non-trivial and not necessarily the number of classes or training data points. Therefore, the number 16 is in accordance with results already published, and was found empirically. The possible reason for deterioration of performance with increasing number of prototypes is that the model is forced to learn a more complex embedding space, which is more difficult to learn. This is in accordance with the observation that the clustering loss lowers the achievable accuracy.
 
 >>[1] Crammer, K., Gilad-Bachrach, R., Navot, A., & Tishby, N. (2002). Margin analysis of the LVQ algorithm. Advances in neural information processing systems, 15.
 
