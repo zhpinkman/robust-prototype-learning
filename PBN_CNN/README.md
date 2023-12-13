@@ -1,6 +1,4 @@
-This directory contains the code for training and evaluating the Prototype-based networks with CNN backbone.
-
-
+This directory contains the code for training and evaluating the Prototype-based networks with CNN backbone that is based on the implementation of the paper, "Prototypical Convolutional Neural Network for a phrase-based explanation of sentiment classification".
 
 
 ## Requirements

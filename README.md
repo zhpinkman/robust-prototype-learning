@@ -1,4 +1,4 @@
-This repository contains the code for the paper "A Study of the Robustness of Prototype-Based Methods on Text Classification Tasks". In the following, different parts of the code and repository are explained for reproducibility purposes.
+This repository contains the code for the paper "Robust Text Classification: Analyzing Prototype-Based Networks". In the following, different parts of the code and repository are explained for reproducibility purposes.
 
 ## Repository Structure
 
@@ -11,6 +11,8 @@ The structure of the repository can be broken down to four parts: (1) adversaria
 `PBN_CNN` directory contains the code for training and evaluating the Prototype-based networks with CNN backbone.
 
 `PBN_Transformer` directory contains the code for training and evaluating the Prototype-based networks with Transformer backbone.
+
+`gpt_experiments` directory contains the code for using GPT3.5 as a baseline model.
 
 ## Requirements
 
