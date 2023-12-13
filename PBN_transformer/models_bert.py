@@ -22,7 +22,7 @@ class ProtoTEx_BERT(torch.nn.Module):
     ):
         super().__init__()
 
-        self.bert_model = BertModel.from_pretrained("prajjwal1/bert-small")
+        self.bert_model = BertModel.from_pretrained("prajjwal1/bert-medium")
 
         self.n_classes = n_classes
         self.bert_out_dim = self.bert_model.config.hidden_size

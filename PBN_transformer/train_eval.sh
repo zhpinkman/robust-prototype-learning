@@ -2,7 +2,7 @@
 
 dataset=$2
 echo "Mode" $1
-architecture="BART"
+architecture="BERT"
 
 if [ "$1" = "train" ]; then
 

@@ -163,13 +163,16 @@ def train_ProtoTEx_w_neg(
     #     model.load_state_dict(model_dict)
 
     # TODO: Try getting the average of a first few batches
-    batch = next(iter(random_data_loader))
+    # batch = next(iter(random_data_loader))
 
     model.set_prototypes(
-        input_ids_rdm=batch["input_ids"],
-        attn_mask_rdm=batch["attention_mask"],
+        input_ids_rdm=None,
+        attn_mask_rdm=None,
         do_random=True,
     )
+    # from IPython import embed
+    # embed()
+    # exit()
 
     # Track all model parameters
     # wandb.watch(
