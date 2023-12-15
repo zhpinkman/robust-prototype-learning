@@ -1,3 +1,5 @@
+from training import train_ProtoTEx_w_neg
+import configs
 import torch
 from transformers import AutoTokenizer
 import wandb
@@ -6,10 +8,8 @@ import argparse
 import sys
 
 sys.path.append("../datasets")
-import configs
 
 # Custom modules
-from training import train_ProtoTEx_w_neg
 
 # Set cuda
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
@@ -106,6 +106,7 @@ def main(args):
             p1_lamb=args.p1_lamb,
             p2_lamb=args.p2_lamb,
             p3_lamb=args.p3_lamb,
+            use_cosine_dist=args.use_cosine_dist,
         )
 
     else:
@@ -138,6 +139,7 @@ if __name__ == "__main__":
     parser.add_argument("--p1_lamb", type=float, default=0.9)
     parser.add_argument("--p2_lamb", type=float, default=0.9)
     parser.add_argument("--p3_lamb", type=float, default=0.9)
+    parser.add_argument("--use_cosine_dist", action="store_true")
 
     args = parser.parse_args()
     main(args)

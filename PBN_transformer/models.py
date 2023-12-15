@@ -2,6 +2,7 @@ import torch
 from transformers import (
     BartForConditionalGeneration,
 )
+import torchmetrics
 
 # torch.manual_seed(0)
 # import random
@@ -68,7 +69,7 @@ class ProtoTEx(torch.nn.Module):
         self.distance_grounder = torch.zeros(self.n_classes, self.num_protos).cuda()
         for i in range(self.n_classes):
             # self.distance_grounder[i][np.random.randint(0, self.num_protos, int(self.num_protos / 2))] = 1e7
-            self.distance_grounder[i][self.num_protos :] = 1e7
+            self.distance_grounder[i][self.num_protos:] = 1e7
 
     def set_prototypes(self, input_ids_rdm, attn_mask_rdm, do_random=False):
         if do_random:
@@ -201,7 +202,7 @@ class ProtoTEx(torch.nn.Module):
             all_protos = self.prototypes
             if use_classfn or use_p1 or use_p2:
                 if not self.dobatchnorm:
-                    ## TODO: This loss function is not ignoring the padded part of the sequence; Get element-wise distane and then multiply with the mask
+                    # TODO: This loss function is not ignoring the padded part of the sequence; Get element-wise distane and then multiply with the mask
                     if self.use_cosine_dist:
                         input_for_classfn = (
                             torchmetrics.functional.pairwise_cosine_similarity(
@@ -233,7 +234,7 @@ class ProtoTEx(torch.nn.Module):
                         input_for_classfn.view(batch_size, 1, self.num_protos)
                     ).view(batch_size, self.num_protos)
             if use_p1 or use_p2:
-                ## This part is for seggregating training of negative and positive prototypes
+                # This part is for seggregating training of negative and positive prototypes
                 distance_mask = self.distance_grounder[y.cuda()]
                 input_for_classfn_masked = input_for_classfn + distance_mask
                 if random_mask_for_distanceMat:
@@ -258,7 +259,7 @@ class ProtoTEx(torch.nn.Module):
                 )[0]
             )
         if use_p3:
-            ## Used for Inter-prototype distance
+            # Used for Inter-prototype distance
             #             l_p3 = self.one_by_sqrt_bartoutdim * torch.mean(torch.pdist(all_protos.view(self.num_protos,-1)))
             l_p3 = self.one_by_sqrt_bartoutdim * torch.mean(
                 torch.pdist(self.prototypes.view(self.num_protos, -1))

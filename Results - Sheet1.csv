@@ -533,3 +533,27 @@ Prototex,separability_20,dbpedia,test - textbugger,,,0.979
 Prototex,separability_20,dbpedia,adv - textbugger,,,0.728
 Prototex,separability_20,dbpedia,test - paraphrased,,,0.991
 Prototex,separability_20,dbpedia,adv - paraphrased,,,0.979
+Prototex,w/o clustering,sst2,test,,,0.885
+Prototex,w/o clustering,sst2,adv,,,0.404
+Prototex,w/o interpretability,sst2,test,,,0.816
+Prototex,w/o interpretability,sst2,adv,,,0.374
+Prototex,separability_0,sst2,test,,,0.916
+Prototex,separability_0,sst2,adv,,,0.328
+Prototex,separability_2,sst2,test,,,0.84
+Prototex,separability_2,sst2,adv,,,0.321
+Prototex,separability_4,sst2,test,,,0.923
+Prototex,separability_4,sst2,adv,,,0.351
+Prototex,separability_10,sst2,test,,,0.901
+Prototex,separability_10,sst2,adv,,,0.297
+Prototex,separability_20,sst2,test,,,0.801
+Prototex,separability_20,sst2,adv,,,0.374
+Prototex,cosine,sst2,test,,,0.786
+Prototex,cosine,sst2,adv,,,0.333
+Prototex,DP=64,sst2,test,,,0.747
+Prototex,DP=64,sst2,adv,,,0.319
+Prototex,DP=2,sst2,test,,,0.862
+Prototex,DP=2,sst2,adv,,,0.394
+Prototex,base,sst2,test,,,0.9
+Prototex,base,sst2,adv,,,0.396
+Prototex,larger model,sst2,test,,,0.916
+Prototex,larger model,sst2,adv,,,0.542
