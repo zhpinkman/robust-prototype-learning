@@ -59,8 +59,17 @@ def main(args):
             "label": torch.LongTensor([i["label"] for i in batch]),
         },
     )
-    # train_dl_eval=torch.utils.data.DataLoader(train_dataset_eval,batch_size=20,shuffle=False,
-    #                                  collate_fn=train_dataset_eval.collate_fn)
+
+    val_dl = torch.utils.data.DataLoader(
+        all_datasets["val"],
+        batch_size=args.batch_size,
+        shuffle=False,
+        collate_fn=lambda batch: {
+            "input_ids": torch.LongTensor([i["input_ids"] for i in batch]),
+            "attention_mask": torch.Tensor([i["attention_mask"] for i in batch]),
+            "label": torch.LongTensor([i["label"] for i in batch]),
+        },
+    )
 
     # Compute class weights
 
@@ -95,7 +104,7 @@ def main(args):
         train_ProtoTEx_w_neg(
             architecture=args.architecture,
             train_dl=train_dl,
-            val_dl=test_dl,
+            val_dl=val_dl,
             test_dl=test_dl,
             n_classes=configs.dataset_to_num_labels[args.dataset],
             max_length=configs.dataset_to_max_length[args.dataset],

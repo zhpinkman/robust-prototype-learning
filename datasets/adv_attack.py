@@ -1,16 +1,10 @@
 from IPython import embed
 import argparse
 import textattack
-from textattack.transformations import WordSwapRandomCharacterDeletion, BackTranslation
 import transformers
 from datasets import Dataset
 import os
 import pandas as pd
-from textattack.transformations import CompositeTransformation
-from textattack.constraints.pre_transformation import (
-    RepeatModification,
-    StopwordModification,
-)
 
 
 dbpedia_dataset_classes = [
@@ -24,16 +18,6 @@ dbpedia_dataset_classes = [
     "Device",
     "TopicalConcept",
 ]
-from textattack.augmentation import (
-    CLAREAugmenter,
-    BackTranslationAugmenter,
-    CharSwapAugmenter,
-    CheckListAugmenter,
-    DeletionAugmenter,
-    EasyDataAugmenter,
-    EmbeddingAugmenter,
-    WordNetAugmenter,
-)
 
 
 def main():
@@ -60,7 +44,7 @@ def main():
             model, tokenizer
         )
 
-        if args.dataset == "dbpedia":
+        if args.dataset in ["dbpedia", "olid"]:
             dataset = textattack.datasets.HuggingFaceDataset(
                 Dataset.from_pandas(pd.read_csv(f"{args.dataset}_dataset/test.csv"))
             )

@@ -14,15 +14,16 @@
 dataset=$2
 echo "Dataset" ${dataset}
 echo "Mode" $1
-# for model_checkpoint in "ModelTC/bart-base-mnli" "google/electra-base-discriminator" "prajjwal1/bert-medium" "prajjwal1/bert-small"; do
-for model_checkpoint in "prajjwal1/bert-medium"; do
+# for model_checkpoint in "ModelTC/bart-base-mnli" "google/electra-base-discriminator" "prajjwal1/bert-medium"; do
+for model_checkpoint in "bert-base-uncased" "distilbert-base-uncased" "roberta-base"; do
+    # for model_checkpoint in "prajjwal1/bert-medium"; do
     echo "Model checkpoint" ${model_checkpoint}
     if [ "$1" = "train" ]; then
 
-        WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=${3} python vanilla_model.py \
+        TOKENIZERS_PARALLELISM=false WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=${3} python vanilla_model.py \
             --mode train \
             --batch_size $4 \
-            --logging_steps 100 \
+            --logging_steps 50 \
             --num_epochs $5 \
             --dataset ${dataset} \
             --data_dir "../datasets/${dataset}_dataset" \

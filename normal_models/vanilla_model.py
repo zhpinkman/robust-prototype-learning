@@ -15,9 +15,15 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-dataset_to_max_length = {"imdb": 512, "dbpedia": 512, "ag_news": 64, "sst2": 64}
+dataset_to_max_length = {
+    "imdb": 512,
+    "dbpedia": 512,
+    "ag_news": 64,
+    "sst2": 64,
+    "olid": 64,
+}
 
-dataset_to_num_labels = {"imdb": 2, "dbpedia": 9, "ag_news": 4, "sst2": 2}
+dataset_to_num_labels = {"imdb": 2, "dbpedia": 9, "ag_news": 4, "sst2": 2, "olid": 2}
 
 
 def preprocess_data(tokenizer, dataset, args):
@@ -39,7 +45,10 @@ def load_data(data_dir, mode):
     test_names = [
         file
         for file in os.listdir(data_dir)
-        if (file.startswith("test") and file.endswith("csv"))
+        if (
+            (file.startswith("test") and file.endswith("csv"))
+            or (file.startswith("val") and file.endswith("csv"))
+        )
     ]
 
     test_dfs = [pd.read_csv(os.path.join(data_dir, file)) for file in test_names]
@@ -169,7 +178,7 @@ def main(args):
             model,
             training_args,
             train_dataset=tokenized_dataset["train"],
-            eval_dataset=tokenized_dataset["test"],
+            eval_dataset=tokenized_dataset["val"],
             tokenizer=tokenizer,
             compute_metrics=compute_metrics,
         )
@@ -178,6 +187,7 @@ def main(args):
         trainer.evaluate(tokenized_dataset["test"])
 
         trainer.train()
+        trainer.evaluate(tokenized_dataset["test"])
         trainer.save_model(args.model_dir)
 
     elif args.mode == "test":

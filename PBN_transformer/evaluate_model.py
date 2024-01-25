@@ -62,7 +62,6 @@ def main(args):
                 p=1,  # p=0.75,
                 batchnormlp1=True,
                 use_cosine_dist=args.use_cosine_dist,
-
             )
         elif args.architecture == "ELECTRA":
             model = ProtoTEx_Electra(
@@ -111,8 +110,8 @@ def main(args):
     # )
 
     for dataset_name, dataloader in all_dataloaders.items():
-        if not dataset_name.startswith("adv_"):
-            continue
+        # if not dataset_name.startswith("adv_"):
+        #     continue
         print(f"Evaluating on {dataset_name}")
         (
             total_loss,
