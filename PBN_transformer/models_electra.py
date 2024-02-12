@@ -1,5 +1,7 @@
 import torch
 from transformers import ElectraModel
+from IPython import embed
+import inspect
 
 # torch.manual_seed(0)
 # import random
@@ -103,6 +105,37 @@ class ProtoTEx_Electra(torch.nn.Module):
 
     def set_protos_status(self, status=True):
         self.prototypes.requires_grad = status
+
+    def predict(self, input_ids, attn_mask):
+
+        batch_size = input_ids.size(0)
+
+        try:
+            last_hidden_state = self.electra_model(
+                input_ids.cuda(), attn_mask.cuda()
+            ).last_hidden_state
+        except Exception as e:
+
+            print(e)
+            embed()
+            exit()
+
+        # Lp3 is minimize the negative of inter-prototype distances (maximize the distance)
+        if not self.dobatchnorm:
+            input_for_classfn = torch.cdist(
+                last_hidden_state.view(batch_size, -1),
+                self.prototypes.view(self.num_protos, -1),
+            )
+        else:
+            input_for_classfn = torch.cdist(
+                last_hidden_state.view(batch_size, -1),
+                self.prototypes.view(self.num_protos, -1),
+            )
+            input_for_classfn = torch.nn.functional.instance_norm(
+                input_for_classfn.view(batch_size, 1, self.num_protos)
+            ).view(batch_size, self.num_protos)
+
+        return self.classfn_model(input_for_classfn).view(batch_size, self.n_classes)
 
     def forward(
         self,

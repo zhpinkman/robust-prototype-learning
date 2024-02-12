@@ -1,11 +1,11 @@
 p1_lamb=0.9
 p2_lamb=0.9
 p3_lamb=0.9
-architecture="BART"
+architecture="ELECTRA"
 # dataset="ag_news"
 # attack_type="textfooler"
 
-for dataset in "ag_news"; do
+for dataset in "imdb" "dbpedia"; do
     for attack_type in "textbugger" "textfooler"; do
 
         if [ "$dataset" = "ag_news" ]; then
@@ -13,10 +13,10 @@ for dataset in "ag_news"; do
             echo " Attack type: " $attack_type
             echo " Dataset: " $dataset
             # echo " Model checkpoint: " $model_checkpoint
-            CUDA_VISIBLE_DEVICES=5,6,7 python adv_attack_pbn.py \
+            CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack_pbn.py \
                 --dataset $dataset \
                 --attack_type $attack_type \
-                --model_checkpoint "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}" \
+                --model_checkpoint "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}_ELECTRA" \
                 --mode "attack" \
                 --batch_size 512 \
                 --architecture $architecture
@@ -26,10 +26,10 @@ for dataset in "ag_news"; do
             echo " Attack type: " $attack_type
             echo " Dataset: " $dataset
             echo " Model checkpoint: " $model_checkpoint
-            CUDA_VISIBLE_DEVICES=5,6,7 python adv_attack_pbn.py \
+            CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack_pbn.py \
                 --dataset $dataset \
                 --attack_type $attack_type \
-                --model_checkpoint "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}" \
+                --model_checkpoint "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}_ELECTRA" \
                 --mode "attack" \
                 --batch_size 512 \
                 --architecture $architecture
@@ -39,10 +39,10 @@ for dataset in "ag_news"; do
             echo " Attack type: " $attack_type
             echo " Dataset: " $dataset
             echo " Model checkpoint: " $model_checkpoint
-            CUDA_VISIBLE_DEVICES=5,6,7 python adv_attack_pbn.py \
+            CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack_pbn.py \
                 --dataset $dataset \
                 --attack_type $attack_type \
-                --model_checkpoint "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}" \
+                --model_checkpoint "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}_ELECTRA" \
                 --mode "attack" \
                 --batch_size 512 \
                 --architecture $architecture
