@@ -101,6 +101,38 @@ class ProtoTEx_BERT(torch.nn.Module):
     def set_protos_status(self, status=True):
         self.prototypes.requires_grad = status
 
+    def predict(self, input_ids, attn_mask):
+        batch_size = input_ids.size(0)
+
+        try:
+            last_hidden_state = self.bert_model(
+                input_ids.cuda(), attn_mask.cuda()
+            ).last_hidden_state
+        except Exception as e:
+            from IPython import embed
+
+            print(e)
+            embed()
+            exit()
+
+        if not self.dobatchnorm:
+            ## TODO: This loss function is not ignoring the padded part of the sequence; Get element-wise distane and then multiply with the mask
+            input_for_classfn = torch.cdist(
+                last_hidden_state.view(batch_size, -1),
+                self.prototypes.view(self.num_protos, -1),
+            )
+        else:
+            # TODO: Try cosine distance
+            input_for_classfn = torch.cdist(
+                last_hidden_state.view(batch_size, -1),
+                self.prototypes.view(self.num_protos, -1),
+            )
+            input_for_classfn = torch.nn.functional.instance_norm(
+                input_for_classfn.view(batch_size, 1, self.num_protos)
+            ).view(batch_size, self.num_protos)
+
+        return self.classfn_model(input_for_classfn).view(batch_size, self.n_classes)
+
     def forward(
         self,
         input_ids,
