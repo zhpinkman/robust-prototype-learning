@@ -37,6 +37,7 @@ def main(args):
         tokenizer=tokenizer,
         max_length=configs.dataset_to_max_length[args.dataset],
     )
+    print(all_datasets.keys())
 
     train_dl = torch.utils.data.DataLoader(
         all_datasets["train"],

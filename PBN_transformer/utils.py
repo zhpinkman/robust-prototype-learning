@@ -101,7 +101,7 @@ def load_dataset(data_dir, tokenizer, max_length):
     test_files = {
         file[: file.find(".")]: os.path.join(data_dir, file)
         for file in os.listdir(data_dir)
-        if (file.startswith("test") or file.startswith("adv"))
+        if (file.startswith("test") or file.startswith("adv") or file.startswith("val"))
     }
 
     test_dfs = {
