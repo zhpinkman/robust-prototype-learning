@@ -2,7 +2,7 @@
 
 echo "Mode" $1
 dataset=$2
-architecture="ELECTRA"
+architecture=$4
 
 # for imdb and dbpedia, the batch size is 32, and for ag_news is 64
 if [ "$dataset" = "imdb" ] || [ "$dataset" = "dbpedia" ]; then
