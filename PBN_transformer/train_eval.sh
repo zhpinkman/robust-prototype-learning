@@ -4,6 +4,13 @@ echo "Mode" $1
 dataset=$2
 architecture="ELECTRA"
 
+# for imdb and dbpedia, the batch size is 32, and for ag_news is 64
+if [ "$dataset" = "imdb" ] || [ "$dataset" = "dbpedia" ]; then
+    batch_size=32
+else
+    batch_size=512
+fi
+
 if [ "$1" = "train" ]; then
 
     for p1_lamb in 0.0 0.9 2.0; do
@@ -12,7 +19,7 @@ if [ "$1" = "train" ]; then
                 for num_proto in 16; do
 
                     WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=$3 python main.py \
-                        --batch_size $4 \
+                        --batch_size $batch_size \
                         --dataset $dataset \
                         --data_dir "../datasets/${dataset}_dataset" \
                         --p1_lamb $p1_lamb \
