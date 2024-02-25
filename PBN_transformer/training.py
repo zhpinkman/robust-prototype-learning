@@ -209,7 +209,9 @@ def train_ProtoTEx_w_neg(
     #     mac_val_f1,
     #     accuracy,
     # )
-    es = EarlyStopping(-np.inf, patience=4, path=save_path, save_epochwise=False)
+    es = EarlyStopping(
+        -np.inf, patience=3, path=save_path, save_epochwise=False, delta=0.01
+    )
     n_iters = 1000
     gamma = 2
     delta = 1

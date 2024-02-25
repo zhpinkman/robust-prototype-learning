@@ -1,14 +1,14 @@
 ################################ Training ################################
 
-dataset=$2
 echo "Mode" $1
-architecture="BART"
+dataset=$2
+architecture="ELECTRA"
 
 if [ "$1" = "train" ]; then
 
-    for p1_lamb in 0.0; do
-        for p2_lamb in 0.0; do
-            for p3_lamb in 0.0; do
+    for p1_lamb in 0.0 0.9 2.0; do
+        for p2_lamb in 0.0 0.9 2.0; do
+            for p3_lamb in 0.0 0.9 2.0; do
                 for num_proto in 16; do
 
                     WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=$3 python main.py \
@@ -19,12 +19,13 @@ if [ "$1" = "train" ]; then
                         --p2_lamb $p2_lamb \
                         --p3_lamb $p3_lamb \
                         --architecture $architecture \
-                        --modelname "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}" \
+                        --modelname "${architecture}_${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}" \
                         --num_prototypes $num_proto
                 done
             done
         done
     done
+# I added architecture before the ${dataset} however, most of the saved models probably won't have this and start with the dataset name
 
 ################################ inference ################################
 
