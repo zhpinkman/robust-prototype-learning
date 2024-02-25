@@ -107,6 +107,11 @@ def load_dataset(data_dir, tokenizer, max_length):
     test_dfs = {
         file_name: pd.read_csv(file_path) for file_name, file_path in test_files.items()
     }
+    test_dfs = {
+        file_name: df
+        for file_name, df in test_dfs.items()
+        if "text" in df.columns and "label" in df.columns
+    }
 
     return {
         "train": load_classification_dataset(train_df, tokenizer, max_length),
