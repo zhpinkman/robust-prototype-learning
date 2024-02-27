@@ -7,13 +7,12 @@ architecture="BERT"
 
 for dataset in "ag_news"; do # "imdb" "dbpedia"; do
     for attack_type in "textbugger" "textfooler"; do
-
         if [ "$dataset" = "ag_news" ]; then
             # for model_checkpoint in "textattack/roberta-base-ag-news" "textattack/bert-base-uncased-ag-news" "andi611/distilbert-base-uncased-ner-agnews"; do
             echo " Attack type: " $attack_type
             echo " Dataset: " $dataset
 
-            CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack_pbn.py \
+            TEXTATTACK_MAX_LENGTH=64 CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack_pbn.py \
                 --dataset $dataset \
                 --attack_type $attack_type \
                 --model_checkpoint "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}_BERT_M" \
@@ -26,7 +25,7 @@ for dataset in "ag_news"; do # "imdb" "dbpedia"; do
             echo " Attack type: " $attack_type
             echo " Dataset: " $dataset
 
-            CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack_pbn.py \
+            TEXTATTACK_MAX_LENGTH=512 CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack_pbn.py \
                 --dataset $dataset \
                 --attack_type $attack_type \
                 --model_checkpoint "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}_BERT_M" \
@@ -39,7 +38,7 @@ for dataset in "ag_news"; do # "imdb" "dbpedia"; do
             echo " Attack type: " $attack_type
             echo " Dataset: " $dataset
 
-            CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack_pbn.py \
+            TEXTATTACK_MAX_LENGTH=512 CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack_pbn.py \
                 --dataset $dataset \
                 --attack_type $attack_type \
                 --model_checkpoint "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}_BERT_M" \
