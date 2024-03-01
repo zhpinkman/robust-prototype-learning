@@ -1,6 +1,6 @@
 for dataset in "imdb" "ag_news" "dbpedia"; do
     # dataset="olid"
-    for attack_type in "bae" "input_reduction" "kuleshov" "swarm" "pwws" "clare" "pruthi" "deepwordbug" "a2t"; do # "checklist" "hotflip" "iga"
+    for attack_type in "input_reduction" "kuleshov" "swarm" "pwws" "clare" "pruthi" "deepwordbug" "a2t" "bae"; do # "checklist" "hotflip" "iga"
         if [ "$dataset" = "ag_news" ]; then
             for model_checkpoint in "../normal_models/models/ag_news_prajjwal1/bert-medium" "textattack/roberta-base-ag-news" "textattack/bert-base-uncased-ag-news" "andi611/distilbert-base-uncased-ner-agnews" "../normal_models/models/ag_news_ModelTC/bart-base-mnli" "../normal_models/models/ag_news_google/electra-base-discriminator"; do
                 echo " Attack type: " $attack_type
