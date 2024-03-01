@@ -2,11 +2,9 @@ p1_lamb=0.9
 p2_lamb=0.9
 p3_lamb=0.9
 architecture="BERT"
-# dataset="ag_news"
-# attack_type="textfooler"
 
-for dataset in "ag_news"; do # "imdb" "dbpedia"; do
-    for attack_type in "textbugger" "textfooler"; do
+for dataset in "ag_news" "imdb" "dbpedia"; do
+    for attack_type in "deepwordbug" "a2t" "checklist" "hotflip" "iga" "bae" "input_reduction" "kuleshov" "swarm" "pwws" "clare" "pruthi"; do
         if [ "$dataset" = "ag_news" ]; then
             # for model_checkpoint in "textattack/roberta-base-ag-news" "textattack/bert-base-uncased-ag-news" "andi611/distilbert-base-uncased-ner-agnews"; do
             echo " Attack type: " $attack_type
@@ -15,7 +13,7 @@ for dataset in "ag_news"; do # "imdb" "dbpedia"; do
             TEXTATTACK_MAX_LENGTH=64 CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack_pbn.py \
                 --dataset $dataset \
                 --attack_type $attack_type \
-                --model_checkpoint "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}_BERT_M" \
+                --model_checkpoint "${architecture}_${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}" \
                 --mode "attack" \
                 --batch_size 512 \
                 --architecture $architecture
@@ -28,7 +26,7 @@ for dataset in "ag_news"; do # "imdb" "dbpedia"; do
             TEXTATTACK_MAX_LENGTH=512 CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack_pbn.py \
                 --dataset $dataset \
                 --attack_type $attack_type \
-                --model_checkpoint "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}_BERT_M" \
+                --model_checkpoint "${architecture}_${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}" \
                 --mode "attack" \
                 --batch_size 512 \
                 --architecture $architecture
@@ -41,7 +39,7 @@ for dataset in "ag_news"; do # "imdb" "dbpedia"; do
             TEXTATTACK_MAX_LENGTH=512 CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack_pbn.py \
                 --dataset $dataset \
                 --attack_type $attack_type \
-                --model_checkpoint "${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}_BERT_M" \
+                --model_checkpoint "${architecture}_${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}" \
                 --mode "attack" \
                 --batch_size 512 \
                 --architecture $architecture

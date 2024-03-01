@@ -167,10 +167,31 @@ def main():
             attack = textattack.attack_recipes.TextBuggerLi2018.build(model_wrapper)
         elif args.attack_type == "deepwordbug":
             attack = textattack.attack_recipes.DeepWordBugGao2018.build(model_wrapper)
-        # elif args.attack_type == "checklist":
-        #     attack = textattack.attack_recipes.CheckList2020.build(
-        #         model_wrapper, type_of_noise=args.dataset
-        #     )
+        elif args.attack_type == "a2t":
+            attack = textattack.attack_recipes.A2TYoo2021.build(model_wrapper)
+        elif args.attack_type == "checklist":
+            attack = textattack.attack_recipes.CheckList2020.build(model_wrapper)
+        elif args.attack_type == "hotflip":
+            attack = textattack.attack_recipes.HotFlipEbrahimi2017.build(model_wrapper)
+        elif args.attack_type == "iga":
+            attack = textattack.attack_recipes.IGAWang2019.build(model_wrapper)
+        elif args.attack_type == "bae":
+            attack = textattack.attack_recipes.BAEGarg2019.build(model_wrapper)
+        elif args.attack_type == "input_reduction":
+            attack = textattack.attack_recipes.InputReductionFeng2018.build(
+                model_wrapper
+            )
+        elif args.attack_type == "kuleshov":
+            attack = textattack.attack_recipes.Kuleshov2017.build(model_wrapper)
+        elif args.attack_type == "swarm":
+            attack = textattack.attack_recipes.PSOZang2020.build(model_wrapper)
+        elif args.attack_type == "pwws":
+            attack = textattack.attack_recipes.PWWSRen2019.build(model_wrapper)
+        elif args.attack_type == "clare":
+            attack = textattack.attack_recipes.CLARE2020.build(model_wrapper)
+        elif args.attack_type == "pruthi":
+            attack = textattack.attack_recipes.Pruthi2019.build(model_wrapper)
+        print("Loaded attack and dataset")
 
         print("Loaded attack and dataset")
 
