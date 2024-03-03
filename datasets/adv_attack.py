@@ -26,7 +26,9 @@ def main():
         "--attack_type", type=str, default="textfooler", help="attack type"
     )
     parser.add_argument("--dataset", type=str, default="imdb", help="dataset to use")
-    parser.add_argument("--mode", type=str)
+    parser.add_argument(
+        "--mode", type=str, default="attack", choices=["attack", "read"]
+    )
     parser.add_argument("--model_checkpoint", type=str)
 
     args = parser.parse_args()
@@ -128,7 +130,7 @@ def main():
             "label": test_labels,
         }
     ).to_csv(
-        f"{args.dataset}_dataset/adv_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.csv",
+        f"{args.dataset}_dataset/summaries/adv_{args.attack_type}_{args.model_checkpoint.replace('/', '_')}.csv",
         index=False,
     )
     print("Saved adv dataset")

@@ -4,7 +4,7 @@ import json
 from IPython import embed
 
 for dataset in ["imdb", "ag_news", "dbpedia"]:
-    dataset_dir = f"{dataset}_dataset"
+    dataset_dir = f"{dataset}_dataset/summaries"
     print("Dataset:", dataset_dir)
 
     for attack in ["textfooler", "textbugger"]:
@@ -12,7 +12,7 @@ for dataset in ["imdb", "ag_news", "dbpedia"]:
         files = [
             os.path.join(dataset_dir, file)
             for file in os.listdir(dataset_dir)
-            if (file.startswith(f"adv_{attack}_") and "protocnn" not in file)
+            if (file.startswith(f"adv_{attack}_"))
         ]
         print("Number of files:", len(files))
         print(files)
