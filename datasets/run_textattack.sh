@@ -57,16 +57,43 @@ for dataset in "dbpedia"; do # "imdb" "ag_news"
                 --mode "attack"
         done
     elif [ "$dataset" = "dbpedia" ]; then
-        for model_checkpoint in "../normal_models/models/dbpedia_prajjwal1/bert-medium" "../normal_models/models/dbpedia_bert-base-uncased" "../normal_models/models/dbpedia_distilbert-base-uncased" "../normal_models/models/dbpedia_roberta-base" "../normal_models/models/dbpedia_ModelTC/bart-base-mnli" "../normal_models/models/dbpedia_google/electra-base-discriminator"; do
-            echo " Attack type: " $attack_type
-            echo " Dataset: " $dataset
-            echo " Model checkpoint: " $model_checkpoint
-            CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack.py \
-                --dataset $dataset \
-                --attack_type $attack_type \
-                --model_checkpoint $model_checkpoint \
-                --mode "attack"
-        done
+        if [ "$subset_models" = "1" ]; then
+            echo "Running subset 1"
+            for model_checkpoint in "../normal_models/models/dbpedia_prajjwal1/bert-medium" "../normal_models/models/dbpedia_bert-base-uncased"; do
+                echo " Attack type: " $attack_type
+                echo " Dataset: " $dataset
+                echo " Model checkpoint: " $model_checkpoint
+                CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack.py \
+                    --dataset $dataset \
+                    --attack_type $attack_type \
+                    --model_checkpoint $model_checkpoint \
+                    --mode "attack"
+            done
+        elif [ "$subset_models" = "2" ]; then
+            echo "Running subset 2"
+            for model_checkpoint in "../normal_models/models/dbpedia_distilbert-base-uncased" "../normal_models/models/dbpedia_roberta-base"; do
+                echo " Attack type: " $attack_type
+                echo " Dataset: " $dataset
+                echo " Model checkpoint: " $model_checkpoint
+                CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack.py \
+                    --dataset $dataset \
+                    --attack_type $attack_type \
+                    --model_checkpoint $model_checkpoint \
+                    --mode "attack"
+            done
+        elif [ "$subset_models" = "3" ]; then
+            echo "Running subset 3"
+            for model_checkpoint in "../normal_models/models/dbpedia_ModelTC/bart-base-mnli" "../normal_models/models/dbpedia_google/electra-base-discriminator"; do
+                echo " Attack type: " $attack_type
+                echo " Dataset: " $dataset
+                echo " Model checkpoint: " $model_checkpoint
+                CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 python adv_attack.py \
+                    --dataset $dataset \
+                    --attack_type $attack_type \
+                    --model_checkpoint $model_checkpoint \
+                    --mode "attack"
+            done
+        fi
     else
         echo "Invalid dataset"
         exit 1
