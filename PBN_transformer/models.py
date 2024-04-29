@@ -69,7 +69,7 @@ class ProtoTEx(torch.nn.Module):
         self.distance_grounder = torch.zeros(self.n_classes, self.num_protos).cuda()
         for i in range(self.n_classes):
             # self.distance_grounder[i][np.random.randint(0, self.num_protos, int(self.num_protos / 2))] = 1e7
-            self.distance_grounder[i][self.num_protos:] = 1e7
+            self.distance_grounder[i][self.num_protos :] = 1e7
 
     def set_prototypes(self, input_ids_rdm, attn_mask_rdm, do_random=False):
         if do_random:
@@ -90,19 +90,16 @@ class ProtoTEx(torch.nn.Module):
                 )
 
     def set_shared_status(self, status=True):
-        print(
-            "ALERT!!! Shared variable is shared by encoder_input_embeddings and decoder_input_embeddings"
-        )
         self.bart_model.model.shared.requires_grad_(status)
 
     def set_encoder_status(self, status=True):
-        self.num_enc_layers = len(self.bart_model.base_model.encoder.layers)
+        # self.num_enc_layers = len(self.bart_model.base_model.encoder.layers)
 
-        for i in range(self.num_enc_layers):
-            self.bart_model.base_model.encoder.layers[i].requires_grad_(False)
-        self.bart_model.base_model.encoder.layers[
-            self.num_enc_layers - 1
-        ].requires_grad_(status)
+        # for i in range(self.num_enc_layers):
+        #     self.bart_model.base_model.encoder.layers[i].requires_grad_(False)
+        # self.bart_model.base_model.encoder.layers[
+        #     self.num_enc_layers - 1
+        # ].requires_grad_(status)
         return
 
     def set_decoder_status(self, status=True):

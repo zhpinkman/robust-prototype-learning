@@ -3,16 +3,28 @@ import os
 import json
 from IPython import embed
 
+
+def check_not_to_be_in_evaluation(file_name):
+    for x in ["bart-base-mnli", "electra-base-discriminator", "bert-medium"]:
+        if x in file_name:
+            return False
+    return True
+
+
 for dataset in ["imdb", "ag_news", "dbpedia"]:
     dataset_dir = f"{dataset}_dataset/summaries"
+    dataset_dir_output = f"{dataset}_dataset/"
     print("Dataset:", dataset_dir)
 
-    for attack in ["textfooler", "textbugger"]:
+    for attack in ["textfooler", "textbugger", "deepwordbug", "pwws"]:
         print("Attack:", attack)
         files = [
             os.path.join(dataset_dir, file)
             for file in os.listdir(dataset_dir)
-            if (file.startswith(f"adv_{attack}_"))
+            if (
+                file.startswith(f"adv_{attack}_")
+                and check_not_to_be_in_evaluation(file)
+            )
         ]
         print("Number of files:", len(files))
         print(files)
@@ -57,14 +69,14 @@ for dataset in ["imdb", "ag_news", "dbpedia"]:
                 "text": results_perturbed_texts,
                 "label": results_labels,
             }
-        ).to_csv(os.path.join(dataset_dir, f"adv_{attack}.csv"), index=False)
+        ).to_csv(os.path.join(dataset_dir_output, f"adv_{attack}.csv"), index=False)
         pd.DataFrame(
             {
                 "text": results_original_texts,
                 "label": results_labels,
             }
-        ).to_csv(os.path.join(dataset_dir, f"test_{attack}.csv"), index=False)
+        ).to_csv(os.path.join(dataset_dir_output, f"test_{attack}.csv"), index=False)
 
         # remove the file in files
-        for file in files:
-            os.remove(file)
+        # for file in files:
+        #     os.remove(file)

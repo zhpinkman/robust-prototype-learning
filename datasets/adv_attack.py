@@ -36,7 +36,7 @@ def main():
     log_file = f"logs/log_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('.', '').replace('/', '_')}.csv"
     summary_file = f"summaries/summary_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('.', '').replace('/', '_')}.json"
 
-    if args.mode == "attack":
+    if args.mode == "attack" or not os.path.exists(log_file):
         model = transformers.AutoModelForSequenceClassification.from_pretrained(
             args.model_checkpoint
         )

@@ -8,15 +8,15 @@ architecture=$4
 if [ "$dataset" = "imdb" ] || [ "$dataset" = "dbpedia" ]; then
     batch_size=32
 else
-    batch_size=512
+    batch_size=256
 fi
 
 if [ "$1" = "train" ]; then
 
-    for p1_lamb in 0.0 0.9 2.0; do
-        for p2_lamb in 0.0 0.9 2.0; do
-            for p3_lamb in 0.0 0.9 2.0; do
-                for num_proto in 16; do
+    for p1_lamb in 0.0 0.9 2.0 10.0; do
+        for p2_lamb in 0.0 0.9 2.0 10.0; do
+            for p3_lamb in 0.0 0.9 2.0 10.0; do
+                for num_proto in 2 4 8 16 64; do
 
                     WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=$3 python main.py \
                         --batch_size $batch_size \
@@ -26,7 +26,7 @@ if [ "$1" = "train" ]; then
                         --p2_lamb $p2_lamb \
                         --p3_lamb $p3_lamb \
                         --architecture $architecture \
-                        --modelname "${architecture}_${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}" \
+                        --modelname "${architecture}_${dataset}_model_${p1_lamb}_${p2_lamb}_${p3_lamb}_${num_proto}" \
                         --num_prototypes $num_proto
                 done
             done
@@ -38,7 +38,7 @@ if [ "$1" = "train" ]; then
 
 elif [ "$1" = "inference" ]; then
     p1_lamb=0.0
-    p2_lamb=0.
+    p2_lamb=0.0
     p3_lamb=0.9
     WANDB_MODE="offline" CUDA_VISIBLE_DEVICES=$3 python inference_and_explanations.py \
         --batch_size 256 \

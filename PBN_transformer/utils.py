@@ -84,13 +84,13 @@ def load_adv_data(dataset_info, data_dir, tokenizer):
 def load_dataset(data_dir, tokenizer, max_length):
     train_df = pd.read_csv(os.path.join(data_dir, "train.csv"))
 
-    if train_df.shape[0] > 20000:
+    if train_df.shape[0] > 10000:
         train_text = train_df["text"].tolist()
         train_labels = train_df["label"].tolist()
         train_text, _, train_labels, _ = train_test_split(
             train_text,
             train_labels,
-            test_size=0.9,
+            train_size=10000,
             stratify=train_labels,
             random_state=42,
         )
@@ -235,7 +235,6 @@ class EarlyStopping(object):
         self.trace_func = trace_func
         self.state_dict_list = [None] * patience
         self.improved = 0
-        self.stop_update = 0
         self.save_model_counter = 0
         self.save_epochwise = save_epochwise
         self.times_improved = 0
@@ -249,26 +248,24 @@ class EarlyStopping(object):
         if not self.activated:
             return None
         self.save_model_counter = (self.save_model_counter + 1) % 4
-        if not self.stop_update:
-            if self.verbose:
-                self.trace_func(
-                    f"\033[91m The val score  of epoch {epoch} is {score:.4f} \033[0m"
-                )
-            if score < self.best_score + self.delta:
-                self.counter += 1
-                self.trace_func(
-                    f"\033[93m EarlyStopping counter: {self.counter} out of {self.patience} \033[0m"
-                )
-                if self.counter >= self.patience:
-                    self.early_stop = True
-                self.improved = 0
-            else:
-                self.save_checkpoint(score, model, epoch)
-                self.best_score = score
-                self.counter = 0
-                self.improved = 1
+
+        if self.verbose:
+            self.trace_func(
+                f"\033[91m The val score  of epoch {epoch} is {score:.4f} \033[0m"
+            )
+        if score < self.best_score + self.delta:
+            self.counter += 1
+            self.trace_func(
+                f"\033[93m EarlyStopping counter: {self.counter} out of {self.patience} \033[0m"
+            )
+            if self.counter >= self.patience:
+                self.early_stop = True
+            self.improved = 0
         else:
-            self.improved = 0  # not needed though
+            self.save_checkpoint(score, model, epoch)
+            self.best_score = score
+            self.counter = 0
+            self.improved = 1
 
     def save_checkpoint(self, score, model, epoch):
         """Saves model when validation loss decrease."""

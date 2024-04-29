@@ -5,6 +5,7 @@ from tqdm import tqdm
 import wandb
 import torch as th
 from models_bert import ProtoTEx_BERT
+import os
 
 # Custom modules
 from utils import EarlyStopping, print_logs, evaluate
@@ -14,6 +15,12 @@ from models_electra import ProtoTEx_Electra
 # Save paths
 MODELPATH = "Models/"
 LOGSPATH = "Logs/"
+
+if not os.path.exists(MODELPATH):
+    os.makedirs(MODELPATH)
+
+if not os.path.exists(LOGSPATH):
+    os.makedirs(LOGSPATH)
 
 # Training and eval functions
 
