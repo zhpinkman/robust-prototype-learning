@@ -84,17 +84,27 @@ def load_adv_data(dataset_info, data_dir, tokenizer):
 def load_dataset(data_dir, tokenizer, max_length):
     train_df = pd.read_csv(os.path.join(data_dir, "train.csv"))
 
-    if train_df.shape[0] > 10000:
-        train_text = train_df["text"].tolist()
-        train_labels = train_df["label"].tolist()
-        train_text, _, train_labels, _ = train_test_split(
-            train_text,
-            train_labels,
-            train_size=10000,
-            stratify=train_labels,
-            random_state=42,
+    indices_to_pick = []
+    for label in train_df["label"].unique():
+        sub_df = train_df[train_df["label"] == label]
+        sub_df_sample = sub_df.sample(
+            n=min(10000, sub_df.shape[0]), random_state=42, replace=False
         )
-        train_df = pd.DataFrame({"text": train_text, "label": train_labels})
+        indices_to_pick.extend(sub_df_sample.index.tolist())
+    train_df = train_df.loc[indices_to_pick]
+    train_df = train_df.sample(frac=1, replace=False).reset_index(drop=True)
+
+    # if train_df.shape[0] > 10000:
+    #     train_text = train_df["text"].tolist()
+    #     train_labels = train_df["label"].tolist()
+    #     train_text, _, train_labels, _ = train_test_split(
+    #         train_text,
+    #         train_labels,
+    #         train_size=10000,
+    #         stratify=train_labels,
+    #         random_state=42,
+    #     )
+    #     train_df = pd.DataFrame({"text": train_text, "label": train_labels})
 
     print("Train data shape: ", train_df.shape)
 

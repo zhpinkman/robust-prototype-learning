@@ -88,13 +88,13 @@ class ProtoTEx_Electra(torch.nn.Module):
         return
 
     def set_encoder_status(self, status=True):
-        # self.num_enc_layers = len(self.electra_model.base_model.encoder.layer)
+        self.num_enc_layers = len(self.electra_model.base_model.encoder.layer)
 
-        # for i in range(self.num_enc_layers):
-        #     self.electra_model.base_model.encoder.layer[i].requires_grad_(False)
-        # self.electra_model.base_model.encoder.layer[
-        #     self.num_enc_layers - 1
-        # ].requires_grad_(status)
+        for i in range(self.num_enc_layers):
+            self.electra_model.base_model.encoder.layer[i].requires_grad_(False)
+        self.electra_model.base_model.encoder.layer[
+            self.num_enc_layers - 1
+        ].requires_grad_(status)
         return
 
     def set_decoder_status(self, status=True):

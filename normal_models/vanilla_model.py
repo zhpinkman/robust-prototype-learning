@@ -74,17 +74,16 @@ def load_data(data_dir, mode):
         from sklearn.model_selection import train_test_split
 
         train_df = pd.read_csv(os.path.join(data_dir, "train.csv"))
-        if train_df.shape[0] > 20000:
-            train_text = train_df["text"].tolist()
-            train_labels = train_df["label"].tolist()
-            train_text, _, train_labels, _ = train_test_split(
-                train_text,
-                train_labels,
-                test_size=0.9,
-                stratify=train_labels,
-                random_state=42,
+
+        indices_to_pick = []
+        for label in train_df["label"].unique():
+            sub_df = train_df[train_df["label"] == label]
+            sub_df_sample = sub_df.sample(
+                n=min(10000, sub_df.shape[0]), random_state=42, replace=False
             )
-            train_df = pd.DataFrame({"text": train_text, "label": train_labels})
+            indices_to_pick.extend(sub_df_sample.index.tolist())
+        train_df = train_df.loc[indices_to_pick]
+        train_df = train_df.sample(frac=1, replace=False).reset_index(drop=True)
 
         # if args.dataset == "dbpedia":
         #     train_df = train_df.sample(frac=0.1)
@@ -134,10 +133,26 @@ def main(args):
             ignore_mismatched_sizes=True,
         )
         if "bart" in args.model_checkpoint:
-            num_dec_layers = len(model.base_model.decoder.layers)
-            for i in range(num_dec_layers):
-                model.base_model.decoder.layers[i].requires_grad_(False)
-            model.base_model.decoder.layers[num_dec_layers - 1].requires_grad_(False)
+            print("Freezing all layers except the last layer for BART")
+            num_enc_layers = len(model.base_model.encoder.layers)
+
+            for i in range(num_enc_layers):
+                model.base_model.encoder.layers[i].requires_grad_(False)
+            model.base_model.encoder.layers[num_enc_layers - 1].requires_grad_(True)
+        elif "bert" in args.model_checkpoint:
+            print("Freezing all layers except the last layer for BERT")
+            num_enc_layers = len(model.base_model.encoder.layer)
+
+            for i in range(num_enc_layers):
+                model.base_model.encoder.layer[i].requires_grad_(False)
+            model.base_model.encoder.layer[num_enc_layers - 1].requires_grad_(True)
+        elif "electra" in args.model_checkpoint:
+            print("Freezing all layers except the last layer for ELECTRA")
+            num_enc_layers = len(model.base_model.encoder.layer)
+
+            for i in range(num_enc_layers):
+                model.base_model.encoder.layer[i].requires_grad_(False)
+            model.base_model.encoder.layer[num_enc_layers - 1].requires_grad_(True)
 
     else:
         tokenizer = AutoTokenizer.from_pretrained(args.model_dir)
@@ -152,9 +167,10 @@ def main(args):
 
     training_args = TrainingArguments(
         output_dir=args.model_dir,
+        eval_accumulation_steps=20,
         num_train_epochs=args.num_epochs,
         per_device_train_batch_size=args.batch_size,
-        per_device_eval_batch_size=args.batch_size,
+        per_device_eval_batch_size=256,
         weight_decay=0.01,
         logging_dir=args.log_dir,
         report_to=None,
@@ -166,12 +182,10 @@ def main(args):
         logging_steps=args.logging_steps,
         eval_steps=args.logging_steps,
         load_best_model_at_end=True,
-        # metric_for_best_model="eval_accuracy",
-        # greater_is_better=True,
-        learning_rate=1e-5,
+        metric_for_best_model="eval_accuracy",
+        greater_is_better=True,
+        learning_rate=1e-4,
     )
-
-    # os.environ["WANDB_PROJECT"] = f"bert-{args.data_dir.split('/')[-1]}"
 
     if args.mode == "train":
         trainer = Trainer(
@@ -181,13 +195,18 @@ def main(args):
             eval_dataset=tokenized_dataset["val"],
             tokenizer=tokenizer,
             compute_metrics=compute_metrics,
+            callbacks=[
+                EarlyStoppingCallback(
+                    early_stopping_patience=3, early_stopping_threshold=0.01
+                )
+            ],
         )
         if not os.path.exists(args.model_dir):
             os.makedirs(args.model_dir)
-        trainer.evaluate(tokenized_dataset["test"])
+        # trainer.evaluate(tokenized_dataset["test"])
 
         trainer.train()
-        trainer.evaluate(tokenized_dataset["test"])
+        # trainer.evaluate(tokenized_dataset["test"])
         trainer.save_model(args.model_dir)
 
     elif args.mode == "test":
@@ -196,11 +215,6 @@ def main(args):
             training_args,
             tokenizer=tokenizer,
             compute_metrics=compute_metrics,
-            callbacks=[
-                EarlyStoppingCallback(
-                    early_stopping_patience=4, early_stopping_threshold=0.01
-                )
-            ],
         )
         splits_for_test_and_adv_in_dataset = [
             key

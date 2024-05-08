@@ -93,13 +93,13 @@ class ProtoTEx(torch.nn.Module):
         self.bart_model.model.shared.requires_grad_(status)
 
     def set_encoder_status(self, status=True):
-        # self.num_enc_layers = len(self.bart_model.base_model.encoder.layers)
+        self.num_enc_layers = len(self.bart_model.base_model.encoder.layers)
 
-        # for i in range(self.num_enc_layers):
-        #     self.bart_model.base_model.encoder.layers[i].requires_grad_(False)
-        # self.bart_model.base_model.encoder.layers[
-        #     self.num_enc_layers - 1
-        # ].requires_grad_(status)
+        for i in range(self.num_enc_layers):
+            self.bart_model.base_model.encoder.layers[i].requires_grad_(False)
+        self.bart_model.base_model.encoder.layers[
+            self.num_enc_layers - 1
+        ].requires_grad_(status)
         return
 
     def set_decoder_status(self, status=True):

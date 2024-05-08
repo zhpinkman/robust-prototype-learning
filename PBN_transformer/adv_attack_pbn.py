@@ -64,7 +64,6 @@ def main():
 
     if args.architecture == "BART":
         tokenizer = AutoTokenizer.from_pretrained("ModelTC/bart-base-mnli")
-        # tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
     elif args.architecture == "ELECTRA":
         tokenizer = AutoTokenizer.from_pretrained("google/electra-base-discriminator")
     elif args.architecture == "BERT":
@@ -140,14 +139,6 @@ def main():
         open(summary_file, "w").close()
 
     if args.mode == "attack":
-        # model = transformers.AutoModelForSequenceClassification.from_pretrained(
-        # args.model_checkpoint
-        # )
-        # tokenizer = transformers.AutoTokenizer.from_pretrained(args.model_checkpoint)
-
-        # model_wrapper = textattack.models.wrappers.HuggingFaceModelWrapper(
-        # model, tokenizer
-        # )
         model_wrapper = textattack.models.wrappers.PyTorchModelWrapper(
             model=model, tokenizer=tokenizer
         )

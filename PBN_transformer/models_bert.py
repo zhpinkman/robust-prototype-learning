@@ -83,13 +83,13 @@ class ProtoTEx_BERT(torch.nn.Module):
         return
 
     def set_encoder_status(self, status=True):
-        # self.num_enc_layers = len(self.bert_model.base_model.encoder.layer)
+        self.num_enc_layers = len(self.bert_model.base_model.encoder.layer)
 
-        # for i in range(self.num_enc_layers):
-        #     self.bert_model.base_model.encoder.layer[i].requires_grad_(False)
-        # self.bert_model.base_model.encoder.layer[
-        #     self.num_enc_layers - 1
-        # ].requires_grad_(status)
+        for i in range(self.num_enc_layers):
+            self.bert_model.base_model.encoder.layer[i].requires_grad_(False)
+        self.bert_model.base_model.encoder.layer[
+            self.num_enc_layers - 1
+        ].requires_grad_(status)
         return
 
     def set_decoder_status(self, status=True):
