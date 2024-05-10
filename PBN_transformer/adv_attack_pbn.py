@@ -62,6 +62,13 @@ def main():
 
     args = parser.parse_args()
 
+    log_file = f"logs/log_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('.', '').replace('/', '_')}.csv"
+    summary_file = f"summaries/summary_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('.', '').replace('/', '_')}.json"
+
+    if os.path.exists(log_file):
+        print("Log file: {0} already exists".format(log_file))
+        exit()
+
     if args.architecture == "BART":
         tokenizer = AutoTokenizer.from_pretrained("ModelTC/bart-base-mnli")
     elif args.architecture == "ELECTRA":
@@ -131,8 +138,6 @@ def main():
     # model = torch.nn.DataParallel(model)
     # model = model.to(device)
 
-    log_file = f"logs/log_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('.', '').replace('/', '_')}.csv"
-    summary_file = f"summaries/summary_{args.dataset}_{args.attack_type}_{args.model_checkpoint.replace('.', '').replace('/', '_')}.json"
     if not os.path.exists(log_file):
         open(log_file, "w").close()
     if not os.path.exists(summary_file):
