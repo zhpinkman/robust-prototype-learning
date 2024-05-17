@@ -1,17 +1,18 @@
-if [ "$dataset" = "imdb" ]; then
-    batch_size=512
-elif [ "$dataset" = "dbpedia" ]; then
-    batch_size=512
-else
-    batch_size=64
-fi
-
 for architecture in "BERT" "ELECTRA" "BART"; do
-    for dataset in "ag_news" "imdb" "dbpedia"; do
+    for dataset in "imdb" "dbpedia" "ag_news"; do
+        if [ "$dataset" = "imdb" ]; then
+            batch_size=512
+        elif [ "$dataset" = "dbpedia" ]; then
+            batch_size=512
+        else
+            batch_size=64
+        fi
+
         for attack_type in "textfooler" "textbugger" "deepwordbug" "pwws" "bae"; do # the ones that are already done
             # for model_checkpoint in "textattack/bert-base-uncased-imdb" "textattack/albert-base-v2-imdb" "textattack/roberta-base-imdb"; do
             echo " Attack type: " $attack_type
             echo " Dataset: " $dataset
+            echo " Batch size" $batch_size
             for p1_lamb in 0.9; do
                 for p2_lamb in 0.9; do
                     for p3_lamb in 0.9; do

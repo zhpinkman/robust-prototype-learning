@@ -21,6 +21,7 @@ import sys
 
 sys.path.append("../datasets")
 import configs
+import utils
 
 from textattack.augmentation import (
     CLAREAugmenter,
@@ -67,7 +68,7 @@ def main():
 
     if os.path.exists(log_file):
         print("Log file: {0} already exists".format(log_file))
-        exit()
+        return
 
     if args.architecture == "BART":
         tokenizer = AutoTokenizer.from_pretrained("ModelTC/bart-base-mnli")
@@ -131,8 +132,43 @@ def main():
     model_dict.update(filtered_dict)
     model.load_state_dict(model_dict)
 
-    # embed()
-    # exit()
+    all_datasets = utils.load_dataset(
+        data_dir=f"../datasets/{args.dataset}_dataset",
+        tokenizer=tokenizer,
+        max_length=configs.dataset_to_max_length[args.dataset],
+    )
+    print(all_datasets.keys())
+
+    test_dl = torch.utils.data.DataLoader(
+        all_datasets["test"],
+        batch_size=args.batch_size,
+        shuffle=False,
+        collate_fn=lambda batch: {
+            "input_ids": torch.LongTensor([i["input_ids"] for i in batch]),
+            "attention_mask": torch.Tensor([i["attention_mask"] for i in batch]),
+            "label": torch.LongTensor([i["label"] for i in batch]),
+        },
+    )
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+
+    (
+        total_loss,
+        mac_prec,
+        mac_recall,
+        mac_f1_score,
+        accuracy,
+        y_true,
+        y_pred,
+    ) = utils.evaluate(test_dl, model_new=model)
+    if mac_f1_score < 0.6:
+        print("This model is not accurate enough in the first place")
+        model = model.to("cpu")
+        return
+
+    # put on cpu
+    model = model.to("cpu")
 
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # model = torch.nn.DataParallel(model)

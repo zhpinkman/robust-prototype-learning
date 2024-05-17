@@ -5,9 +5,9 @@ dataset=$2
 architecture=$4
 
 # for imdb and dbpedia, the batch size is 32, and for ag_news is 64
-if [ "$dataset" = "imdb" ]; then
+if [ "$dataset" == "imdb" ]; then
     batch_size=32
-elif [ "$dataset" = "dbpedia" ]; then
+elif [ "$dataset" == "dbpedia" ]; then
     batch_size=32
 else
     batch_size=256
