@@ -165,6 +165,10 @@ def main():
     if mac_f1_score < 0.6:
         print("This model is not accurate enough in the first place")
         model = model.to("cpu")
+        if not os.path.exists(log_file):
+            open(log_file, "w").close()
+        if not os.path.exists(summary_file):
+            open(summary_file, "w").close()
         return
 
     # put on cpu
