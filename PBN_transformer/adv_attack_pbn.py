@@ -11,6 +11,7 @@ from textattack.constraints.pre_transformation import (
     RepeatModification,
     StopwordModification,
 )
+import json
 import torch
 from transformers import AutoTokenizer
 from models import ProtoTEx
@@ -168,7 +169,11 @@ def main():
         if not os.path.exists(log_file):
             open(log_file, "w").close()
         if not os.path.exists(summary_file):
-            open(summary_file, "w").close()
+            with open(summary_file, "w") as f:
+                json.dump(
+                    {"result": "This model is not accurate enough in the first place"},
+                    f,
+                )
         return
 
     # put on cpu

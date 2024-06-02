@@ -1,0 +1,13 @@
+{
+    "Attack Results": {
+        "Number of successful attacks:": 800,
+        "Number of failed attacks:": 166,
+        "Number of skipped attacks:": 127,
+        "Original accuracy:": 88.38,
+        "Accuracy under attack:": 15.19,
+        "Attack success rate:": 82.82,
+        "Average perturbed word %:": 26.28,
+        "Average num. words per input:": 37.82,
+        "Avg num queries:": 331.07
+    }
+}
