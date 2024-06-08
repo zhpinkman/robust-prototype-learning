@@ -40,6 +40,7 @@ class ProtoTEx(torch.nn.Module):
         self.max_position_embeddings = max_length
         self.num_protos = num_prototypes
         self.use_cosine_dist = use_cosine_dist
+        print("Using cosine distance: ", self.use_cosine_dist)
 
         self.prototypes = torch.nn.Parameter(
             torch.rand(self.num_protos, self.max_position_embeddings, self.bart_out_dim)

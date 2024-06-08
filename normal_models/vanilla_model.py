@@ -264,7 +264,7 @@ def main(args):
         splits_for_test_and_adv_in_dataset = [
             key
             for key in tokenized_dataset.keys()
-            if (key.startswith("test_") or key.startswith("adv_"))
+            if (key.startswith("test") or key.startswith("adv"))
         ]
 
         for split in splits_for_test_and_adv_in_dataset:

@@ -2,6 +2,7 @@ import torch
 from transformers import ElectraModel
 from IPython import embed
 import inspect
+import torchmetrics
 
 # torch.manual_seed(0)
 # import random
@@ -20,6 +21,7 @@ class ProtoTEx_Electra(torch.nn.Module):
         special_classfn=False,
         p=0.5,
         batchnormlp1=True,
+        use_cosine_dist=False,
     ):
         super().__init__()
 
@@ -34,6 +36,9 @@ class ProtoTEx_Electra(torch.nn.Module):
         )
         self.max_position_embeddings = max_length
         self.num_protos = num_prototypes
+        self.use_cosine_dist = use_cosine_dist
+        print("Using cosine distance: ", self.use_cosine_dist)
+
         self.prototypes = torch.nn.Parameter(
             torch.rand(
                 self.num_protos, self.max_position_embeddings, self.electra_out_dim
@@ -192,16 +197,33 @@ class ProtoTEx_Electra(torch.nn.Module):
             if use_classfn or use_p1 or use_p2:
                 if not self.dobatchnorm:
                     ## TODO: This loss function is not ignoring the padded part of the sequence; Get element-wise distane and then multiply with the mask
-                    input_for_classfn = torch.cdist(
-                        last_hidden_state.view(batch_size, -1),
-                        all_protos.view(self.num_protos, -1),
-                    )
+                    if self.use_cosine_dist:
+                        input_for_classfn = (
+                            torchmetrics.functional.pairwise_cosine_similarity(
+                                last_hidden_state.view(batch_size, -1),
+                                all_protos.view(self.num_protos, -1),
+                            )
+                        )
+                    else:
+                        input_for_classfn = torch.cdist(
+                            last_hidden_state.view(batch_size, -1),
+                            all_protos.view(self.num_protos, -1),
+                        )
                 else:
                     # TODO: Try cosine distance
-                    input_for_classfn = torch.cdist(
-                        last_hidden_state.view(batch_size, -1),
-                        all_protos.view(self.num_protos, -1),
-                    )
+
+                    if self.use_cosine_dist:
+                        input_for_classfn = (
+                            torchmetrics.functional.pairwise_cosine_similarity(
+                                last_hidden_state.view(batch_size, -1),
+                                all_protos.view(self.num_protos, -1),
+                            )
+                        )
+                    else:
+                        input_for_classfn = torch.cdist(
+                            last_hidden_state.view(batch_size, -1),
+                            all_protos.view(self.num_protos, -1),
+                        )
                     input_for_classfn = torch.nn.functional.instance_norm(
                         input_for_classfn.view(batch_size, 1, self.num_protos)
                     ).view(batch_size, self.num_protos)

@@ -1,0 +1,632 @@
+[
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "dbpedia",
+        "attack_type": "textfooler",
+        "results": {
+            "test": {
+                "eval_loss": 0.20868253707885742,
+                "eval_accuracy": 0.9397590361445783,
+                "eval_runtime": 20.2493,
+                "eval_samples_per_second": 8.198,
+                "eval_steps_per_second": 0.049
+            }
+        }
+    },
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "dbpedia",
+        "attack_type": "textbugger",
+        "results": {
+            "test": {
+                "eval_loss": 0.3217843472957611,
+                "eval_accuracy": 0.8879310344827587,
+                "eval_runtime": 0.9372,
+                "eval_samples_per_second": 123.776,
+                "eval_steps_per_second": 1.067
+            }
+        }
+    },
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "dbpedia",
+        "attack_type": "deepwordbug",
+        "results": {
+            "test": {
+                "eval_loss": 0.5419952869415283,
+                "eval_accuracy": 0.7961165048543689,
+                "eval_runtime": 0.9887,
+                "eval_samples_per_second": 104.177,
+                "eval_steps_per_second": 1.011
+            }
+        }
+    },
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "dbpedia",
+        "attack_type": "pwws",
+        "results": {
+            "test": {
+                "eval_loss": 0.3424117863178253,
+                "eval_accuracy": 0.8968253968253969,
+                "eval_runtime": 1.0633,
+                "eval_samples_per_second": 118.496,
+                "eval_steps_per_second": 0.94
+            }
+        }
+    },
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "dbpedia",
+        "attack_type": "bae",
+        "results": {
+            "test": {
+                "eval_loss": 0.41232550144195557,
+                "eval_accuracy": 0.8404255319148937,
+                "eval_runtime": 0.8375,
+                "eval_samples_per_second": 112.237,
+                "eval_steps_per_second": 1.194
+            }
+        }
+    },
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "imdb",
+        "attack_type": "textfooler",
+        "results": {
+            "test": {
+                "eval_loss": 0.11865473538637161,
+                "eval_accuracy": 0.9653846153846154,
+                "eval_runtime": 1.685,
+                "eval_samples_per_second": 154.301,
+                "eval_steps_per_second": 0.593
+            }
+        }
+    },
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "imdb",
+        "attack_type": "textbugger",
+        "results": {
+            "test": {
+                "eval_loss": 0.21277453005313873,
+                "eval_accuracy": 0.8986175115207373,
+                "eval_runtime": 1.2434,
+                "eval_samples_per_second": 174.519,
+                "eval_steps_per_second": 0.804
+            }
+        }
+    },
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "imdb",
+        "attack_type": "deepwordbug",
+        "results": {
+            "test": {
+                "eval_loss": 0.29921790957450867,
+                "eval_accuracy": 0.8671328671328671,
+                "eval_runtime": 0.9853,
+                "eval_samples_per_second": 145.139,
+                "eval_steps_per_second": 1.015
+            }
+        }
+    },
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "imdb",
+        "attack_type": "pwws",
+        "results": {
+            "test": {
+                "eval_loss": 0.19245083630084991,
+                "eval_accuracy": 0.9291338582677166,
+                "eval_runtime": 1.5969,
+                "eval_samples_per_second": 159.058,
+                "eval_steps_per_second": 0.626
+            }
+        }
+    },
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "imdb",
+        "attack_type": "bae",
+        "results": {
+            "test": {
+                "eval_loss": 0.33632394671440125,
+                "eval_accuracy": 0.8571428571428571,
+                "eval_runtime": 1.1922,
+                "eval_samples_per_second": 135.048,
+                "eval_steps_per_second": 0.839
+            }
+        }
+    },
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "ag_news",
+        "attack_type": "textfooler",
+        "results": {
+            "test": {
+                "eval_loss": 0.3356342017650604,
+                "eval_accuracy": 0.9005847953216374,
+                "eval_runtime": 0.7419,
+                "eval_samples_per_second": 230.498,
+                "eval_steps_per_second": 1.348
+            }
+        }
+    },
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "ag_news",
+        "attack_type": "textbugger",
+        "results": {
+            "test": {
+                "eval_loss": 0.6650336384773254,
+                "eval_accuracy": 0.776,
+                "eval_runtime": 0.7574,
+                "eval_samples_per_second": 165.035,
+                "eval_steps_per_second": 1.32
+            }
+        }
+    },
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "ag_news",
+        "attack_type": "deepwordbug",
+        "results": {
+            "test": {
+                "eval_loss": 0.5986118912696838,
+                "eval_accuracy": 0.7844827586206896,
+                "eval_runtime": 0.7723,
+                "eval_samples_per_second": 150.195,
+                "eval_steps_per_second": 1.295
+            }
+        }
+    },
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "ag_news",
+        "attack_type": "pwws",
+        "results": {
+            "test": {
+                "eval_loss": 0.37559381127357483,
+                "eval_accuracy": 0.855072463768116,
+                "eval_runtime": 0.7486,
+                "eval_samples_per_second": 184.354,
+                "eval_steps_per_second": 1.336
+            }
+        }
+    },
+    {
+        "architecture": "ModelTC/bart-base-mnli",
+        "dataset": "ag_news",
+        "attack_type": "bae",
+        "results": {
+            "test": {
+                "eval_loss": 0.7702204585075378,
+                "eval_accuracy": 0.7166666666666667,
+                "eval_runtime": 0.7357,
+                "eval_samples_per_second": 81.554,
+                "eval_steps_per_second": 1.359
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "dbpedia",
+        "attack_type": "textfooler",
+        "results": {
+            "test": {
+                "eval_loss": 0.25124770402908325,
+                "eval_accuracy": 0.927710843373494,
+                "eval_runtime": 0.9033,
+                "eval_samples_per_second": 183.771,
+                "eval_steps_per_second": 1.107
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "dbpedia",
+        "attack_type": "textbugger",
+        "results": {
+            "test": {
+                "eval_loss": 0.5052272081375122,
+                "eval_accuracy": 0.8448275862068966,
+                "eval_runtime": 0.9635,
+                "eval_samples_per_second": 120.39,
+                "eval_steps_per_second": 1.038
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "dbpedia",
+        "attack_type": "deepwordbug",
+        "results": {
+            "test": {
+                "eval_loss": 0.6638765931129456,
+                "eval_accuracy": 0.7378640776699029,
+                "eval_runtime": 0.833,
+                "eval_samples_per_second": 123.645,
+                "eval_steps_per_second": 1.2
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "dbpedia",
+        "attack_type": "pwws",
+        "results": {
+            "test": {
+                "eval_loss": 0.2991635799407959,
+                "eval_accuracy": 0.8809523809523809,
+                "eval_runtime": 0.8403,
+                "eval_samples_per_second": 149.944,
+                "eval_steps_per_second": 1.19
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "dbpedia",
+        "attack_type": "bae",
+        "results": {
+            "test": {
+                "eval_loss": 0.4837143123149872,
+                "eval_accuracy": 0.8617021276595744,
+                "eval_runtime": 0.8768,
+                "eval_samples_per_second": 107.212,
+                "eval_steps_per_second": 1.141
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "imdb",
+        "attack_type": "textfooler",
+        "results": {
+            "test": {
+                "eval_loss": 0.12725718319416046,
+                "eval_accuracy": 0.9576923076923077,
+                "eval_runtime": 1.2007,
+                "eval_samples_per_second": 216.537,
+                "eval_steps_per_second": 0.833
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "imdb",
+        "attack_type": "textbugger",
+        "results": {
+            "test": {
+                "eval_loss": 0.1266193687915802,
+                "eval_accuracy": 0.9493087557603687,
+                "eval_runtime": 1.3144,
+                "eval_samples_per_second": 165.089,
+                "eval_steps_per_second": 0.761
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "imdb",
+        "attack_type": "deepwordbug",
+        "results": {
+            "test": {
+                "eval_loss": 0.16687510907649994,
+                "eval_accuracy": 0.9370629370629371,
+                "eval_runtime": 0.907,
+                "eval_samples_per_second": 157.668,
+                "eval_steps_per_second": 1.103
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "imdb",
+        "attack_type": "pwws",
+        "results": {
+            "test": {
+                "eval_loss": 0.14062248170375824,
+                "eval_accuracy": 0.952755905511811,
+                "eval_runtime": 1.1858,
+                "eval_samples_per_second": 214.208,
+                "eval_steps_per_second": 0.843
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "imdb",
+        "attack_type": "bae",
+        "results": {
+            "test": {
+                "eval_loss": 0.2312179058790207,
+                "eval_accuracy": 0.8944099378881988,
+                "eval_runtime": 0.9093,
+                "eval_samples_per_second": 177.051,
+                "eval_steps_per_second": 1.1
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "ag_news",
+        "attack_type": "textfooler",
+        "results": {
+            "test": {
+                "eval_loss": 0.5276903510093689,
+                "eval_accuracy": 0.7953216374269005,
+                "eval_runtime": 0.6984,
+                "eval_samples_per_second": 244.857,
+                "eval_steps_per_second": 1.432
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "ag_news",
+        "attack_type": "textbugger",
+        "results": {
+            "test": {
+                "eval_loss": 0.8996857404708862,
+                "eval_accuracy": 0.616,
+                "eval_runtime": 0.9057,
+                "eval_samples_per_second": 138.012,
+                "eval_steps_per_second": 1.104
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "ag_news",
+        "attack_type": "deepwordbug",
+        "results": {
+            "test": {
+                "eval_loss": 0.934901773929596,
+                "eval_accuracy": 0.5948275862068966,
+                "eval_runtime": 0.6614,
+                "eval_samples_per_second": 175.396,
+                "eval_steps_per_second": 1.512
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "ag_news",
+        "attack_type": "pwws",
+        "results": {
+            "test": {
+                "eval_loss": 0.635575532913208,
+                "eval_accuracy": 0.717391304347826,
+                "eval_runtime": 0.6991,
+                "eval_samples_per_second": 197.401,
+                "eval_steps_per_second": 1.43
+            }
+        }
+    },
+    {
+        "architecture": "google/electra-base-discriminator",
+        "dataset": "ag_news",
+        "attack_type": "bae",
+        "results": {
+            "test": {
+                "eval_loss": 1.0714434385299683,
+                "eval_accuracy": 0.55,
+                "eval_runtime": 0.6783,
+                "eval_samples_per_second": 88.45,
+                "eval_steps_per_second": 1.474
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "dbpedia",
+        "attack_type": "textfooler",
+        "results": {
+            "test": {
+                "eval_loss": 0.24634671211242676,
+                "eval_accuracy": 0.9096385542168675,
+                "eval_runtime": 0.8407,
+                "eval_samples_per_second": 197.447,
+                "eval_steps_per_second": 1.189
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "dbpedia",
+        "attack_type": "textbugger",
+        "results": {
+            "test": {
+                "eval_loss": 0.3145425319671631,
+                "eval_accuracy": 0.9051724137931034,
+                "eval_runtime": 0.7002,
+                "eval_samples_per_second": 165.665,
+                "eval_steps_per_second": 1.428
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "dbpedia",
+        "attack_type": "deepwordbug",
+        "results": {
+            "test": {
+                "eval_loss": 0.7990233302116394,
+                "eval_accuracy": 0.7087378640776699,
+                "eval_runtime": 0.6713,
+                "eval_samples_per_second": 153.424,
+                "eval_steps_per_second": 1.49
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "dbpedia",
+        "attack_type": "pwws",
+        "results": {
+            "test": {
+                "eval_loss": 0.38873612880706787,
+                "eval_accuracy": 0.8412698412698413,
+                "eval_runtime": 1.0424,
+                "eval_samples_per_second": 120.878,
+                "eval_steps_per_second": 0.959
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "dbpedia",
+        "attack_type": "bae",
+        "results": {
+            "test": {
+                "eval_loss": 0.6871300339698792,
+                "eval_accuracy": 0.7553191489361702,
+                "eval_runtime": 0.7159,
+                "eval_samples_per_second": 131.295,
+                "eval_steps_per_second": 1.397
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "imdb",
+        "attack_type": "textfooler",
+        "results": {
+            "test": {
+                "eval_loss": 0.3122941553592682,
+                "eval_accuracy": 0.8923076923076924,
+                "eval_runtime": 0.9764,
+                "eval_samples_per_second": 266.274,
+                "eval_steps_per_second": 1.024
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "imdb",
+        "attack_type": "textbugger",
+        "results": {
+            "test": {
+                "eval_loss": 0.24595403671264648,
+                "eval_accuracy": 0.9078341013824884,
+                "eval_runtime": 0.8838,
+                "eval_samples_per_second": 245.532,
+                "eval_steps_per_second": 1.131
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "imdb",
+        "attack_type": "deepwordbug",
+        "results": {
+            "test": {
+                "eval_loss": 0.5309562683105469,
+                "eval_accuracy": 0.7762237762237763,
+                "eval_runtime": 0.6956,
+                "eval_samples_per_second": 205.592,
+                "eval_steps_per_second": 1.438
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "imdb",
+        "attack_type": "pwws",
+        "results": {
+            "test": {
+                "eval_loss": 0.23892061412334442,
+                "eval_accuracy": 0.9173228346456693,
+                "eval_runtime": 0.9146,
+                "eval_samples_per_second": 277.729,
+                "eval_steps_per_second": 1.093
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "imdb",
+        "attack_type": "bae",
+        "results": {
+            "test": {
+                "eval_loss": 0.4495001435279846,
+                "eval_accuracy": 0.8322981366459627,
+                "eval_runtime": 0.8388,
+                "eval_samples_per_second": 191.951,
+                "eval_steps_per_second": 1.192
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "ag_news",
+        "attack_type": "textfooler",
+        "results": {
+            "test": {
+                "eval_loss": 0.417857825756073,
+                "eval_accuracy": 0.8538011695906432,
+                "eval_runtime": 0.8667,
+                "eval_samples_per_second": 197.296,
+                "eval_steps_per_second": 1.154
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "ag_news",
+        "attack_type": "textbugger",
+        "results": {
+            "test": {
+                "eval_loss": 0.7134006023406982,
+                "eval_accuracy": 0.712,
+                "eval_runtime": 0.6202,
+                "eval_samples_per_second": 201.558,
+                "eval_steps_per_second": 1.612
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "ag_news",
+        "attack_type": "deepwordbug",
+        "results": {
+            "test": {
+                "eval_loss": 0.8020163774490356,
+                "eval_accuracy": 0.7155172413793104,
+                "eval_runtime": 0.6331,
+                "eval_samples_per_second": 183.229,
+                "eval_steps_per_second": 1.58
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "ag_news",
+        "attack_type": "pwws",
+        "results": {
+            "test": {
+                "eval_loss": 0.5231444835662842,
+                "eval_accuracy": 0.782608695652174,
+                "eval_runtime": 0.6742,
+                "eval_samples_per_second": 204.68,
+                "eval_steps_per_second": 1.483
+            }
+        }
+    },
+    {
+        "architecture": "prajjwal1/bert-medium",
+        "dataset": "ag_news",
+        "attack_type": "bae",
+        "results": {
+            "test": {
+                "eval_loss": 0.8534796237945557,
+                "eval_accuracy": 0.5833333333333334,
+                "eval_runtime": 0.5949,
+                "eval_samples_per_second": 100.857,
+                "eval_steps_per_second": 1.681
+            }
+        }
+    }
+]

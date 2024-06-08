@@ -133,7 +133,7 @@ def main():
     model_dict.update(filtered_dict)
     model.load_state_dict(model_dict)
 
-    all_datasets = utils.load_dataset(
+    all_datasets = utils.load_only_test_data(
         data_dir=f"../datasets/{args.dataset}_dataset",
         tokenizer=tokenizer,
         max_length=configs.dataset_to_max_length[args.dataset],

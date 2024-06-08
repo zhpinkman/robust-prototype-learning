@@ -44,15 +44,50 @@ def process_condition(
     return all_results
 
 
-all_results = []
+if os.path.exists("all_results_from_pbn_models_static.json"):
+    with open("all_results_from_pbn_models_static.json", "r") as f:
+        all_results = json.load(f)
+        f.close()
+    already_existing_conditions = set()
+    for result in all_results:
+        already_existing_conditions.add(
+            (
+                result["architecture"],
+                result["dataset"],
+                result["attack_type"],
+                result["p1_lamb"],
+                result["p2_lamb"],
+                result["p3_lamb"],
+                result["num_proto"],
+            )
+        )
+else:
+    all_results = []
+    already_existing_conditions = set()
 
 for architecture in ["BART", "ELECTRA", "BERT"]:
-    for dataset in ["dbpedia", "imdb", "ag_news"]:
-        for attack_type in ["pwws", "textfooler", "textbugger", "deepwordbug", "bae"]:
+    for dataset in ["dbpedia", "imdb", "ag_news", "sst2"]:
+        attack_type_list = (
+            ["glue"]
+            if dataset == "sst2"
+            else ["pwws", "textfooler", "textbugger", "deepwordbug", "bae"]
+        )
+        for attack_type in attack_type_list:
             for p1_lamb in [0.0, 0.9, 10.0]:
                 for p2_lamb in [0.0, 0.9, 10.0]:
                     for p3_lamb in [0.0, 0.9, 10.0]:
                         for num_proto in [2, 4, 8, 16, 64]:
+                            if (
+                                architecture,
+                                dataset,
+                                attack_type,
+                                p1_lamb,
+                                p2_lamb,
+                                p3_lamb,
+                                num_proto,
+                            ) in already_existing_conditions:
+                                print("condition already found")
+                                continue
                             condition_results = process_condition(
                                 architecture,
                                 dataset,

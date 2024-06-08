@@ -39,6 +39,8 @@ def process_condition(architecture, dataset, attack_type):
             test_file=f"{condition}_{attack_type}.csv",
             data_dir=data_dir,
             batch_size=batch_size,
+            split_training_data=False,
+            learning_rate=1e-4,
         )
 
         results = evaluate_model(args)
@@ -46,16 +48,38 @@ def process_condition(architecture, dataset, attack_type):
     return all_results
 
 
-all_results = []
+if os.path.exists("all_results_from_non_pbn_models_static.json"):
+    with open("all_results_from_non_pbn_models_static.json", "r") as f:
+        all_results = json.load(f)
+        f.close()
+    already_existing_conditions = set()
+    for result in all_results:
+        already_existing_conditions.add(
+            (
+                result["architecture"],
+                result["dataset"],
+                result["attack_type"],
+            )
+        )
+else:
+    already_existing_conditions = set()
+    all_results = []
 
 for architecture in [
     "ModelTC/bart-base-mnli",
     "google/electra-base-discriminator",
     "prajjwal1/bert-medium",
 ]:
-    for dataset in ["dbpedia", "imdb", "ag_news"]:
-        for attack_type in ["textfooler", "textbugger", "deepwordbug", "pwws", "bae"]:
-
+    for dataset in ["dbpedia", "imdb", "ag_news", "sst2"]:
+        attack_type_list = (
+            ["glue"]
+            if dataset == "sst2"
+            else ["pwws", "textfooler", "textbugger", "deepwordbug", "bae"]
+        )
+        for attack_type in attack_type_list:
+            if (architecture, dataset, attack_type) in already_existing_conditions:
+                print("Skipping", architecture, dataset, attack_type)
+                continue
             condition_results = process_condition(
                 architecture,
                 dataset,

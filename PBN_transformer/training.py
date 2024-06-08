@@ -123,6 +123,7 @@ def train_ProtoTEx_w_neg(
             special_classfn=True,
             p=1,  # p=0.75,
             batchnormlp1=True,
+            use_cosine_dist=use_cosine_dist,
         )
     elif architecture == "BERT":
         model = ProtoTEx_BERT(
@@ -134,6 +135,7 @@ def train_ProtoTEx_w_neg(
             special_classfn=True,
             p=1,  # p=0.75,
             batchnormlp1=True,
+            use_cosine_dist=use_cosine_dist,
         )
 
     # model = torch.nn.DataParallel(model)

@@ -98,6 +98,28 @@ def load_one_dataset(data_dir, tokenizer, max_length, test_file):
     }
 
 
+def load_only_test_data(data_dir, tokenizer, max_length):
+    test_files = {
+        file[: file.find(".")]: os.path.join(data_dir, file)
+        for file in os.listdir(data_dir)
+        if file.startswith("test")
+    }
+
+    test_dfs = {
+        file_name: pd.read_csv(file_path) for file_name, file_path in test_files.items()
+    }
+    test_dfs = {
+        file_name: df
+        for file_name, df in test_dfs.items()
+        if "text" in df.columns and "label" in df.columns
+    }
+
+    return {
+        file_name: load_classification_dataset(df, tokenizer, max_length)
+        for file_name, df in test_dfs.items()
+    }
+
+
 def load_dataset(data_dir, tokenizer, max_length):
     train_df = pd.read_csv(os.path.join(data_dir, "train.csv"))
 
