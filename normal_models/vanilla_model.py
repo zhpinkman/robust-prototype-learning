@@ -13,6 +13,9 @@ import os
 import numpy as np
 import warnings
 
+# import train_test split
+from sklearn.model_selection import train_test_split
+
 warnings.filterwarnings("ignore")
 
 dataset_to_max_length = {
@@ -39,6 +42,36 @@ def preprocess_data(tokenizer, dataset, args):
         tokenize_function, batched=True, remove_columns=["text"]
     )
     return tokenized_dataset
+
+
+def load_one_data(data_dir, mode, file, split_training_data):
+    df = pd.read_csv(os.path.join(data_dir, file))
+    if split_training_data:
+        df_texts = df["text"].tolist()
+        df_labels = df["label"].tolist()
+        train_texts, val_texts, train_labels, val_labels = train_test_split(
+            df_texts, df_labels, test_size=0.1, random_state=42
+        )
+        train_texts, test_texts, train_labels, test_labels = train_test_split(
+            train_texts, train_labels, test_size=0.1, random_state=42
+        )
+        train_df = pd.DataFrame(
+            {"text": train_texts, "label": train_labels, "split": "train"}
+        )
+        val_df = pd.DataFrame({"text": val_texts, "label": val_labels, "split": "val"})
+        test_df = pd.DataFrame(
+            {"text": test_texts, "label": test_labels, "split": "test"}
+        )
+        return DatasetDict(
+            {
+                split: Dataset.from_pandas(df)
+                for split, df in zip(
+                    ["train", "val", "test"], [train_df, val_df, test_df]
+                )
+            }
+        )
+    else:
+        return DatasetDict({file[: file.find(".csv")]: Dataset.from_pandas(df)})
 
 
 def load_data(data_dir, mode):
@@ -155,14 +188,24 @@ def main(args):
             model.base_model.encoder.layer[num_enc_layers - 1].requires_grad_(True)
 
     else:
+        print(
+            "Loading model from: ",
+            args.model_dir,
+            "with num labels: ",
+            dataset_to_num_labels[args.dataset],
+        )
         tokenizer = AutoTokenizer.from_pretrained(args.model_dir)
         model = AutoModelForSequenceClassification.from_pretrained(
             args.model_dir,
-            num_labels=dataset_to_num_labels[args.dataset],
-            ignore_mismatched_sizes=True,
         )
 
-    dataset = load_data(args.data_dir, args.mode)
+    if args.test_file is not None:
+        dataset = load_one_data(
+            args.data_dir, args.mode, args.test_file, args.split_training_data
+        )
+    else:
+        dataset = load_data(args.data_dir, args.mode)
+
     tokenized_dataset = preprocess_data(tokenizer, dataset, args)
 
     training_args = TrainingArguments(
@@ -184,8 +227,9 @@ def main(args):
         load_best_model_at_end=True,
         metric_for_best_model="eval_accuracy",
         greater_is_better=True,
-        learning_rate=1e-4,
+        learning_rate=args.learning_rate,
     )
+    all_results_for_test_and_adv = {}
 
     if args.mode == "train":
         trainer = Trainer(
@@ -210,6 +254,7 @@ def main(args):
         trainer.save_model(args.model_dir)
 
     elif args.mode == "test":
+
         trainer = Trainer(
             model,
             training_args,
@@ -221,10 +266,13 @@ def main(args):
             for key in tokenized_dataset.keys()
             if (key.startswith("test_") or key.startswith("adv_"))
         ]
+
         for split in splits_for_test_and_adv_in_dataset:
             print("results for split: ", split)
-            trainer.evaluate(tokenized_dataset[split])
-            embed()
+            returned_metrics = trainer.evaluate(tokenized_dataset[split])
+            all_results_for_test_and_adv[split] = returned_metrics
+
+    return all_results_for_test_and_adv
 
 
 if __name__ == "__main__":
@@ -250,12 +298,15 @@ if __name__ == "__main__":
     parser.add_argument("--model_checkpoint", type=str, default="bert-base-uncased")
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--num_epochs", type=float, default=3)
+    parser.add_argument("--test_file", type=str, required=False)
 
     parser.add_argument("--log_dir", type=str, default="./logs")
 
     parser.add_argument("--dataset", type=str, required=True)
 
     parser.add_argument("--logging_steps", type=int, default=100)
+    parser.add_argument("--learning_rate", type=float, default=1e-4)
+    parser.add_argument("--split_training_data", action="store_true")
 
     args = parser.parse_args()
     main(args)

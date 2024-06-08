@@ -27,11 +27,19 @@ def main(args):
     else:
         print(f"Invalid backbone architecture: {args.architecture}")
 
-    all_datasets = utils.load_dataset(
-        data_dir=args.data_dir,
-        tokenizer=tokenizer,
-        max_length=configs.dataset_to_max_length[args.dataset],
-    )
+    if args.test_file:
+        all_datasets = utils.load_one_dataset(
+            data_dir=args.data_dir,
+            tokenizer=tokenizer,
+            max_length=configs.dataset_to_max_length[args.dataset],
+            test_file=args.test_file,
+        )
+    else:
+        all_datasets = utils.load_dataset(
+            data_dir=args.data_dir,
+            tokenizer=tokenizer,
+            max_length=configs.dataset_to_max_length[args.dataset],
+        )
 
     all_dataloaders = {
         dataset_name: torch.utils.data.DataLoader(
@@ -108,6 +116,7 @@ def main(args):
     # utils.print_predictions(
     #     os.path.join("Logs", "test_predictions.csv"), y_pred, y_true
     # )
+    returned_results = {}
 
     for dataset_name, dataloader in all_dataloaders.items():
         # if not dataset_name.startswith("adv_"):
@@ -132,10 +141,17 @@ def main(args):
             mac_f1_score,
             accuracy,
         )
+        returned_results[dataset_name] = {
+            "total_loss": total_loss,
+            "mac_prec": mac_prec,
+            "mac_recall": mac_recall,
+            "mac_f1_score": mac_f1_score,
+            "accuracy": accuracy,
+        }
         # utils.print_predictions(
         #     os.path.join("Logs", f"adv_predictions.csv"), y_pred, y_true
         # )
-        embed()
+    return returned_results
 
 
 if __name__ == "__main__":
@@ -151,6 +167,7 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str)
     parser.add_argument("--data_dir", type=str)
     parser.add_argument("--learning_rate", type=float, default="3e-5")
+    parser.add_argument("--test_file", type=str, required=False)
 
     # Wandb parameters
     parser.add_argument("--project", type=str)

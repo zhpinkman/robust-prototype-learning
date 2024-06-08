@@ -16,7 +16,7 @@ for dataset in ["imdb", "ag_news", "dbpedia"]:
     dataset_dir_output = f"{dataset}_dataset/"
     print("Dataset:", dataset_dir)
 
-    for attack in ["textfooler", "textbugger", "deepwordbug", "pwws"]:
+    for attack in ["textfooler", "textbugger", "deepwordbug", "pwws", "bae"]:
         print("Attack:", attack)
         files = [
             os.path.join(dataset_dir, file)

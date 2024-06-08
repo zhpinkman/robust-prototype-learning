@@ -1,0 +1,86 @@
+import pandas as pd
+import numpy as np
+import json
+import os
+from argparse import Namespace
+import sys
+from evaluate_model import main as evaluate_model
+from IPython import embed
+
+Models_directory = "/scratch/zhivar/robust-prototype-learning/PBN_transformer/Models"
+os.environ["CUDA_VISIBLE_DEVICES"] = "7"
+
+
+batch_size = 256
+
+
+def process_condition(
+    architecture, dataset, attack_type, p1_lamb, p2_lamb, p3_lamb, num_proto
+):
+    data_dir = f"/scratch/zhivar/robust-prototype-learning/datasets/{dataset}_dataset"
+    model_checkpoint = (
+        f"{architecture}_{dataset}_model_{p1_lamb}_{p2_lamb}_{p3_lamb}_{num_proto}"
+    )
+    if not os.path.exists(os.path.join(Models_directory, model_checkpoint)):
+        return None
+
+    all_results = {}
+    for condition in ["test", "adv"]:
+
+        args = Namespace(
+            architecture=architecture,
+            test_file=f"{condition}_{attack_type}.csv",
+            data_dir=data_dir,
+            dataset=dataset,
+            batch_size=batch_size,
+            num_prototypes=num_proto,
+            modelname=model_checkpoint,
+            use_cosine_dist=False,
+            model="ProtoTEx",
+        )
+
+        results = evaluate_model(args)
+        all_results[condition] = results
+    return all_results
+
+
+all_results = []
+
+for architecture in ["BART", "ELECTRA", "BERT"]:
+    for dataset in ["dbpedia", "imdb", "ag_news"]:
+        for attack_type in ["pwws", "textfooler", "textbugger", "deepwordbug", "bae"]:
+            for p1_lamb in [0.0, 0.9, 10.0]:
+                for p2_lamb in [0.0, 0.9, 10.0]:
+                    for p3_lamb in [0.0, 0.9, 10.0]:
+                        for num_proto in [2, 4, 8, 16, 64]:
+                            condition_results = process_condition(
+                                architecture,
+                                dataset,
+                                attack_type,
+                                p1_lamb,
+                                p2_lamb,
+                                p3_lamb,
+                                num_proto,
+                            )
+                            if condition_results is not None:
+                                all_results.append(
+                                    {
+                                        "architecture": architecture,
+                                        "dataset": dataset,
+                                        "attack_type": attack_type,
+                                        "p1_lamb": p1_lamb,
+                                        "p2_lamb": p2_lamb,
+                                        "p3_lamb": p3_lamb,
+                                        "num_proto": num_proto,
+                                        "results": condition_results,
+                                    }
+                                )
+
+try:
+    with open("all_results_from_pbn_models_static.json", "w") as f:
+        json.dump(all_results, f)
+except Exception as e:
+
+    import joblib
+
+    joblib.dump(all_results, "all_results_from_pbn_models_static.pkl")
