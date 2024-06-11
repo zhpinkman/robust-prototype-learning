@@ -121,16 +121,28 @@ class ProtoTEx_BERT(torch.nn.Module):
 
         if not self.dobatchnorm:
             ## TODO: This loss function is not ignoring the padded part of the sequence; Get element-wise distane and then multiply with the mask
-            input_for_classfn = torch.cdist(
-                last_hidden_state.view(batch_size, -1),
-                self.prototypes.view(self.num_protos, -1),
-            )
+            if self.use_cosine_dist:
+                input_for_classfn = torchmetrics.functional.pairwise_cosine_similarity(
+                    last_hidden_state.view(batch_size, -1),
+                    self.prototypes.view(self.num_protos, -1),
+                )
+            else:
+                input_for_classfn = torch.cdist(
+                    last_hidden_state.view(batch_size, -1),
+                    self.prototypes.view(self.num_protos, -1),
+                )
         else:
             # TODO: Try cosine distance
-            input_for_classfn = torch.cdist(
-                last_hidden_state.view(batch_size, -1),
-                self.prototypes.view(self.num_protos, -1),
-            )
+            if self.use_cosine_dist:
+                input_for_classfn = torchmetrics.functional.pairwise_cosine_similarity(
+                    last_hidden_state.view(batch_size, -1),
+                    self.prototypes.view(self.num_protos, -1),
+                )
+            else:
+                input_for_classfn = torch.cdist(
+                    last_hidden_state.view(batch_size, -1),
+                    self.prototypes.view(self.num_protos, -1),
+                )
             input_for_classfn = torch.nn.functional.instance_norm(
                 input_for_classfn.view(batch_size, 1, self.num_protos)
             ).view(batch_size, self.num_protos)

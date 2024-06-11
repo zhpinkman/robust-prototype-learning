@@ -61,6 +61,7 @@ def main():
     parser.add_argument("--curriculum", type=str, default="No")
     parser.add_argument("--augmentation", type=str, default="No")
     parser.add_argument("--architecture", type=str, default="BART")
+    parser.add_argument("--use_cosine_dist", action="store_true")
 
     args = parser.parse_args()
 
@@ -94,6 +95,7 @@ def main():
                 special_classfn=True,
                 p=1,  # p=0.75,
                 batchnormlp1=True,
+                use_cosine_dist=args.use_cosine_dist,
             )
         elif args.architecture == "ELECTRA":
             model = ProtoTEx_Electra(
@@ -105,6 +107,7 @@ def main():
                 special_classfn=True,
                 p=1,  # p=0.75,
                 batchnormlp1=True,
+                use_cosine_dist=args.use_cosine_dist,
             )
         elif args.architecture == "BERT":
             model = ProtoTEx_BERT(
@@ -116,6 +119,7 @@ def main():
                 special_classfn=True,
                 p=1,  # p=0.75,
                 batchnormlp1=True,
+                use_cosine_dist=args.use_cosine_dist,
             )
         else:
             print(f"Invalid backbone architecture: {args.architecture}")

@@ -127,15 +127,27 @@ class ProtoTEx_Electra(torch.nn.Module):
 
         # Lp3 is minimize the negative of inter-prototype distances (maximize the distance)
         if not self.dobatchnorm:
-            input_for_classfn = torch.cdist(
-                last_hidden_state.view(batch_size, -1),
-                self.prototypes.view(self.num_protos, -1),
-            )
+            if self.use_cosine_dist:
+                input_for_classfn = torchmetrics.functional.pairwise_cosine_similarity(
+                    last_hidden_state.view(batch_size, -1),
+                    self.prototypes.view(self.num_protos, -1),
+                )
+            else:
+                input_for_classfn = torch.cdist(
+                    last_hidden_state.view(batch_size, -1),
+                    self.prototypes.view(self.num_protos, -1),
+                )
         else:
-            input_for_classfn = torch.cdist(
-                last_hidden_state.view(batch_size, -1),
-                self.prototypes.view(self.num_protos, -1),
-            )
+            if self.use_cosine_dist:
+                input_for_classfn = torchmetrics.functional.pairwise_cosine_similarity(
+                    last_hidden_state.view(batch_size, -1),
+                    self.prototypes.view(self.num_protos, -1),
+                )
+            else:
+                input_for_classfn = torch.cdist(
+                    last_hidden_state.view(batch_size, -1),
+                    self.prototypes.view(self.num_protos, -1),
+                )
             input_for_classfn = torch.nn.functional.instance_norm(
                 input_for_classfn.view(batch_size, 1, self.num_protos)
             ).view(batch_size, self.num_protos)

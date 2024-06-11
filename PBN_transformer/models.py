@@ -127,20 +127,33 @@ class ProtoTEx(torch.nn.Module):
             output_hidden_states=False,
         ).last_hidden_state
         if not self.dobatchnorm:
-            input_for_classfn = torch.cdist(
-                last_hidden_state.view(batch_size, -1),
-                self.prototypes.view(self.num_protos, -1),
-            )
+            if self.use_cosine_dist:
+                input_for_classfn = torchmetrics.functional.pairwise_cosine_similarity(
+                    last_hidden_state.view(batch_size, -1),
+                    self.prototypes.view(self.num_protos, -1),
+                )
+            else:
+                input_for_classfn = torch.cdist(
+                    last_hidden_state.view(batch_size, -1),
+                    self.prototypes.view(self.num_protos, -1),
+                )
         else:
             # from IPython import embed
             try:
                 # print(last_hidden_state.shape)
                 # print(self.prototypes.shape)
-
-                input_for_classfn = torch.cdist(
-                    last_hidden_state.view(batch_size, -1),
-                    self.prototypes.view(self.num_protos, -1),
-                )
+                if self.use_cosine_dist:
+                    input_for_classfn = (
+                        torchmetrics.functional.pairwise_cosine_similarity(
+                            last_hidden_state.view(batch_size, -1),
+                            self.prototypes.view(self.num_protos, -1),
+                        )
+                    )
+                else:
+                    input_for_classfn = torch.cdist(
+                        last_hidden_state.view(batch_size, -1),
+                        self.prototypes.view(self.num_protos, -1),
+                    )
             except:
                 exit()
             # embed()
