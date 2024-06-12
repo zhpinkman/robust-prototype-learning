@@ -8,6 +8,7 @@ from sklearn.metrics import (
     accuracy_score,
     classification_report,
 )
+import torchmetrics
 import datasets
 from sklearn.model_selection import train_test_split
 import torch.nn as nn
@@ -82,10 +83,29 @@ def load_adv_data(dataset_info, data_dir, tokenizer):
 
 
 def load_one_dataset(data_dir, tokenizer, max_length, test_file):
-    test_files = {test_file[: test_file.find(".")]: os.path.join(data_dir, test_file)}
-    test_dfs = {
-        file_name: pd.read_csv(file_path) for file_name, file_path in test_files.items()
-    }
+
+    if test_file == "train.csv":
+        test_dfs = pd.read_csv(os.path.join(data_dir, "train.csv"))
+
+        indices_to_pick = []
+        for label in test_dfs["label"].unique():
+            sub_df = test_dfs[test_dfs["label"] == label]
+            sub_df_sample = sub_df.sample(
+                n=min(10000, sub_df.shape[0]), random_state=42, replace=False
+            )
+            indices_to_pick.extend(sub_df_sample.index.tolist()[:100])
+        test_dfs = test_dfs.loc[indices_to_pick]
+        test_dfs = test_dfs.sample(frac=1, replace=False).reset_index(drop=True)
+        test_dfs = {"train": test_dfs}
+    else:
+        test_files = {
+            test_file[: test_file.find(".")]: os.path.join(data_dir, test_file)
+        }
+        test_dfs = {
+            file_name: pd.read_csv(file_path)
+            for file_name, file_path in test_files.items()
+        }
+
     test_dfs = {
         file_name: df
         for file_name, df in test_dfs.items()
@@ -436,6 +456,7 @@ def get_best_k_protos_for_batch(
     model_new=None,
     topk=None,
     do_all=False,
+    architecture="BART",
 ):
     """
     get the best k protos for that a fraction of test data where each element has a specific true label.
@@ -454,34 +475,63 @@ def get_best_k_protos_for_batch(
         best_protos = []
         best_protos_dists = []
         all_predictions = []
+        all_correct_labels = []
         for batch in loader:
             input_ids = batch["input_ids"]
             attn_mask = batch["attention_mask"]
             y = batch["label"]
             batch_size = input_ids.size(0)
-            last_hidden_state = model_new.bart_model.base_model.encoder(
-                input_ids.cuda(),
-                attn_mask.cuda(),
-                output_attentions=False,
-                output_hidden_states=False,
-            ).last_hidden_state
-            if not model_new.dobatchnorm:
-                input_for_classfn = torch.cdist(
-                    last_hidden_state.view(batch_size, -1),
-                    all_protos.view(model_new.num_protos, -1),
-                )
+            if architecture == "BART":
+                last_hidden_state = model_new.bart_model.base_model.encoder(
+                    input_ids.cuda(),
+                    attn_mask.cuda(),
+                    output_attentions=False,
+                    output_hidden_states=False,
+                ).last_hidden_state
+            elif architecture == "BERT":
+                last_hidden_state = model_new.bert_model(
+                    input_ids.cuda(), attn_mask.cuda()
+                ).last_hidden_state
+            elif architecture == "ELECTRA":
+                last_hidden_state = model_new.electra_model(
+                    input_ids.cuda(), attn_mask.cuda()
+                ).last_hidden_state
             else:
-                input_for_classfn = torch.cdist(
-                    last_hidden_state.view(batch_size, -1),
-                    all_protos.view(model_new.num_protos, -1),
-                )
-                # embed()
+                raise ValueError("Invalid architecture")
+            if not model_new.dobatchnorm:
+                if model_new.use_cosine_dist:
+                    input_for_classfn = (
+                        torchmetrics.functional.pairwise_cosine_similarity(
+                            last_hidden_state.view(batch_size, -1),
+                            all_protos.view(model_new.num_protos, -1),
+                        )
+                    )
+                else:
+                    input_for_classfn = torch.cdist(
+                        last_hidden_state.view(batch_size, -1),
+                        all_protos.view(model_new.num_protos, -1),
+                    )
+            else:
+                if model_new.use_cosine_dist:
+                    input_for_classfn = (
+                        torchmetrics.functional.pairwise_cosine_similarity(
+                            last_hidden_state.view(batch_size, -1),
+                            all_protos.view(model_new.num_protos, -1),
+                        )
+                    )
+                else:
+                    input_for_classfn = torch.cdist(
+                        last_hidden_state.view(batch_size, -1),
+                        all_protos.view(model_new.num_protos, -1),
+                    )
                 input_for_classfn = torch.nn.functional.instance_norm(
                     input_for_classfn.view(batch_size, 1, model_new.num_protos)
                 ).view(batch_size, model_new.num_protos)
 
             if do_all:
-                temp = torch.topk(input_for_classfn, dim=1, k=topk, largest=False)
+                temp = torch.topk(
+                    input_for_classfn, dim=1, k=topk, largest=model_new.use_cosine_dist
+                )
                 predicted = torch.argmax(
                     model_new.classfn_model(input_for_classfn).view(
                         batch_size, model_new.n_classes
@@ -502,15 +552,24 @@ def get_best_k_protos_for_batch(
             best_protos.append(temp[1].cpu())
             best_protos_dists.append(temp[0].cpu())
             all_predictions.append(predicted.cpu())
+            all_correct_labels.append(y.cpu())
         #             best_protos.append((torch.topk(input_for_classfn,dim=1,
         #                                               k=topk,largest=False)[1]).cpu())
-        best_protos = torch.cat(best_protos, dim=0)
-        best_protos_dists = torch.cat(best_protos_dists, dim=0)
-        all_predictions = torch.cat(all_predictions, dim=0)
-    return best_protos, best_protos_dists, all_predictions
+        best_protos = torch.cat(best_protos, dim=0).numpy().tolist()
+        best_protos_dists = torch.cat(best_protos_dists, dim=0).numpy().tolist()
+        all_predictions = torch.cat(all_predictions, dim=0).numpy().tolist()
+        all_correct_labels = torch.cat(all_correct_labels, dim=0).numpy().tolist()
+    return {
+        "best_protos": best_protos,
+        "best_protos_dists": best_protos_dists,
+        "all_predictions": all_predictions,
+        "all_correct_labels": all_correct_labels,
+    }
 
 
-def get_bestk_train_data_for_every_proto(train_dataset_loader, model_new=None, top_k=3):
+def get_bestk_train_data_for_every_proto(
+    train_dataset_loader, model_new=None, top_k=3, architecture="BART"
+):
     """
     for every prototype find out k best similar training examples
     """
@@ -521,6 +580,8 @@ def get_bestk_train_data_for_every_proto(train_dataset_loader, model_new=None, t
         best_train_egs = []
         best_train_egs_values = []
         all_distances = torch.tensor([])
+        all_texts = []
+        all_labels = []
         predict_all = torch.tensor([])
         true_all = torch.tensor([])
 
@@ -529,23 +590,53 @@ def get_bestk_train_data_for_every_proto(train_dataset_loader, model_new=None, t
             input_ids = batch["input_ids"]
             attn_mask = batch["attention_mask"]
             y = batch["label"]
+            text = batch["text"]
             batch_size = input_ids.size(0)
-            last_hidden_state = model_new.bart_model.base_model.encoder(
-                input_ids.cuda(),
-                attn_mask.cuda(),
-                output_attentions=False,
-                output_hidden_states=False,
-            ).last_hidden_state
-            if not model_new.dobatchnorm:
-                input_for_classfn = torch.cdist(
-                    last_hidden_state.view(batch_size, -1),
-                    all_protos.view(model_new.num_protos, -1),
-                )
+
+            if architecture == "BART":
+                last_hidden_state = model_new.bart_model.base_model.encoder(
+                    input_ids.cuda(),
+                    attn_mask.cuda(),
+                    output_attentions=False,
+                    output_hidden_states=False,
+                ).last_hidden_state
+            elif architecture == "BERT":
+                last_hidden_state = model_new.bert_model(
+                    input_ids.cuda(), attn_mask.cuda()
+                ).last_hidden_state
+            elif architecture == "ELECTRA":
+                last_hidden_state = model_new.electra_model(
+                    input_ids.cuda(), attn_mask.cuda()
+                ).last_hidden_state
             else:
-                input_for_classfn = torch.cdist(
-                    last_hidden_state.view(batch_size, -1),
-                    all_protos.view(model_new.num_protos, -1),
-                )
+                raise ValueError("Invalid architecture")
+
+            if not model_new.dobatchnorm:
+                if model_new.use_cosine_dist:
+                    input_for_classfn = (
+                        torchmetrics.functional.pairwise_cosine_similarity(
+                            last_hidden_state.view(batch_size, -1),
+                            all_protos.view(model_new.num_protos, -1),
+                        )
+                    )
+                else:
+                    input_for_classfn = torch.cdist(
+                        last_hidden_state.view(batch_size, -1),
+                        all_protos.view(model_new.num_protos, -1),
+                    )
+            else:
+                if model_new.use_cosine_dist:
+                    input_for_classfn = (
+                        torchmetrics.functional.pairwise_cosine_similarity(
+                            last_hidden_state.view(batch_size, -1),
+                            all_protos.view(model_new.num_protos, -1),
+                        )
+                    )
+                else:
+                    input_for_classfn = torch.cdist(
+                        last_hidden_state.view(batch_size, -1),
+                        all_protos.view(model_new.num_protos, -1),
+                    )
                 input_for_classfn = torch.nn.functional.instance_norm(
                     input_for_classfn.view(batch_size, 1, model_new.num_protos)
                 ).view(batch_size, model_new.num_protos)
@@ -557,10 +648,24 @@ def get_bestk_train_data_for_every_proto(train_dataset_loader, model_new=None, t
             )
             concerned_idxs = torch.nonzero((predicted == y.cuda())).view(-1)
             input_for_classfn = input_for_classfn[concerned_idxs]
+            selected_text = [text[i] for i in concerned_idxs]
+            selected_labels = [y[i] for i in concerned_idxs]
 
             all_distances = torch.cat((all_distances, input_for_classfn.cpu()), dim=0)
+            all_texts.extend(selected_text)
+            all_labels.extend(selected_labels)
 
-    return torch.topk(all_distances, dim=0, k=top_k, largest=False)
+    best_distances = torch.topk(
+        all_distances, dim=0, k=top_k, largest=model_new.use_cosine_dist
+    )
+    prototypes_texts = {}
+    for i in range(model_new.num_protos):
+        prototypes_texts[i] = []
+        for index in best_distances[1][:, i]:
+            prototypes_texts[i].append(
+                [all_texts[index.item()], all_labels[index.item()].item()]
+            )
+    return {"best_train_egs": prototypes_texts}
     # else:
     #     best_train_egs = torch.cat(best_train_egs, dim=0)
     #     best_train_egs_values = torch.cat(best_train_egs_values, dim=0)

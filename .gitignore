@@ -5,3 +5,5 @@ mnist.pkl
 wandb/
 **/checkpoints/*
 datasets/dbpedia_dataset/train.csv
+PBN_transformer/prototypes_analysis_logs/*
+datasets/embeddings.json

@@ -15,12 +15,15 @@ batch_size = 256
 
 
 def process_condition(
-    architecture, dataset, attack_type, p1_lamb, p2_lamb, p3_lamb, num_proto
+    architecture, dataset, attack_type, p1_lamb, p2_lamb, p3_lamb, num_proto, is_cosine
 ):
     data_dir = f"/scratch/zhivar/robust-prototype-learning/datasets/{dataset}_dataset"
-    model_checkpoint = (
-        f"{architecture}_{dataset}_model_{p1_lamb}_{p2_lamb}_{p3_lamb}_{num_proto}"
-    )
+    if is_cosine:
+        model_checkpoint = f"{architecture}_{dataset}_model_{p1_lamb}_{p2_lamb}_{p3_lamb}_{num_proto}_cosine"
+    else:
+        model_checkpoint = (
+            f"{architecture}_{dataset}_model_{p1_lamb}_{p2_lamb}_{p3_lamb}_{num_proto}"
+        )
     if not os.path.exists(os.path.join(Models_directory, model_checkpoint)):
         return None
 
@@ -35,8 +38,8 @@ def process_condition(
             batch_size=batch_size,
             num_prototypes=num_proto,
             modelname=model_checkpoint,
-            use_cosine_dist=False,
             model="ProtoTEx",
+            use_cosine_dist=is_cosine,
         )
 
         results = evaluate_model(args)
@@ -50,6 +53,10 @@ if os.path.exists("all_results_from_pbn_models_static.json"):
         f.close()
     already_existing_conditions = set()
     for result in all_results:
+        if "is_cosine" in result.keys():
+            is_cosine = result["is_cosine"]
+        else:
+            is_cosine = False
         already_existing_conditions.add(
             (
                 result["architecture"],
@@ -59,12 +66,14 @@ if os.path.exists("all_results_from_pbn_models_static.json"):
                 result["p2_lamb"],
                 result["p3_lamb"],
                 result["num_proto"],
+                is_cosine,
             )
         )
 else:
     all_results = []
     already_existing_conditions = set()
 
+is_cosine = True
 for architecture in ["BART", "ELECTRA", "BERT"]:
     for dataset in ["dbpedia", "imdb", "ag_news", "sst2"]:
         attack_type_list = (
@@ -73,10 +82,10 @@ for architecture in ["BART", "ELECTRA", "BERT"]:
             else ["pwws", "textfooler", "textbugger", "deepwordbug", "bae"]
         )
         for attack_type in attack_type_list:
-            for p1_lamb in [0.0, 0.9, 10.0]:
-                for p2_lamb in [0.0, 0.9, 10.0]:
-                    for p3_lamb in [0.0, 0.9, 10.0]:
-                        for num_proto in [2, 4, 8, 16, 64]:
+            for p1_lamb in [0.9]:
+                for p2_lamb in [0.9]:
+                    for p3_lamb in [0.9]:
+                        for num_proto in [16]:
                             if (
                                 architecture,
                                 dataset,
@@ -85,6 +94,7 @@ for architecture in ["BART", "ELECTRA", "BERT"]:
                                 p2_lamb,
                                 p3_lamb,
                                 num_proto,
+                                is_cosine,
                             ) in already_existing_conditions:
                                 print("condition already found")
                                 continue
@@ -96,6 +106,7 @@ for architecture in ["BART", "ELECTRA", "BERT"]:
                                 p2_lamb,
                                 p3_lamb,
                                 num_proto,
+                                is_cosine,
                             )
                             if condition_results is not None:
                                 all_results.append(
@@ -107,6 +118,7 @@ for architecture in ["BART", "ELECTRA", "BERT"]:
                                         "p2_lamb": p2_lamb,
                                         "p3_lamb": p3_lamb,
                                         "num_proto": num_proto,
+                                        "is_cosine": is_cosine,
                                         "results": condition_results,
                                     }
                                 )

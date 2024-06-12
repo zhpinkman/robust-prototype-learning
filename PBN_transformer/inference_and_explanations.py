@@ -1,17 +1,12 @@
-# TODO: The whole code should be changed according to the
-# new structure in the main and evaluate_model files
-
-
+import os
 import torch
 from transformers import AutoTokenizer
-from preprocess import *
-from IPython import embed
-import os
 import argparse
+from IPython import embed
 import utils
-import joblib
 from models import ProtoTEx
 from models_electra import ProtoTEx_Electra
+from models_bert import ProtoTEx_BERT
 import sys
 
 sys.path.append("../datasets")
@@ -24,17 +19,26 @@ def main(args):
 
     if args.architecture == "BART":
         tokenizer = AutoTokenizer.from_pretrained("ModelTC/bart-base-mnli")
-        # tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
     elif args.architecture == "ELECTRA":
         tokenizer = AutoTokenizer.from_pretrained("google/electra-base-discriminator")
+    elif args.architecture == "BERT":
+        tokenizer = AutoTokenizer.from_pretrained("prajjwal1/bert-medium")
     else:
         print(f"Invalid backbone architecture: {args.architecture}")
 
-    all_datasets = utils.load_dataset(
-        data_dir=args.data_dir,
-        tokenizer=tokenizer,
-        max_length=configs.dataset_to_max_length[args.dataset],
-    )
+    if args.test_file:
+        all_datasets = utils.load_one_dataset(
+            data_dir=args.data_dir,
+            tokenizer=tokenizer,
+            max_length=configs.dataset_to_max_length[args.dataset],
+            test_file=args.test_file,
+        )
+    else:
+        all_datasets = utils.load_dataset(
+            data_dir=args.data_dir,
+            tokenizer=tokenizer,
+            max_length=configs.dataset_to_max_length[args.dataset],
+        )
 
     all_dataloaders = {
         dataset_name: torch.utils.data.DataLoader(
@@ -45,6 +49,7 @@ def main(args):
                 "input_ids": torch.LongTensor([i["input_ids"] for i in batch]),
                 "attention_mask": torch.Tensor([i["attention_mask"] for i in batch]),
                 "label": torch.LongTensor([i["label"] for i in batch]),
+                "text": [i["text"] for i in batch],
             },
         )
         for dataset_name in all_datasets.keys()
@@ -64,6 +69,7 @@ def main(args):
                 special_classfn=True,
                 p=1,  # p=0.75,
                 batchnormlp1=True,
+                use_cosine_dist=args.use_cosine_dist,
             )
         elif args.architecture == "ELECTRA":
             model = ProtoTEx_Electra(
@@ -76,7 +82,17 @@ def main(args):
                 p=1,  # p=0.75,
                 batchnormlp1=True,
             )
-
+        elif args.architecture == "BERT":
+            model = ProtoTEx_BERT(
+                num_prototypes=args.num_prototypes,
+                class_weights=None,
+                n_classes=configs.dataset_to_num_labels[args.dataset],
+                max_length=configs.dataset_to_max_length[args.dataset],
+                bias=False,
+                special_classfn=True,
+                p=1,  # p=0.75,
+                batchnormlp1=True,
+            )
         else:
             print(f"Invalid backbone architecture: {args.architecture}")
 
@@ -97,110 +113,34 @@ def main(args):
     # model = torch.nn.DataParallel(model)
     model = model.to(device)
 
-    if not os.path.exists(f"artifacts/{args.dataset}"):
-        os.mkdir(f"artifacts/{args.dataset}")
-    if not os.path.exists(f"artifacts/{args.dataset}/{args.modelname}"):
-        os.mkdir(f"artifacts/{args.dataset}/{args.modelname}")
+    if not os.path.exists("artifacts"):
+        os.mkdir("artifacts")
 
-    # bestk_train_data_per_proto = utils.get_bestk_train_data_for_every_proto(
-    #     all_dataloaders["test"], model_new=model, top_k=5
-    # )
-    # joblib.dump(
-    #     bestk_train_data_per_proto,
-    #     f"artifacts/{args.dataset}/{args.modelname}/bestk_train_data_per_proto.joblib",
-    # )
+    if args.mode == "prototypes":
 
-    best_protos_per_traineg = utils.get_best_k_protos_for_batch(
-        dataloader=all_dataloaders["test"],
-        model_new=model,
-        topk=16,
-        do_all=True,
-    )
-    joblib.dump(
-        best_protos_per_traineg,
-        f"artifacts/{args.dataset}/{args.modelname}/best_protos_per_traineg.joblib",
-    )
-
-    best_protos_per_split = {}
-    for dataset_name, dataloader in all_dataloaders.items():
-        if not (dataset_name.startswith("test_") or dataset_name.startswith("adv_")):
-            continue
-        print(f"getting the prototypes for test examples of {dataset_name}")
-
-        best_protos_per_split[dataset_name] = utils.get_best_k_protos_for_batch(
-            dataloader=dataloader,
+        bestk_train_data_per_proto = utils.get_bestk_train_data_for_every_proto(
+            all_dataloaders["train"],
             model_new=model,
-            topk=16,
-            do_all=True,
+            top_k=5,
+            architecture=args.architecture,
         )
+        prototypes = model.prototypes.detach().cpu().numpy().tolist()
+        return bestk_train_data_per_proto, prototypes
 
-    joblib.dump(
-        best_protos_per_split,
-        f"artifacts/{args.dataset}/{args.modelname}/best_protos_per_testeg.joblib",
-    )
-    torch.save(
-        model.prototypes.detach().cpu().numpy(),
-        f"artifacts/{args.dataset}/{args.modelname}/all_protos.pt",
-    )
-
-    # train_sents_joined = train_sentences
-    # test_sents_joined = test_sentences
-
-    """
-    distances generation
-    test true labels and pred labels
-    """
-    # loader = tqdm(test_dl, total=len(test_dl), unit="batches")
-    # model.eval()
-    # with torch.no_grad():
-    #     test_true=[]
-    #     test_pred=[]
-    #     for batch in loader:
-    #         input_ids,attn_mask,y=batch
-    #         classfn_out,_=model(input_ids,attn_mask,y,use_decoder=False,use_classfn=1)
-    #         predict=torch.argmax(classfn_out,dim=1)
-    # #         correct_idxs.append(torch.nonzero((predicted==y.cuda())).view(-1)
-    #         test_pred.append(predict.cpu().numpy())
-    #         test_true.append(y.cpu().numpy())
-    # test_true=np.concatenate(test_true)
-    # test_pred=np.concatenate(test_pred)
-
-    """
-    distances generation
-    csv generation
-    """
-    # import csv
-
-    # fields = ["S.No.", "Test Sentence","Predicted","Actual","Actual Prop or NonProp"]
-    # num_protos_per_test=5
-    # num_train_per_proto=5
-    # for i in range(num_protos_per_test):
-    #     for j in range(num_train_per_proto):
-    #         fields.append(f"Prototype_{i}_wieght0")
-    #         fields.append(f"Prototype_{i}_wieght1")
-    #         fields.append(f"Prototype_{i}_Nearest_train_eg_{j}")
-    #         fields.append(f"Prototype_{i}_Nearest_train_eg_{j}_actuallabel")
-    #         fields.append(f"Prototype_{i}_Nearest_train_eg_{j}_distance")
-
-    # filename = f"{model_path[len('Models/'):]}_nearest.csv"
-    # weights=model.classfn_model.weight.detach().cpu().numpy()
-    # with open(filename, 'w') as csvfile:
-    #     csvwriter = csv.writer(csvfile)
-    #     csvwriter.writerow(fields)
-    #     for i in range(len(test_sents_joined)):
-    # #     for i in range(100):
-    #         row=[i,test_sents_joined[i],test_pred[i],test_labels[i],test_true[i]]
-    #         for j in range(num_protos_per_test):
-    #             proto_idx=best_protos_per_testeg[0][i][j]
-    #             for k in range(num_train_per_proto):
-    # #                 print(i,j,k)
-    #                 row.append(weights[0][proto_idx])
-    #                 row.append(weights[1][proto_idx])
-    #                 row.append(train_sents_joined[bestk_train_data_per_proto[0][proto_idx][k]])
-    #                 row.append(train_labels[bestk_train_data_per_proto[0][proto_idx][k]])
-    #                 row.append(bestk_train_data_per_proto[1][k][proto_idx])
-
-    #         csvwriter.writerow(row)
+    elif args.mode == "data":
+        returned_results = {}
+        for dataset_name, dataloader in all_dataloaders.items():
+            best_protos_per_traineg = utils.get_best_k_protos_for_batch(
+                dataloader=dataloader,
+                model_new=model,
+                topk=min(16, args.num_prototypes),
+                do_all=True,
+                architecture=args.architecture,
+            )
+            returned_results[dataset_name] = best_protos_per_traineg
+        return returned_results
+    else:
+        raise ValueError("Invalid mode")
 
 
 if __name__ == "__main__":
@@ -216,6 +156,14 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str)
     parser.add_argument("--data_dir", type=str)
     parser.add_argument("--learning_rate", type=float, default="3e-5")
+    parser.add_argument("--test_file", type=str, required=False)
+    parser.add_argument(
+        "--mode",
+        type=str,
+        choices=["prototypes", "data"],
+        required=True,
+        default="prototypes",
+    )
 
     # Wandb parameters
     parser.add_argument("--project", type=str)
@@ -225,6 +173,7 @@ if __name__ == "__main__":
     parser.add_argument("--curriculum", type=str, default="No")
     parser.add_argument("--augmentation", type=str, default="No")
     parser.add_argument("--architecture", type=str, default="BART")
+    parser.add_argument("--use_cosine_dist", action="store_true")
 
     args = parser.parse_args()
 
