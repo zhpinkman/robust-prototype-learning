@@ -33,6 +33,7 @@ def main(args):
             tokenizer=tokenizer,
             max_length=configs.dataset_to_max_length[args.dataset],
             test_file=args.test_file,
+            split_training_data=args.split_training_data,
         )
     else:
         all_datasets = utils.load_dataset(
@@ -178,6 +179,7 @@ if __name__ == "__main__":
     parser.add_argument("--augmentation", type=str, default="No")
     parser.add_argument("--architecture", type=str, default="BART")
     parser.add_argument("--use_cosine_dist", action="store_true")
+    parser.add_argument("--split_training_data", action="store_true")
 
     args = parser.parse_args()
 

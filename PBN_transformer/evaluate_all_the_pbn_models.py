@@ -15,7 +15,15 @@ batch_size = 256
 
 
 def process_condition(
-    architecture, dataset, attack_type, p1_lamb, p2_lamb, p3_lamb, num_proto, is_cosine
+    architecture,
+    dataset,
+    attack_type,
+    p1_lamb,
+    p2_lamb,
+    p3_lamb,
+    num_proto,
+    is_cosine,
+    split_training_data,
 ):
     data_dir = f"/scratch/zhivar/robust-prototype-learning/datasets/{dataset}_dataset"
     if is_cosine:
@@ -40,6 +48,7 @@ def process_condition(
             modelname=model_checkpoint,
             model="ProtoTEx",
             use_cosine_dist=is_cosine,
+            split_training_data=split_training_data,
         )
 
         results = evaluate_model(args)
@@ -47,8 +56,8 @@ def process_condition(
     return all_results
 
 
-if os.path.exists("all_results_from_pbn_models_static.json"):
-    with open("all_results_from_pbn_models_static.json", "r") as f:
+if os.path.exists("all_results_from_pbn_models_static_split_training_data.json"):
+    with open("all_results_from_pbn_models_static_split_training_data.json", "r") as f:
         all_results = json.load(f)
         f.close()
     already_existing_conditions = set()
@@ -57,6 +66,10 @@ if os.path.exists("all_results_from_pbn_models_static.json"):
             is_cosine = result["is_cosine"]
         else:
             is_cosine = False
+        if "split_training_data" in result.keys():
+            split_training_data = result["split_training_data"]
+        else:
+            split_training_data = False
         already_existing_conditions.add(
             (
                 result["architecture"],
@@ -67,13 +80,15 @@ if os.path.exists("all_results_from_pbn_models_static.json"):
                 result["p3_lamb"],
                 result["num_proto"],
                 is_cosine,
+                split_training_data,
             )
         )
 else:
     all_results = []
     already_existing_conditions = set()
 
-is_cosine = True
+is_cosine = False
+split_training_data = True
 for architecture in ["BART", "ELECTRA", "BERT"]:
     for dataset in ["dbpedia", "imdb", "ag_news", "sst2"]:
         attack_type_list = (
@@ -82,10 +97,10 @@ for architecture in ["BART", "ELECTRA", "BERT"]:
             else ["pwws", "textfooler", "textbugger", "deepwordbug", "bae"]
         )
         for attack_type in attack_type_list:
-            for p1_lamb in [0.9]:
-                for p2_lamb in [0.9]:
-                    for p3_lamb in [0.9]:
-                        for num_proto in [16]:
+            for p1_lamb in [0.0, 0.9, 10.0]:
+                for p2_lamb in [0.0, 0.9, 10.0]:
+                    for p3_lamb in [0.0, 0.9, 10.0]:
+                        for num_proto in [2, 4, 8, 16, 64]:
                             if (
                                 architecture,
                                 dataset,
@@ -95,6 +110,7 @@ for architecture in ["BART", "ELECTRA", "BERT"]:
                                 p3_lamb,
                                 num_proto,
                                 is_cosine,
+                                split_training_data,
                             ) in already_existing_conditions:
                                 print("condition already found")
                                 continue
@@ -107,6 +123,7 @@ for architecture in ["BART", "ELECTRA", "BERT"]:
                                 p3_lamb,
                                 num_proto,
                                 is_cosine,
+                                split_training_data,
                             )
                             if condition_results is not None:
                                 all_results.append(
@@ -119,15 +136,18 @@ for architecture in ["BART", "ELECTRA", "BERT"]:
                                         "p3_lamb": p3_lamb,
                                         "num_proto": num_proto,
                                         "is_cosine": is_cosine,
+                                        "split_training_data": split_training_data,
                                         "results": condition_results,
                                     }
                                 )
 
 try:
-    with open("all_results_from_pbn_models_static.json", "w") as f:
+    with open("all_results_from_pbn_models_static_split_training_data.json", "w") as f:
         json.dump(all_results, f)
 except Exception as e:
 
     import joblib
 
-    joblib.dump(all_results, "all_results_from_pbn_models_static.pkl")
+    joblib.dump(
+        all_results, "all_results_from_pbn_models_static_split_training_data.pkl"
+    )
