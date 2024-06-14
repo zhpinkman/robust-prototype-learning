@@ -82,7 +82,7 @@ def load_adv_data(dataset_info, data_dir, tokenizer):
     }
 
 
-def load_one_dataset(data_dir, tokenizer, max_length, test_file):
+def load_one_dataset(data_dir, tokenizer, max_length, test_file, split_training_data):
 
     if test_file == "train.csv":
         test_dfs = pd.read_csv(os.path.join(data_dir, "train.csv"))
@@ -104,6 +104,25 @@ def load_one_dataset(data_dir, tokenizer, max_length, test_file):
         test_dfs = {
             file_name: pd.read_csv(file_path)
             for file_name, file_path in test_files.items()
+        }
+
+    if split_training_data:
+        print("Splitting the given one dataset!")
+        df = list(test_dfs.values())[0]
+        df_texts = df["text"].tolist()
+        df_labels = df["label"].tolist()
+        train_texts, val_texts, train_labels, val_labels = train_test_split(
+            df_texts, df_labels, test_size=0.1, random_state=42
+        )
+        train_texts, test_texts, train_labels, test_labels = train_test_split(
+            train_texts, train_labels, test_size=0.1, random_state=42
+        )
+
+        test_df = pd.DataFrame(
+            {"text": test_texts, "label": test_labels, "split": "test"}
+        )
+        test_dfs = {
+            "test": test_df,
         }
 
     test_dfs = {
