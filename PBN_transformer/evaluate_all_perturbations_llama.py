@@ -37,38 +37,29 @@ def label_2_ids_to_str(dictionary):
     )
 
 
-def prompt_gpt_model(text, dataset):
-
-    client = OpenAI()
+def prompt_llama_model(text, dataset):
 
     content = f"Considering the following text, '{text}', return which label it should be associated with, from the following labels, {label_2_ids_to_str(mappings_from_label_to_ids[dataset])}.\nONLY return the index of the label in a \\\\boxed{{}}."
-    response = client.chat.completions.create(
-        model="gpt-4o",
+    import ollama
+
+    response = ollama.chat(
+        model="llama3",
         messages=[
             {
                 "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": content,
-                    }
-                ],
-            }
+                "content": content,
+            },
         ],
-        temperature=0,
-        max_tokens=32,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0,
+        options={"temperature": 0, "max_tokens": 32, "top_p": 1},
     )
-    return response.choices[0].message.content
+    return response["message"]["content"]
 
 
 def process_condition(
     dataset,
     attack_type,
 ):
-    data_dir = f"/scratch/zhivar/robust-prototype-learning/datasets/{dataset}_dataset"
+    data_dir = f"../datasets/{dataset}_dataset"
 
     all_results = {}
     for condition in ["test", "adv"]:
@@ -80,19 +71,19 @@ def process_condition(
         labels = df["label"].values
 
         predictions = [
-            prompt_gpt_model(text, dataset) for text in tqdm(texts, leave=False)
+            prompt_llama_model(text, dataset) for text in tqdm(texts, leave=False)
         ]
 
         all_results[condition] = {
             "predictions": predictions,
-            "labels": labels,
-            "texts": texts,
+            "labels": labels.tolist(),
+            "texts": texts.tolist(),
         }
     return all_results
 
 
-if os.path.exists("all_results_from_perturbations_gpt_models.json"):
-    with open("all_results_from_perturbations_gpt_models.json", "r") as f:
+if os.path.exists("all_results_from_perturbations_llama_models.json"):
+    with open("all_results_from_perturbations_llama_models.json", "r") as f:
         all_results = json.load(f)
         f.close()
     already_existing_conditions = set()
@@ -130,7 +121,7 @@ else:
 
                 try:
                     with open(
-                        "all_results_from_perturbations_gpt_models.json", "w"
+                        "all_results_from_perturbations_llama_models.json", "w"
                     ) as f:
                         json.dump(all_results, f)
                 except Exception as e:
@@ -138,5 +129,5 @@ else:
                     import joblib
 
                     joblib.dump(
-                        all_results, "all_results_from_perturbations_gpt_models.pkl"
+                        all_results, "all_results_from_perturbations_llama_models.pkl"
                     )

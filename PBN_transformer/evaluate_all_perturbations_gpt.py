@@ -85,9 +85,10 @@ def process_condition(
 
         all_results[condition] = {
             "predictions": predictions,
-            "labels": labels,
-            "texts": texts,
+            "labels": labels.tolist(),
+            "texts": texts.tolist(),
         }
+
     return all_results
 
 
