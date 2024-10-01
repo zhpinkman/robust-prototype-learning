@@ -4,7 +4,6 @@ echo "Mode" $1
 dataset=$2
 architecture=$4
 
-# for imdb and dbpedia, the batch size is 32, and for ag_news is 64
 if [ "$dataset" == "imdb" ]; then
     batch_size=32
 elif [ "$dataset" == "dbpedia" ]; then
@@ -106,7 +105,6 @@ if [ "$1" = "train" ]; then
     #         done
     #     done
     # done
-# I added architecture before the ${dataset} however, most of the saved models probably won't have this and start with the dataset name
 
 ################################ inference ################################
 

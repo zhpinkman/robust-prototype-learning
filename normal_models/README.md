@@ -1,12 +1,5 @@
 This directory contains the code for training and evaluating the baseline models and vanilla models with Transformer backbones. 
 
-## Requirements
-
-Please install the requirements by running the following command:
-
-```
-conda env create -f conda_environment.yml
-```
 
 ## Training and Evaluating the Models
 

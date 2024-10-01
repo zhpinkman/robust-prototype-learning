@@ -1,12 +1,5 @@
 This directory contains the code for training and evaluating the Prototype-based networks with Transformer backbone that is based on the implementation of the paper, "ProtoTEx: Explaining Model Decisions with Prototype Tensors".
 
-## Requirements
-
-Please install the requirements by running the following command:
-
-```
-conda env create -f conda_environment.yml
-```
 
 
 ## Training and Evaluating the Models
@@ -35,7 +28,9 @@ CUDA_VISIBLE_DEVICES=1,2,3 python evaluate_model.py \
     --batch_size 512 \
     --dataset "dbpedia" \
     --data_dir "datasets/dbpedia_dataset" \
-    --modelname "dbpedia_model_ELECTRA"
+    --modelname "dbpedia_model_ELECTRA" \
+    --architecture $architecture \
+    --num_prototypes $num_proto
 ```
 
 ## Pretrained model weights
@@ -56,3 +51,10 @@ CUDA_VISIBLE_DEVICES=5,6,7 python adv_attack_pbn.py \
     --batch_size 512 \
     --architecture "BART"
 ```
+
+
+Furthermore, to evaluate all the models and gathering the log files that track each models' performance as well as the developed prototypes on different datasets and their adversarial perturbations, you can use the files: `evaluate_all_the_pbn_models_prototypes.py` and `evaluate_all_the_pbn_models.py`.
+
+
+Also, the code to evaluate LLMs on the perturbations can be found in `evaluate_all_perturbations_gpt.py` and `evaluate_all_perturbations_llama.py`.
+
