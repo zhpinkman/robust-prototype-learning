@@ -32,6 +32,7 @@ def main(args):
             tokenizer=tokenizer,
             max_length=configs.dataset_to_max_length[args.dataset],
             test_file=args.test_file,
+            split_training_data=False,
         )
     else:
         all_datasets = utils.load_dataset(

@@ -68,7 +68,7 @@ def process_condition(
     dataset,
     attack_type,
 ):
-    data_dir = f"/scratch/zhivar/robust-prototype-learning/datasets/{dataset}_dataset"
+    data_dir = f"../datasets/{dataset}_dataset"
 
     all_results = {}
     for condition in ["test", "adv"]:

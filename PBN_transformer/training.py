@@ -11,6 +11,7 @@ import os
 from utils import EarlyStopping, print_logs, evaluate
 from models import ProtoTEx
 from models_electra import ProtoTEx_Electra
+from IPython import embed
 
 # Save paths
 MODELPATH = "Models/"
@@ -137,6 +138,9 @@ def train_ProtoTEx_w_neg(
             batchnormlp1=True,
             use_cosine_dist=use_cosine_dist,
         )
+
+    embed()
+    exit()
 
     # model = torch.nn.DataParallel(model)
     model = model.to(device)

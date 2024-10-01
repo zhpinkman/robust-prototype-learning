@@ -66,7 +66,9 @@ class ProtoTEx_Electra(torch.nn.Module):
         self.dobatchnorm = (
             batchnormlp1  # This flag is actually for instance normalization
         )
-        self.distance_grounder = torch.zeros(self.n_classes, self.num_protos).cuda()
+        self.distance_grounder = torch.zeros(self.n_classes, self.num_protos).to(
+            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        )
         for i in range(self.n_classes):
             # self.distance_grounder[i][np.random.randint(0, self.num_protos, int(self.num_protos / 2))] = 1e7
             self.distance_grounder[i][self.num_protos :] = 1e7
@@ -82,8 +84,16 @@ class ProtoTEx_Electra(torch.nn.Module):
             with torch.no_grad():
                 self.prototypes = torch.nn.Parameter(
                     self.electra_model(
-                        input_ids_rdm.cuda(),
-                        attn_mask_rdm.cuda(),
+                        (
+                            input_ids_rdm.cuda()
+                            if torch.cuda.is_available()
+                            else input_ids_rdm
+                        ),
+                        (
+                            attn_mask_rdm.cuda()
+                            if torch.cuda.is_available()
+                            else attn_mask_rdm
+                        ),
                         output_attentions=False,
                         output_hidden_states=False,
                     ).last_hidden_state

@@ -187,6 +187,9 @@ def main(args):
                 model.base_model.encoder.layer[i].requires_grad_(False)
             model.base_model.encoder.layer[num_enc_layers - 1].requires_grad_(True)
 
+        embed()
+        exit()
+
     else:
         print(
             "Loading model from: ",
