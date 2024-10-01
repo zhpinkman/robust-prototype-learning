@@ -583,6 +583,9 @@ def get_best_k_protos_for_batch(
         "best_protos_dists": best_protos_dists,
         "all_predictions": all_predictions,
         "all_correct_labels": all_correct_labels,
+        "weights_associated_with_protos": model_new.classfn_model.weight.data.cpu()
+        .numpy()
+        .tolist(),
     }
 
 

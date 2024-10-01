@@ -24,7 +24,7 @@ if [ "$1" = "train" ]; then
         --p3_lamb 0.9 \
         --architecture $architecture \
         --modelname "${architecture}_${dataset}_model_0.9_0.9_0.9_16_cosine" \
-        --num_prototypes 16 \
+        --num_prototypes 64 \
         --use_cosine_dist
 
     # for p1_lamb in 0.9; do

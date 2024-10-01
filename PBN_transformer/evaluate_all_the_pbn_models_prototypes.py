@@ -69,17 +69,17 @@ json_files_already_computed = [
 
 
 for architecture in ["BART"]:
-    for dataset in ["ag_news", "sst2", "dbpedia", "imdb"]:
+    for dataset in ["dbpedia"]:
         attack_type_list = (
             ["glue"]
             if dataset == "sst2"
             else ["pwws", "textfooler", "textbugger", "deepwordbug", "bae"]
         )
         for attack_type in attack_type_list:
-            for p1_lamb in [0.9, 0.0, 10.0]:
-                for p2_lamb in [0.9, 0.0, 10.0]:
-                    for p3_lamb in [0.9, 0.0, 10.0]:
-                        for num_proto in [4, 2, 8, 16, 64]:
+            for p1_lamb in [0.9]:
+                for p2_lamb in [0.9]:
+                    for p3_lamb in [0.9]:
+                        for num_proto in [16]:
                             if p1_lamb == 0.0 and p2_lamb == 0.0 and p3_lamb == 0.0:
                                 continue
                             json_file_name_to_save = os.path.join(
