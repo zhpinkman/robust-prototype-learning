@@ -1,4 +1,4 @@
-This repository contains the code for the paper "Robust Text Classification: Analyzing Prototype-Based Networks". In the following, different parts of the code and repository are explained for reproducibility purposes.
+This repository contains the code for the paper "Robust Text Classification: Analyzing Prototype-Based Networks" accepted to EMNLP 2024. In the following, different parts of the code and repository are explained for reproducibility purposes.
 
 ## Repository Structure
 
