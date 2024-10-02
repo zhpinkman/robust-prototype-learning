@@ -18,8 +18,6 @@ The structure of the repository can be broken down to three parts: (1) adversari
 
 `PBN_Transformer` directory contains the code for training and evaluating the Prototype-based networks with Transformer backbone.
 
-`gpt_experiments` directory contains the code for using GPT3.5 as a baseline model.
-
 ## Visualizing the Results
 
 All the visualizations can be accessed for the static and targeted attacks separately in the two notebooks `analysis_on_dynamic_attacks.ipynb` and `analysis_on_static_attacks.ipynb` respectively.
