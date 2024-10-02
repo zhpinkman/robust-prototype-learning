@@ -1,4 +1,4 @@
-This repository contains the code for the paper "Robust Text Classification: Analyzing Prototype-Based Networks" accepted to EMNLP 2024. In the following, different parts of the code and repository are explained for reproducibility purposes. As some modifications were made to the TextAttack package for the attacks to be executed on the prototype-based networks, the modified version of this package can be accessed from the following link: [TextAttack](https://github.com/zhpinkman/custom-textattack).
+This repository contains the code for the paper ["Robust Text Classification: Analyzing Prototype-Based Networks"](https://arxiv.org/abs/2311.06647) accepted to EMNLP 2024. In the following, different parts of the code and repository are explained for reproducibility purposes. As some modifications were made to the TextAttack package for the attacks to be executed on the prototype-based networks, the modified version of this package can be accessed from the following link: [TextAttack](https://github.com/zhpinkman/custom-textattack).
 
 ## Requirements
 
